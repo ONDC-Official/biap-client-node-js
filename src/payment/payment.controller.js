@@ -12,12 +12,12 @@ class PaymentController
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    async signedPayload(req, res, next) 
+    async signPayload(req, res, next) 
     {
         const data = req.body;
 
         try{
-            const signedPayload = await juspayService.signedPayload(data);
+            const signedPayload = await juspayService.signPayload(data);
             return res.json({ signedPayload: signedPayload });
         }
         catch(err) {

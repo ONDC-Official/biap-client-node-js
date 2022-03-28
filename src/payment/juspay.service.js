@@ -7,10 +7,10 @@ const readFile = util.promisify(fs.readFile);
 class PaymentService 
 {
     /**
-    * signed payload using juspay's private key
+    * sign payload using juspay's private key
     * @param {Object} data
     */
-    async signedPayload(data) 
+    async signPayload(data) 
     {
         try
         {
