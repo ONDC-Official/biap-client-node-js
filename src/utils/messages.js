@@ -14,4 +14,4 @@ function formatMessage(username, text) {
     };
 }
 
-export default {MESSAGES, formatMessage};
+export default { MESSAGES, formatMessage };
