@@ -7,16 +7,16 @@ const readFile = util.promisify(fs.readFile);
 class PaymentService 
 {
     /**
-    * sign payload using juspay's private key
+    * signed payload using juspay's private key
     * @param {Object} data
     */
-    async signPayload(data) 
+    async signedPayload(data) 
     {
         try
         {
-            let { payload } = data;     
-            let result;
-            
+            const { payload } = data;     
+            let result = null;
+
             //TODO - Sign the payload using juspay's private key. 
             //The below key is a sample key
             //Load key in a secure manner

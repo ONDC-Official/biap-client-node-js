@@ -5,11 +5,11 @@ import PaymentController from './payment.controller.js';
 const router = new Router();
 const paymentController = new PaymentController();
 
-//sign payload
+// signed payload
 router.post(
-    '/payment/signPayload', 
+    '/payment/signedPayload', 
     // authentication(),
-    paymentController.signPayload,
+    paymentController.signedPayload,
 );
 
 export default router;
