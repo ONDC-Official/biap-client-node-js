@@ -14,16 +14,19 @@ class PaymentService
     {
         try
         {
-            let {payload} = data;     
-    
+            let { payload } = data;     
+            let result;
+            
             //TODO - Sign the payload using juspay's private key. 
             //The below key is a sample key
             //Load key in a secure manner
-            const privateKeyHyperBeta = await readFile(process.env.JUSPAY_KEY_PATH, 'utf-8');
 
-            const encryptKey = new NodeRSA(privateKeyHyperBeta, 'pkcs1');
-            var result = encryptKey.sign(payload,'hex','utf8');
-              
+            if(payload) {
+                const privateKeyHyperBeta = await readFile(process.env.JUSPAY_KEY_PATH, 'utf-8');
+
+                const encryptKey = new NodeRSA(privateKeyHyperBeta, 'pkcs1');
+                result = encryptKey.sign(payload,'hex','utf8');
+            }
             return result;
 
         } 
