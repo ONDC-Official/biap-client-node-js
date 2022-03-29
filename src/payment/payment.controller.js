@@ -21,8 +21,7 @@ class PaymentController
             return res.json({ signedPayload: signedPayload });
         }
         catch(err) {
-            console.log(err);
-            throw err;
+            next(err);
         }
 
     }
