@@ -19,8 +19,6 @@ const tokenExtractor = function (req) {
         tokenArray = token.split(" ");
     }
     
-    console.log(tokenArray[1]);
-
     return tokenArray[1];
 };
 
@@ -62,9 +60,6 @@ const passportJwtStrategy = new JwtStrategy(opts, async (req, jwtPayload, done) 
             return done(null, user);
         }
     } catch (err) {
-
-        console.log(err);
-
         return done(err, null);
     }
 });

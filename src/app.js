@@ -23,6 +23,10 @@ app.use(cors());
 app.use('/api', cors(), paymentRoutes);
 app.use(logErrors)
 
+app.get("*", (req, res) => {
+    res.send("API NOT FOUND");
+  });
+
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => {

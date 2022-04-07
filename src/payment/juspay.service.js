@@ -2,9 +2,16 @@ import NodeRSA from "node-rsa";
 import fs from "fs";
 import util from "util";
 
+// import { accessSecretVersion } from "../utils/accessSecretKey.js";
+import { getJuspayOrderStatus } from "../utils/juspayApis.js";
+import MESSAGES from "../utils/messages.js";
+import { NoRecordFoundError } from "../lib/errors/index.js";
+import PaymentService from "./payment.service.js";
+
 const readFile = util.promisify(fs.readFile);
 
-class PaymentService 
+const paymentService = new PaymentService();
+class JuspayService 
 {
     /**
     * sign payload using juspay's private key
@@ -17,13 +24,10 @@ class PaymentService
             const { payload } = data;     
             let result = null;
 
-            //TODO - Sign the payload using juspay's private key. 
-            //The below key is a sample key
-            //Load key in a secure manner
-
             if(payload) {
-                const privateKeyHyperBeta = await readFile(process.env.JUSPAY_KEY_PATH, 'utf-8');
-
+                // const privateKeyHyperBeta = await accessSecretVersion(process.env.JUSPAY_SECRET_KEY_PATH);
+                const privateKeyHyperBeta = await readFile(process.env.JUSPAY_SECRET_KEY_PATH, 'utf-8');
+                
                 const encryptKey = new NodeRSA(privateKeyHyperBeta, 'pkcs1');
                 result = encryptKey.sign(payload,'hex','utf8');
             }
@@ -35,6 +39,51 @@ class PaymentService
             throw err;
         }
     }
+
+    /**
+    * get order status
+    * @param {Object} data
+    */
+    async getOrderStatus(orderId, user) 
+    {
+        try 
+        {
+            let paymentDetails = await getJuspayOrderStatus(orderId);
+
+            if(!paymentDetails)
+                throw new NoRecordFoundError(MESSAGES.ORDER_NOT_EXIST);
+            // else if(paymentDetails.status === "CHARGED")
+            //     await paymentService.processOrder(orderId, paymentDetails, user);
+
+            return paymentDetails;
+        } 
+        catch (err) 
+        {
+            throw err;
+        }
+    }
+
+    /**
+    * verify payment webhook
+    * @param {Object} data
+    */
+    async verifyPayment(data) 
+    {
+        try
+        {
+            const { id, date_created, event_name, content = {}} = data;     
+
+            if(event_name === "ORDER_SUCCEEDED"){
+                // TODO : Process the payment
+            }
+
+        } 
+        catch (err) 
+        {
+            throw err;
+        }
+    }
+
 }
 
-export default PaymentService;
+export default JuspayService;

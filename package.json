@@ -5,6 +5,7 @@
   "main": "app.js",
   "type": "module",
   "dependencies": {
+    "@google-cloud/secret-manager": "^3.11.0",
     "axios": "^0.26.1",
     "body-parser": "^1.19.2",
     "cookie-parser": "^1.4.6",
@@ -25,7 +26,7 @@
   },
   "scripts": {
     "debug": "nodemon src/app.js",
-    "start": " node src/app.js"
+    "start": "node src/app.js"
   },
   "repository": {
     "type": "git",

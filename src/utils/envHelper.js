@@ -9,7 +9,7 @@ const loadEnvVariables = () => {
     } 
     else 
     {
-        dotenv.config({ path: path.resolve(process.cwd(), '.env.dev') });
+        dotenv.config({ path: path.resolve(process.cwd(), '.env') });
     }
 
 }

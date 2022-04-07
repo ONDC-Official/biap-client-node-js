@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { authentication } from '../middlewares/index.js';
+import { authentication, juspayAuthentication } from '../middlewares/index.js';
 
 import PaymentController from './payment.controller.js';
 
@@ -13,5 +13,13 @@ router.post(
     paymentController.signPayload,
 );
 
+// get order status
+router.get('/payment/status/:orderId', authentication(), paymentController.getOrderStatus);
 
+// verify payment
+router.post(
+    '/payment/verification', 
+    juspayAuthentication(),
+    paymentController.verifyPayment,
+);
 export default router;

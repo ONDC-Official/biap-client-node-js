@@ -29,7 +29,7 @@ class HttpRequest {
      */
     async send() 
     {
-       
+    
         try 
         {
             let headers = {...this.headers, 'Content-Type': 'application/json'};

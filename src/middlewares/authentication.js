@@ -8,7 +8,7 @@ const authentication =  (options) => (req, res, next) => {
         const idToken = authHeader.split(" ")[1];
         validateToken(idToken).then(decodedToken => {
             if (decodedToken) {
-                req.user = decodedToken;
+                req.user = { decodedToken: decodedToken, token: idToken };
                 next();
             } 
             else {
