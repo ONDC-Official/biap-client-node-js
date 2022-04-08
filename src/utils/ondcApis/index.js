@@ -14,7 +14,7 @@ const confirmOrder = async (orderDetails, user) => {
         {...orderDetails},
         { 
             "Accept": 'application/json',
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
 
@@ -40,7 +40,7 @@ const getOrderDetails = async (orderId, user) => {
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
 
@@ -71,7 +71,7 @@ const getBillingAddress = async (user) => {
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
     let billingAddress = {};
@@ -101,7 +101,7 @@ const getDeliveryAddress = async (user) => {
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );    
     let deliveryAddress = {}
