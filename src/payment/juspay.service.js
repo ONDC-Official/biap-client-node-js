@@ -73,9 +73,20 @@ class JuspayService
         {
             const { id, date_created, event_name, content = {}} = data;     
 
-            if(event_name === "ORDER_SUCCEEDED"){
-                // TODO : Process the payment
+            switch (event_name) {
+                case "ORDER_SUCCEEDED":
+                    // TODO : Process the payment
+                    break;
+                case "ORDER_FAILED":
+
+                    break;
+                case "ORDER_AUTHORIZED":
+
+                    break;
+                default:
+                    break;
             }
+            
 
         } 
         catch (err) 
