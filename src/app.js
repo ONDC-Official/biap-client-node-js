@@ -7,6 +7,7 @@ import cors from "cors";
 import initializeFirebase from './lib/firebase/initializeFirebase.js';
 import logErrors from './utils/logErrors.js';
 import paymentRoutes from './payment/payment.routes.js';
+import confirmOrderRoutes from './order/confirm/confirmOrder.routes.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({limit: '50mb'}));
 
 app.use(cors());
 app.use('/api', cors(), paymentRoutes);
+app.use('/client', cors(), confirmOrderRoutes);
 app.use(logErrors)
 
 app.get("*", (req, res) => {

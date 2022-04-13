@@ -47,6 +47,7 @@ class FetchRequest {
             }
 
             const response = await fetch(this.baseUrl + this.url, options);
+            
             const data = await response.json();
             
             return data;

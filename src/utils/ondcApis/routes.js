@@ -4,7 +4,7 @@ const GET_BILLING_ADDRESS = "/client/v1/billing_details";
 const GET_DELIVERY_ADDRESS = "/client/v1/delivery_address";
 const GET_ORDER = "/client/v1/order";
 
-export const ONDC_APIS = {
+export const ONDC_API_URLS = {
     CONFIRM_ORDER,
     GET_BILLING_ADDRESS,
     GET_DELIVERY_ADDRESS,
