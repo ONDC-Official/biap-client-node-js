@@ -1,6 +1,6 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import BppConfirmService from "./bppConfirm.service.js";
-
+import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 const bppConfirmService = new BppConfirmService();
 
 class ConfirmOrderService 
@@ -53,10 +53,6 @@ class ConfirmOrderService
 
         }
         catch (err) {
-            throw err;
-        }
-    }
-    */
             throw err;
         }
     }
