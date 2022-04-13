@@ -30,16 +30,33 @@ class ConfirmOrderService
 
     /**
     * on confirm order
-    * @param {Object} messageIds
+    * @param {Object} messageId
     */
-    async onConfirmOrder(messageIds) 
-    {
-        try
-        {
-            console.log(messageIds);
-        } 
-        catch (err) 
-        {
+    async onConfirmOrder(messageId) {
+        try {
+            let orderStatus = await onOrderConfirm(messageId);
+
+            if (!(orderStatus && orderStatus.length)) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({ messageId: messageId });
+
+                return [{
+                    context,
+                    error: {
+                        message: "No data found"
+                    }
+                }];
+            }
+            else {
+                return orderStatus;
+            }
+
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+    */
             throw err;
         }
     }

@@ -33,11 +33,11 @@ class ConfirmOrderController
     * @return {callback}
     */
     onConfirmOrder(req, res, next) {
-        const { params } = req;
-        const { messageIds } = params;     
+        const { query } = req;
+        const { messageId } = query;
         
-        confirmOrderService.onConfirmOrder(messageIds).then(orderStatus => {
-            res.json({data: orderStatus});
+        confirmOrderService.onConfirmOrder(messageId).then(order => {
+            res.json(order);
         }).catch((err) => {
             next(err);
         });

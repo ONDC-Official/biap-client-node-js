@@ -14,6 +14,6 @@ router.post(
 );
 
 // on confirm order
-router.post('/v3/on_confirm_order', authentication(), confirmOrderController.onConfirmOrder);
+router.get('/v1/on_confirm_order', authentication(), confirmOrderController.onConfirmOrder);
 
 export default router;
