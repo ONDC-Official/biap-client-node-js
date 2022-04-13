@@ -8,7 +8,7 @@ const confirmOrderController = new ConfirmOrderController();
 
 // confirm order
 router.post(
-    '/v3/confirm_order', 
+    '/v1/confirm_order', 
     authentication(),
     confirmOrderController.confirmOrder,
 );
