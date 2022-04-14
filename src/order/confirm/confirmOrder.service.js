@@ -115,6 +115,29 @@ class ConfirmOrderService {
             throw err;
         }
     }
+
+    /**
+    * on confirm multiple order
+    * @param {Object} messageId
+    */
+    async onConfirmMultipleOrder(messageIds) {
+        try {
+            const parentOrderId = getRandomString();
+
+            const onConfirmOrderResponse = await Promise.all(
+                messageIds.map(async messageId => {
+                    let onConfirm = await this.onConfirmOrder(messageId);
+                    return onConfirm?.[0];
+                })
+            );
+
+            return onConfirmOrderResponse;
+
+        }
+        catch (err) {
+            throw err;
+        }
+    }
 }
 
 export default ConfirmOrderService;

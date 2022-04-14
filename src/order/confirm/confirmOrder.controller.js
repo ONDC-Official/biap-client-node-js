@@ -60,6 +60,30 @@ class ConfirmOrderController {
             next(err);
         });
     }
+
+    /**
+    * on confirm multiple order
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    onConfirmMultipleOrder(req, res, next) {
+        const { query } = req;
+        const { messageIds } = query;
+        
+        if(messageIds && messageIds.length && messageIds.trim().length) { 
+            const messageIdArray = messageIds.split(",");
+            
+            confirmOrderService.onConfirmMultipleOrder(messageIdArray).then(orders => {
+                res.json(orders);
+            }).catch((err) => {
+                next(err);
+            });
+        }
+        else
+            throw new BadRequestParameterError();
+    }
 }
 
 export default ConfirmOrderController;
