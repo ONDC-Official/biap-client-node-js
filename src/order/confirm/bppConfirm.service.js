@@ -1,4 +1,5 @@
 import { bppConfirm } from "../../utils/bppApis/index.js";
+import { PROTOCOL_PAYMENT } from "../../utils/constants.js";
 
 class BppConfirmService {
     /**
@@ -44,7 +45,7 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
                             },
-                            status: "PAID" //TODO paid status enum
+                            status: PROTOCOL_PAYMENT.PAID
                         }
                     }
                 }

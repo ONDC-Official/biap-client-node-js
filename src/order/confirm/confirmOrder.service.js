@@ -1,7 +1,7 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { getRandomString } from '../../utils/stringHelper.js';
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
+import { PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -34,7 +34,7 @@ class ConfirmOrderService {
      * @returns Boolean
      */
     arePaymentsPending(payment) {
-        return payment == null || payment.status != "PAID" || payment.paidAmount <= 0
+        return payment == null || payment.status != PROTOCOL_PAYMENT.PAID || payment.paidAmount <= 0
     }
 
     /**
@@ -61,7 +61,7 @@ class ConfirmOrderService {
                 throw new Error("Payment pending");
             }
 
-            const subcriberDetails = await lookupBppById({ type: "BPP", subscriber_id: order?.items[0]?.bpp_id });
+            const subcriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
 
             return await bppConfirmService.confirm(context, subcriberDetails?.[0]?.subscriber_url, order);
         }

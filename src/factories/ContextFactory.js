@@ -1,10 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
+import { PROTOCOL_CONTEXT, PROTOCOL_VERSION } from '../utils/constants.js';
 
 class ContextFactory {
 
     constructor(arg = {}) {
-        //TODO environment variable setup
-        const { domain="nic2004:52110", city="std:080", country="IND", bapId= "box.beckn.org", bapUrl="http://13.235.14.111:9002/protocol/v1" } = arg || {};
+        const { 
+            domain = process.env.DOMAIN, 
+            city = process.env.CITY, 
+            country = process.env.COUNTRY, 
+            bapId = process.env.BAP_ID, 
+            bapUrl = process.env.BAP_URL 
+        } = arg || {};
         
         this.domain = domain;
         this.city = city;
@@ -15,14 +21,19 @@ class ContextFactory {
     };
 
     create(contextObject = {}) {
-        const {transactionId = uuidv4(), messageId = uuidv4(), action = "search", bppId=null } = contextObject || {};
-        
+        const {
+            transactionId = uuidv4(), 
+            messageId = uuidv4(), 
+            action = PROTOCOL_CONTEXT.SEARCH,
+            bppId = null 
+        } = contextObject || {};
+                
         return {
             domain : this.domain,
             country: this.country,
             city : this.city,
             action : action,
-            coreVersion : "0.9.1", //TODO protocol version
+            coreVersion : PROTOCOL_VERSION.v_0_9_3,
             bap_id : this.bapId,
             bap_uri : this.bapUrl,
             bpp_id : bppId,
