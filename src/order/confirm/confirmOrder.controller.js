@@ -1,10 +1,8 @@
 import ConfirmOrderService from './confirmOrder.service.js';
-import ContextFactory from "../../factories/ContextFactory.js";
+import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 
 const confirmOrderService = new ConfirmOrderService();
-
-class ConfirmOrderController 
-{
+class ConfirmOrderController {
     /**
     * confirm order
     * @param {*} req    HTTP request object
@@ -15,16 +13,36 @@ class ConfirmOrderController
     confirmOrder(req, res, next) {
         const orderRequest = req.body;
 
-        const contextFactory = new ContextFactory();
-        const context = contextFactory.create({action: "confirm", transactionId: orderRequest.context.transaction_id});
-
-        confirmOrderService.confirmOrder(context, orderRequest.message).then(response => {
+        confirmOrderService.confirmOrder(orderRequest).then(response => {
             res.json({ ...response });
         }).catch((err) => {
             next(err);
         });
     }
-    
+
+    /**
+    * confirm multiple orders
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    confirmMultipleOrder(req, res, next) {
+        const orderRequests = req.body;
+
+        if (orderRequests && orderRequests.length) {
+
+            confirmOrderService.confirmMultipleOrder(orderRequests).then(response => {
+                res.json(response);
+            }).catch((err) => {
+                next(err);
+            });
+
+        }
+        else
+            throw new BadRequestParameterError();
+    }
+
     /**
     * on confirm order
     * @param {*} req    HTTP request object

@@ -13,6 +13,13 @@ router.post(
     confirmOrderController.confirmOrder,
 );
 
+// confirm order
+router.post(
+    '/v2/confirm_order', 
+    authentication(),
+    confirmOrderController.confirmMultipleOrder,
+);
+
 // on confirm order
 router.get('/v1/on_confirm_order', authentication(), confirmOrderController.onConfirmOrder);
 

@@ -28,3 +28,21 @@ export const HEADERS = {
     ACCESS_TOKEN: 'access-token',
     AUTH_TOKEN: 'Authorization',
 }
+
+export const PROTOCOL_CONTEXT = {
+    CANCEL: "cancel",
+    CONFIRM: "confirm",
+    INIT: "init",
+    ON_CONFIRM: "on_confirm",
+    SEARCH: "search",
+    TRACK: "track"
+}
+
+export const PROTOCOL_PAYMENT = {
+    PAID: "PAID",
+    "NOT-PAID": "NOT-PAID",
+}
+
+export const PROTOCOL_VERSION = {
+    v_0_9_3: "0.9.3"
+}
