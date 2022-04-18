@@ -1,4 +1,4 @@
-import loadEnvVariables from './utils/envHelper.js';
+//import loadEnvVariables from './utils/envHelper.js';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import express from "express";
@@ -11,7 +11,7 @@ import confirmOrderRoutes from './order/confirm/confirmOrder.routes.js';
 
 const app = express();
 
-loadEnvVariables();
+//loadEnvVariables();
 initializeFirebase();
 
 app.use(express.json());
