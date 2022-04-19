@@ -1,12 +1,14 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { getRandomString } from '../../utils/stringHelper.js';
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
+import JuspayService from "../../payment/juspay.service.js";
 
 const bppConfirmService = new BppConfirmService();
+const juspayService = new JuspayService();
 
 class ConfirmOrderService {
 
@@ -33,8 +35,13 @@ class ConfirmOrderService {
      * @param {Object} payment 
      * @returns Boolean
      */
-    arePaymentsPending(payment) {
-        return payment == null || payment.status != PROTOCOL_PAYMENT.PAID || payment.paidAmount <= 0
+    async arePaymentsPending(payment, orderId) {
+        const paymentDetails = await juspayService.getOrderStatus(orderId);
+        
+        return payment == null || 
+        payment.status != PROTOCOL_PAYMENT.PAID || 
+        payment.paidAmount <= 0 || 
+        paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
     }
 
     /**
@@ -44,21 +51,22 @@ class ConfirmOrderService {
     async confirmOrder(orderRequest) {
         try {
             const contextFactory = new ContextFactory();
-            const context = contextFactory.create({ action: PROTOCOL_CONTEXT.CONFIRM, transactionId: orderRequest.context.transaction_id });
+            const context = contextFactory.create({ action: PROTOCOL_CONTEXT.CONFIRM, transactionId: orderRequest?.context?.transaction_id });
 
             const { message: order = {} } = orderRequest || {};
 
             if (!(order?.items?.length)) {
-                throw new Error("Empty order received, no op");
+                throw new Error("Empty order received");
             }
             else if (this.areMultipleBppItemsSelected(order?.items)) {
-                throw new Error("Order contains items from more than one BPP, returning error");
+                throw new Error("More than one BPP's item(s) selected/initialized");
             }
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
-                throw new Error("Order contains items from more than one provider, returning error");
+                throw new Error("More than one Provider's item(s) selected/initialized");
             }
-            else if (this.arePaymentsPending(order?.payment)) {
-                throw new Error("Payment pending");
+            
+            if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
+                throw new Error("BAP hasn't received payment yet");
             }
 
             const subcriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
