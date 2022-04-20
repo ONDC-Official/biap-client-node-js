@@ -64,14 +64,13 @@ class ConfirmOrderService {
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
                 throw new Error("More than one Provider's item(s) selected/initialized");
             }
-            
-            if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
+            else if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
                 throw new Error("BAP hasn't received payment yet");
             }
 
-            const subcriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
+            const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
 
-            return await bppConfirmService.confirm(context, subcriberDetails?.[0]?.subscriber_url, order);
+            return await bppConfirmService.confirm(context, subscriberDetails?.[0]?.subscriber_url, order);
         }
         catch (err) {
             throw err;

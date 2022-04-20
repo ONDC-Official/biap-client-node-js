@@ -1,5 +1,6 @@
 import { bppConfirm } from "../../utils/bppApis/index.js";
 import { PROTOCOL_PAYMENT } from "../../utils/constants.js";
+import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
     /**
@@ -50,6 +51,8 @@ class BppConfirmService {
                     }
                 }
             }
+
+            bppUri = getBaseUri(bppUri);
 
             let response = await bppConfirm(bppUri, confirmRequest);
 
