@@ -1,11 +1,12 @@
 const logErrors = (err, req, res, next) => {
     //TODO handle errors
-    
-    res.send({status: "error", error: {
-        name: err.name,
-        status: err.status,
-        message: err.message
-    }});
+    res.send({
+        status: err.status, 
+        error: {
+            name: err.name,
+            message: err.message
+        }
+    });
     next(err);
 };
 

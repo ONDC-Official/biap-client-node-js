@@ -6,6 +6,7 @@ import { JUSPAY_PAYMENT_STATUS, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_T
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../payment/juspay.service.js";
+import CustomError from "../../lib/errors/custom.error.js";
 
 const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
@@ -56,16 +57,16 @@ class ConfirmOrderService {
             const { message: order = {} } = orderRequest || {};
 
             if (!(order?.items?.length)) {
-                throw new Error("Empty order received");
+                throw new CustomError("Empty order received");
             }
             else if (this.areMultipleBppItemsSelected(order?.items)) {
-                throw new Error("More than one BPP's item(s) selected/initialized");
+                throw new CustomError("More than one BPP's item(s) selected/initialized");
             }
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
-                throw new Error("More than one Provider's item(s) selected/initialized");
+                throw new CustomError("More than one Provider's item(s) selected/initialized");
             }
             else if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
-                throw new Error("BAP hasn't received payment yet");
+                throw new CustomError("BAP hasn't received payment yet", "BAP_015", "PAYMENT_PENDING");
             }
 
             const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
