@@ -8,6 +8,7 @@ import initializeFirebase from './lib/firebase/initializeFirebase.js';
 import logErrors from './utils/logErrors.js';
 import paymentRoutes from './payment/payment.routes.js';
 import orderRoutes from './order/order.routes.js';
+import dbConnect from './database/mongooseConnector.js';
 
 const app = express();
 
@@ -31,6 +32,20 @@ app.get("*", (req, res) => {
 
 const port = process.env.PORT || 8080;
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-})
+// app.listen(port, () => {
+//     console.log(`Listening on port ${port}`);
+// })
+
+//Setup connection to the database
+dbConnect()
+    .then((db) => {
+        console.log("Database connection successful");
+        
+        app.listen(port, () => {
+            console.log(`Listening on port ${port}`);
+        });
+    })
+    .catch((error) => {
+        console.log("Error connecting to the database", error);
+        return;
+    });
