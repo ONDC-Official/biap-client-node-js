@@ -29,7 +29,7 @@ class JuspayService
                 const privateKeyHyperBeta = await readFile(process.env.JUSPAY_SECRET_KEY_PATH, 'utf-8');
                 
                 const encryptKey = new NodeRSA(privateKeyHyperBeta, 'pkcs1');
-                result = encryptKey.sign(payload,'hex','utf8');
+                result = encryptKey.sign(payload,'base64','utf8');
             }
             return result;
 
