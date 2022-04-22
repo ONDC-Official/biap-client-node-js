@@ -32,7 +32,7 @@ class ConfirmOrderController {
 
         if (orderRequests && orderRequests.length) {
 
-            confirmOrderService.confirmMultipleOrder(orderRequests).then(response => {
+            confirmOrderService.confirmMultipleOrder(orderRequests, req.user).then(response => {
                 res.json(response);
             }).catch((err) => {
                 next(err);
@@ -69,13 +69,13 @@ class ConfirmOrderController {
     * @return {callback}
     */
     onConfirmMultipleOrder(req, res, next) {
-        const { query } = req;
+        const { query, user } = req;
         const { messageIds } = query;
         
         if(messageIds && messageIds.length && messageIds.trim().length) { 
             const messageIdArray = messageIds.split(",");
             
-            confirmOrderService.onConfirmMultipleOrder(messageIdArray).then(orders => {
+            confirmOrderService.onConfirmMultipleOrder(messageIdArray, user).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);

@@ -10,7 +10,7 @@ class BppConfirmService {
     async confirm(context, bppUri, order) {
         try {
             let provider = order?.items?.[0]?.provider || {};
-
+            
             const confirmRequest = {
                 context: context,
                 message: {
@@ -22,7 +22,10 @@ class BppConfirmService {
                                 quantity: item.quantity
                             };
                         }) || [],
-                        provider: { id: provider.id, locations: provider.locations },
+                        provider: { 
+                            id: provider.id, 
+                            locations: provider.locations 
+                        },
                         fulfillment: {
                             end: {
                                 contact: {

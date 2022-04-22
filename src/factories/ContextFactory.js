@@ -25,7 +25,7 @@ class ContextFactory {
             transactionId = uuidv4(), 
             messageId = uuidv4(), 
             action = PROTOCOL_CONTEXT.SEARCH,
-            bppId = null 
+            bppId 
         } = contextObject || {};
                 
         return {

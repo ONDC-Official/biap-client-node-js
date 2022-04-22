@@ -7,6 +7,7 @@ import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../payment/juspay.service.js";
 import CustomError from "../../lib/errors/custom.error.js";
+import OrderMongooseModel from '../db/order.js';
 
 const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
@@ -41,7 +42,7 @@ class ConfirmOrderService {
         
         return payment == null || 
         payment.status != PROTOCOL_PAYMENT.PAID || 
-        payment.paidAmount <= 0 || 
+        payment.paidAmount <= 0 ||
         paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
     }
 
@@ -53,7 +54,7 @@ class ConfirmOrderService {
         try {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({ action: PROTOCOL_CONTEXT.CONFIRM, transactionId: orderRequest?.context?.transaction_id });
-
+            
             const { message: order = {} } = orderRequest || {};
 
             if (!(order?.items?.length)) {
@@ -82,13 +83,33 @@ class ConfirmOrderService {
      * confirm multiple orders
      * @param {Array} orders 
      */
-    async confirmMultipleOrder(orders) {
+    async confirmMultipleOrder(orders, user) {
 
         const parentOrderId = getRandomString();
 
         const confirmOrderResponse = await Promise.all(
             orders.map(async order => {
-                return await this.confirmOrder(order);
+                try {
+                    const orderResponse = await this.confirmOrder(order);
+                    
+                    await OrderMongooseModel.findOneAndUpdate(
+                        {
+                            messageId: orderResponse.context.message_id
+                        }, 
+                        {
+                            userId: user?.decodedToken?.uid,
+                            messageId: orderResponse.context.message_id,
+                            transactionId: null,
+                            parentOrderId:  parentOrderId
+                        }, 
+                        { upsert: true }
+                    );
+
+                    return orderResponse;
+                }
+                catch(err) {
+                    throw err;
+                }
             })
         );
 
@@ -128,14 +149,57 @@ class ConfirmOrderService {
     * on confirm multiple order
     * @param {Object} messageId
     */
-    async onConfirmMultipleOrder(messageIds) {
+    async onConfirmMultipleOrder(messageIds, user) {
         try {
-            const parentOrderId = getRandomString();
 
             const onConfirmOrderResponse = await Promise.all(
                 messageIds.map(async messageId => {
-                    let onConfirm = await this.onConfirmOrder(messageId);
-                    return onConfirm?.[0];
+                    try {
+                        const onConfirm = await this.onConfirmOrder(messageId);
+                        let resultResponse = onConfirm?.[0];
+
+                        
+
+                        if(resultResponse?.message?.order) {
+                            
+                            if(!resultResponse.context.message_id) {
+                                throw new CustomError("No message with the given ID", "404", "NOT_FOUND");
+                            }
+                            
+                            let orderData = await OrderMongooseModel.find({
+                                messageId: resultResponse.context.message_id 
+                            });
+                            
+                            if(!(orderData || orderData.length)){
+                                throw new CustomError("No message with the given ID", "404", "NOT_FOUND");
+                            }
+                            else {
+                                let orderSchema = {...resultResponse.message.order};
+                                orderSchema.transactionId = resultResponse?.context?.transactionId;
+                                orderSchema.userId = user?.decodedToken?.uid;
+                                orderSchema.messageId = resultResponse.context?.message_id;
+                                orderSchema.parentOrderId = orderData[0].parentOrderId;
+                                orderSchema.bppId = resultResponse.context?.bpp_id;
+
+                                await OrderMongooseModel.findOneAndUpdate(
+                                    {
+                                        messageId: resultResponse.context.message_id
+                                    }, 
+                                    {
+                                        ...orderSchema
+                                    }, 
+                                    { upsert: true }
+                                );
+                            }
+                            resultResponse.parentOrderId = orderData?.[0].parentOrderId;
+                        }
+                        
+
+                        return { ...resultResponse };
+                    }
+                    catch(err) {
+                        throw err;
+                    }
                 })
             );
 
