@@ -6,8 +6,7 @@ import cors from "cors";
 
 import initializeFirebase from './lib/firebase/initializeFirebase.js';
 import logErrors from './utils/logErrors.js';
-import paymentRoutes from './payment/payment.routes.js';
-import orderRoutes from './order/order.routes.js';
+import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
 
 const app = express();
@@ -22,8 +21,7 @@ app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 
 app.use(cors());
-app.use('/api', cors(), paymentRoutes);
-app.use('/client', cors(), orderRoutes);
+app.use('/clientApis', cors(), router);
 app.use(logErrors)
 
 app.get("*", (req, res) => {

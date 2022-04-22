@@ -3,7 +3,7 @@ import { REGISTRY_SERVICE, REGISTRY_SERVICE_API_URLS } from "./routes.js";
 
 /**
  * lookup bpp by Id
- * @param {Object} subcriberDetails 
+ * @param {Object} subscriberDetails 
  *  
  */
 const lookupBppById = async ({subscriber_id, type, domain="nic2004:52110", city="std:080", country="IND"}) => {
