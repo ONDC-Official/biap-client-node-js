@@ -1,7 +1,7 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { getRandomString } from '../../utils/stringHelper.js';
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -39,11 +39,12 @@ class ConfirmOrderService {
      */
     async arePaymentsPending(payment, orderId) {
         const paymentDetails = await juspayService.getOrderStatus(orderId);
-        
-        return payment == null || 
-        payment.status != PROTOCOL_PAYMENT.PAID || 
-        payment.paidAmount <= 0 ||
-        paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
+
+        return payment?.type === PAYMENT_TYPES["ON-ORDER"] && (payment == null ||
+            payment.status != PROTOCOL_PAYMENT.PAID ||
+            payment.paid_amount <= 0 ||
+            payment.paid_amount !== paymentDetails.amount ||
+            paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status);
     }
 
     /**
@@ -53,26 +54,28 @@ class ConfirmOrderService {
     async confirmOrder(orderRequest) {
         try {
             const contextFactory = new ContextFactory();
-            const context = contextFactory.create({ action: PROTOCOL_CONTEXT.CONFIRM, transactionId: orderRequest?.context?.transaction_id });
-            
+            let context = contextFactory.create({ action: PROTOCOL_CONTEXT.CONFIRM, transactionId: orderRequest?.context?.transaction_id });
+
             const { message: order = {} } = orderRequest || {};
 
             if (!(order?.items?.length)) {
-                throw new CustomError("Empty order received");
+                return { error: { message: "Empty order received" }, context };
             }
             else if (this.areMultipleBppItemsSelected(order?.items)) {
-                throw new CustomError("More than one BPP's item(s) selected/initialized");
+                return { error: { message: "More than one BPP's item(s) selected/initialized" }, context };
             }
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
-                throw new CustomError("More than one Provider's item(s) selected/initialized");
+                return { error: { message: "More than one Provider's item(s) selected/initialized" }, context };
             }
             else if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
-                throw new CustomError("BAP hasn't received payment yet", "BAP_015", "PAYMENT_PENDING");
+                return { error: { message: "BAP hasn't received payment yet", status: "BAP_015", name: "PAYMENT_PENDING" }, context };
             }
 
             const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
-
+            context.bpp_id = order?.items[0]?.bpp_id;
+            
             return await bppConfirmService.confirm(context, subscriberDetails?.[0]?.subscriber_url, order);
+
         }
         catch (err) {
             throw err;
@@ -91,23 +94,25 @@ class ConfirmOrderService {
             orders.map(async order => {
                 try {
                     const orderResponse = await this.confirmOrder(order);
-                    
-                    await OrderMongooseModel.findOneAndUpdate(
-                        {
-                            messageId: orderResponse.context.message_id
-                        }, 
-                        {
-                            userId: user?.decodedToken?.uid,
-                            messageId: orderResponse.context.message_id,
-                            transactionId: null,
-                            parentOrderId:  parentOrderId
-                        }, 
-                        { upsert: true }
-                    );
+                    if(!orderResponse.error) {
+                        await OrderMongooseModel.findOneAndUpdate(
+                            {
+                                messageId: orderResponse.context.message_id
+                            },
+                            {
+                                userId: user?.decodedToken?.uid,
+                                messageId: orderResponse.context.message_id,
+                                transactionId: null,
+                                parentOrderId: parentOrderId,
+                                bppId: orderResponse.context.bpp_id
+                            },
+                            { upsert: true }
+                        );
+                    }
 
                     return orderResponse;
                 }
-                catch(err) {
+                catch (err) {
                     throw err;
                 }
             })
@@ -158,24 +163,23 @@ class ConfirmOrderService {
                         const onConfirm = await this.onConfirmOrder(messageId);
                         let resultResponse = onConfirm?.[0];
 
-                        
+                        if (resultResponse?.message?.order) {
 
-                        if(resultResponse?.message?.order) {
-                            
-                            if(!resultResponse.context.message_id) {
+                            if (!resultResponse.context.message_id) {
                                 throw new CustomError("No message with the given ID", "404", "NOT_FOUND");
                             }
-                            
+
                             let orderData = await OrderMongooseModel.find({
-                                messageId: resultResponse.context.message_id 
+                                messageId: resultResponse.context.message_id
                             });
-                            
-                            if(!(orderData || orderData.length)){
+
+                            if (!(orderData || orderData.length)) {
                                 throw new CustomError("No message with the given ID", "404", "NOT_FOUND");
                             }
                             else {
-                                let orderSchema = {...resultResponse.message.order};
-                                orderSchema.transactionId = resultResponse?.context?.transactionId;
+                                let orderSchema = { ...resultResponse.message.order };
+                                
+                                orderSchema.transactionId = resultResponse?.context?.transaction_id;
                                 orderSchema.userId = user?.decodedToken?.uid;
                                 orderSchema.messageId = resultResponse.context?.message_id;
                                 orderSchema.parentOrderId = orderData[0].parentOrderId;
@@ -184,20 +188,20 @@ class ConfirmOrderService {
                                 await OrderMongooseModel.findOneAndUpdate(
                                     {
                                         messageId: resultResponse.context.message_id
-                                    }, 
+                                    },
                                     {
                                         ...orderSchema
-                                    }, 
+                                    },
                                     { upsert: true }
                                 );
                             }
                             resultResponse.parentOrderId = orderData?.[0].parentOrderId;
                         }
-                        
+
 
                         return { ...resultResponse };
                     }
-                    catch(err) {
+                    catch (err) {
                         throw err;
                     }
                 })

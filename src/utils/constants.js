@@ -29,6 +29,13 @@ export const HEADERS = {
     AUTH_TOKEN: 'Authorization',
 };
 
+export const PAYMENT_TYPES = {
+    "ON-ORDER": "ON-ORDER",
+    "PRE-FULFILLMENT": "PRE-FULFILLMENT",
+    "ON-FULFILLMENT": "ON-FULFILLMENT",
+    "POST-FULFILLMENT": "POST-FULFILLMENT"
+};
+
 export const PROTOCOL_CONTEXT = {
     CANCEL: "cancel",
     CONFIRM: "confirm",

@@ -49,7 +49,8 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
                             },
-                            status: PROTOCOL_PAYMENT.PAID
+                            status: PROTOCOL_PAYMENT.PAID,
+                            type: order?.payment?.type
                         }
                     }
                 }
@@ -57,7 +58,7 @@ class BppConfirmService {
 
             bppUri = getBaseUri(bppUri);
 
-            let response = await bppConfirm(bppUri, confirmRequest);
+            const response = await bppConfirm(bppUri, confirmRequest);
 
             return { context: context, message: response.message };
         }
