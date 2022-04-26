@@ -26,7 +26,7 @@ app.use(logErrors)
 
 app.get("*", (req, res) => {
     res.send("API NOT FOUND");
-  });
+});
 
 const port = process.env.PORT || 8080;
 
