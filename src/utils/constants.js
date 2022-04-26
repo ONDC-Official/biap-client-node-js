@@ -12,10 +12,10 @@ export const EMAIL_TEMPLATES = {
     INVITE: 'INVITE',
     USER_ACTIVITY: 'USER_ACTIVITY',
     EXCEPTION: 'EXCEPTION',
-    EVENT_UPDATE:'EVENT_UPDATE',
-    EVENT_CANCEL:'EVENT_CANCEL',
-    ORDER_BOOKED:'ORDER_BOOKED',
-    ORDER_CANCEL:'ORDER_CANCEL'
+    EVENT_UPDATE: 'EVENT_UPDATE',
+    EVENT_CANCEL: 'EVENT_CANCEL',
+    ORDER_BOOKED: 'ORDER_BOOKED',
+    ORDER_CANCEL: 'ORDER_CANCEL'
 };
 
 export const RESOURCE_POSSESSION = {
@@ -27,4 +27,59 @@ export const RESOURCE_POSSESSION = {
 export const HEADERS = {
     ACCESS_TOKEN: 'access-token',
     AUTH_TOKEN: 'Authorization',
+};
+
+export const PAYMENT_TYPES = {
+    "ON-ORDER": "ON-ORDER",
+    "PRE-FULFILLMENT": "PRE-FULFILLMENT",
+    "ON-FULFILLMENT": "ON-FULFILLMENT",
+    "POST-FULFILLMENT": "POST-FULFILLMENT"
+};
+
+export const PROTOCOL_CONTEXT = {
+    CANCEL: "cancel",
+    CONFIRM: "confirm",
+    INIT: "init",
+    ON_CONFIRM: "on_confirm",
+    SEARCH: "search",
+    TRACK: "track"
+};
+
+export const PROTOCOL_PAYMENT = {
+    PAID: "PAID",
+    "NOT-PAID": "NOT-PAID",
+};
+
+export const PROTOCOL_VERSION = {
+    v_0_9_3: "0.9.3"
+};
+
+export const SUBSCRIBER_TYPE = {
+    BAP: "BAP",
+    BPP: "BPP",
+    BG: "BG",
+    LREG: "LREG",
+    CREG: "CREG",
+    RREG: "RREG"
+};
+
+export const JUSPAY_PAYMENT_STATUS = {
+    NEW: { id: 10, status: "NEW" },
+    PENDING_VBV: { id: 23, status: "PENDING_VBV" },
+    VBV_SUCCESSFUL: { id: 24, status: "VBV_SUCCESSFUL" },
+    CHARGED: { id: 21, status: "CHARGED" },
+    AUTHENTICATION_FAILED: { id: 26, status: "AUTHENTICATION_FAILED" },
+    AUTHORIZATION_FAILED: { id: 27, status: "AUTHORIZATION_FAILED" },
+    JUSPAY_DECLINED: { id: 22, status: "JUSPAY_DECLINED" },
+    AUTHORIZING: { id: 28, status: "AUTHORIZING" },
+    COD_INITIATED: { id: 29, status: "COD_INITIATED" },
+    STARTED: { id: 20, status: "STARTED" },
+    AUTO_REFUNDED: { id: 36, status: "AUTO_REFUNDED" },
+    CAPTURE_INITIATED: { id: 33, status: "CAPTURE_INITIATED" },
+    CAPTURE_FAILED: { id: 34, status: "CAPTURE_FAILED" },
+    VOID_INITIATED: { id: 32, status: "VOID_INITIATED" },
+    VOIDED: { id: 31, status: "VOIDED" },
+    VOID_FAILED: { id: 35, status: "VOID_FAILED" },
+    NOT_FOUND: { id: 40, status: "NOT_FOUND" },
+
 }

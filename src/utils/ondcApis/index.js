@@ -1,5 +1,5 @@
 import FetchRequest from "../FetchRequest.js";
-import { ONDC_APIS } from "./routes.js";
+import { ONDC_API_URLS } from "./routes.js";
 
 /**
  * update order status
@@ -9,12 +9,12 @@ import { ONDC_APIS } from "./routes.js";
 const confirmOrder = async (orderDetails, user) => {
     let apiCall = new FetchRequest(
         process.env.ONDC_BASE_API_URL,
-        ONDC_APIS.CONFIRM_ORDER,
+        ONDC_API_URLS.CONFIRM_ORDER,
         "POST",
         {...orderDetails},
         { 
             "Accept": 'application/json',
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
 
@@ -36,11 +36,11 @@ const confirmOrder = async (orderDetails, user) => {
 const getOrderDetails = async (orderId, user) => {
     let apiCall = new FetchRequest(
         process.env.ONDC_BASE_API_URL,
-        ONDC_APIS.GET_ORDER,
+        ONDC_API_URLS.GET_ORDER,
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
 
@@ -67,11 +67,11 @@ const getOrderDetails = async (orderId, user) => {
 const getBillingAddress = async (user) => {
     let apiCall = new FetchRequest(
         process.env.ONDC_BASE_API_URL,
-        ONDC_APIS.GET_BILLING_ADDRESS,
+        ONDC_API_URLS.GET_BILLING_ADDRESS,
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );
     let billingAddress = {};
@@ -97,11 +97,11 @@ const getBillingAddress = async (user) => {
 const getDeliveryAddress = async (user) => {
     let apiCall = new FetchRequest(
         process.env.ONDC_BASE_API_URL,
-        ONDC_APIS.GET_DELIVERY_ADDRESS,
+        ONDC_API_URLS.GET_DELIVERY_ADDRESS,
         "GET",
         {},
         { 
-            "Authorization": 'Basic ' + user.token
+            "Authorization": 'Bearer ' + user.token
         }
     );    
     let deliveryAddress = {}

@@ -6,11 +6,8 @@ import util from "util";
 import { getJuspayOrderStatus } from "../utils/juspayApis.js";
 import MESSAGES from "../utils/messages.js";
 import { NoRecordFoundError } from "../lib/errors/index.js";
-import PaymentService from "./payment.service.js";
 
 const readFile = util.promisify(fs.readFile);
-
-const paymentService = new PaymentService();
 class JuspayService 
 {
     /**
@@ -52,8 +49,6 @@ class JuspayService
 
             if(!paymentDetails)
                 throw new NoRecordFoundError(MESSAGES.ORDER_NOT_EXIST);
-            // else if(paymentDetails.status === "CHARGED")
-            //     await paymentService.processOrder(orderId, paymentDetails, user);
 
             return paymentDetails;
         } 
@@ -73,9 +68,20 @@ class JuspayService
         {
             const { id, date_created, event_name, content = {}} = data;     
 
-            if(event_name === "ORDER_SUCCEEDED"){
-                // TODO : Process the payment
+            switch (event_name) {
+                case "ORDER_SUCCEEDED":
+                    // TODO : Process the payment
+                    break;
+                case "ORDER_FAILED":
+
+                    break;
+                case "ORDER_AUTHORIZED":
+
+                    break;
+                default:
+                    break;
             }
+            
 
         } 
         catch (err) 

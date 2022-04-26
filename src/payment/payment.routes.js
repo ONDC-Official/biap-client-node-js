@@ -18,7 +18,7 @@ router.get('/payment/status/:orderId', authentication(), paymentController.getOr
 
 // verify payment
 router.post(
-    '/payment/verification', 
+    '/payment/verify',
     juspayAuthentication(),
     paymentController.verifyPayment,
 );
