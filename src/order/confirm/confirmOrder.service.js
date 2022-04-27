@@ -38,13 +38,15 @@ class ConfirmOrderService {
      * @returns Boolean
      */
     async arePaymentsPending(payment, orderId) {
-        const paymentDetails = await juspayService.getOrderStatus(orderId);
+        if (payment?.type !== PAYMENT_TYPES["ON-ORDER"])
+            return false;
 
-        return payment?.type === PAYMENT_TYPES["ON-ORDER"] && (payment == null ||
+        const paymentDetails = await juspayService.getOrderStatus(orderId);
+        return payment == null ||
             payment.status != PROTOCOL_PAYMENT.PAID ||
             payment.paid_amount <= 0 ||
             payment.paid_amount !== paymentDetails.amount ||
-            paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status);
+            paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
     }
 
     /**
@@ -73,7 +75,7 @@ class ConfirmOrderService {
 
             const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
             context.bpp_id = order?.items[0]?.bpp_id;
-            
+
             return await bppConfirmService.confirm(context, subscriberDetails?.[0]?.subscriber_url, order);
 
         }
@@ -94,7 +96,7 @@ class ConfirmOrderService {
             orders.map(async order => {
                 try {
                     const orderResponse = await this.confirmOrder(order);
-                    if(!orderResponse.error) {
+                    if (!orderResponse.error) {
                         await OrderMongooseModel.findOneAndUpdate(
                             {
                                 messageId: orderResponse.context.message_id
@@ -178,7 +180,7 @@ class ConfirmOrderService {
                             }
                             else {
                                 let orderSchema = { ...resultResponse.message.order };
-                                
+
                                 orderSchema.transactionId = resultResponse?.context?.transaction_id;
                                 orderSchema.userId = user?.decodedToken?.uid;
                                 orderSchema.messageId = resultResponse.context?.message_id;

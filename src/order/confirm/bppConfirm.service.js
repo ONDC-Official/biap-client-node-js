@@ -1,5 +1,5 @@
 import { bppConfirm } from "../../utils/bppApis/index.js";
-import { PROTOCOL_PAYMENT } from "../../utils/constants.js";
+import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
@@ -10,7 +10,7 @@ class BppConfirmService {
     async confirm(context, bppUri, order) {
         try {
             let provider = order?.items?.[0]?.provider || {};
-            
+
             const confirmRequest = {
                 context: context,
                 message: {
@@ -22,9 +22,9 @@ class BppConfirmService {
                                 quantity: item.quantity
                             };
                         }) || [],
-                        provider: { 
-                            id: provider.id, 
-                            locations: provider.locations 
+                        provider: {
+                            id: provider.id,
+                            locations: provider.locations
                         },
                         fulfillment: {
                             end: {
@@ -34,7 +34,7 @@ class BppConfirmService {
                                 },
                                 location: order.delivery_info.location,
                             },
-                            type: "home_delivery",
+                            type: order.delivery_info.type,
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
@@ -49,7 +49,7 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
                             },
-                            status: PROTOCOL_PAYMENT.PAID,
+                            status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PROTOCOL_PAYMENT.PAID : PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
                         }
                     }
