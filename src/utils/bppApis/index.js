@@ -19,4 +19,22 @@ const bppConfirm = async (bppUri, order) => {
     return result.data;
 };
 
-export { bppConfirm };
+/**
+ * cancel order
+ * @param {Object} orderDetails 
+ * @param {Object} user 
+ */
+const bppCancel = async (bppUri, order) => {
+
+    const apiCall = new HttpRequest(
+        bppUri,
+        BPP_API_URLS.CANCEL,
+        "POST",
+        order
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+export { bppCancel, bppConfirm };

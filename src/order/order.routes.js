@@ -1,11 +1,13 @@
 import {Router} from 'express';
 import { authentication } from '../middlewares/index.js';
 
+import CancelOrderController from './cancel/cancelOrder.controller.js';
 import ConfirmOrderController from './confirm/confirmOrder.controller.js';
 import OrderHistoryController from './history/orderHistory.controller.js';
 
 const rootRouter = new Router();
 
+const cancelOrderController = new CancelOrderController();
 const confirmOrderController = new ConfirmOrderController();
 const orderHistoryController = new OrderHistoryController();
 
@@ -34,6 +36,15 @@ rootRouter.get('/v2/on_confirm_order', authentication(), confirmOrderController.
 //#endregion
 
 //#region cancel order
+
+rootRouter.post(
+    '/v1/cancel_order', 
+    authentication(),
+    cancelOrderController.cancelOrder,
+);
+
+rootRouter.get('/v1/on_cancel_order', authentication(), cancelOrderController.onCancelOrder);
+
 //#endregion
 
 //#region order history

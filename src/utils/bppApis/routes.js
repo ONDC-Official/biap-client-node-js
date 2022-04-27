@@ -1,7 +1,9 @@
+const CANCEL = "cancel";
 const CONFIRM = "confirm";
 
 const BPP_API_URLS = {
-    CONFIRM
+    CANCEL,
+    CONFIRM,
 }
 
 export default BPP_API_URLS;

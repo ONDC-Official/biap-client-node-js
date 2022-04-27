@@ -16,4 +16,20 @@ const onOrderConfirm = async (messageId) => {
     return result.data;
 };
 
-export { onOrderConfirm };
+
+/**
+ * on cancel order
+ * @param {String} messageId 
+ */
+const onOrderCancel = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_CANCEL + "?messageId="+ messageId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+export { onOrderCancel, onOrderConfirm };
