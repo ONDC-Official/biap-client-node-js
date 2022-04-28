@@ -42,10 +42,11 @@ class ConfirmOrderService {
             return false;
 
         const paymentDetails = await juspayService.getOrderStatus(orderId);
+
         return payment == null ||
             payment.status != PROTOCOL_PAYMENT.PAID ||
             payment.paid_amount <= 0 ||
-            payment.paid_amount !== paymentDetails.amount ||
+            (process.env.NODE_ENV === "prod" && payment.paid_amount !== paymentDetails.amount) ||
             paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
     }
 
@@ -61,16 +62,16 @@ class ConfirmOrderService {
             const { message: order = {} } = orderRequest || {};
 
             if (!(order?.items?.length)) {
-                return { error: { message: "Empty order received" }, context };
+                return { context, error: { message: "Empty order received" }};
             }
             else if (this.areMultipleBppItemsSelected(order?.items)) {
-                return { error: { message: "More than one BPP's item(s) selected/initialized" }, context };
+                return { context, error: { message: "More than one BPP's item(s) selected/initialized" }};
             }
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
-                return { error: { message: "More than one Provider's item(s) selected/initialized" }, context };
+                return { context, error: { message: "More than one Provider's item(s) selected/initialized" }};
             }
             else if (await this.arePaymentsPending(order?.payment, orderRequest?.context?.transaction_id)) {
-                return { error: { message: "BAP hasn't received payment yet", status: "BAP_015", name: "PAYMENT_PENDING" }, context };
+                return { context, error: { message: "BAP hasn't received payment yet", status: "BAP_015", name: "PAYMENT_PENDING" }};
             }
 
             const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: order?.items[0]?.bpp_id });
