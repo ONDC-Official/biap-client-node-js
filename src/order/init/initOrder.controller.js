@@ -4,6 +4,7 @@ import BadRequestParameterError from '../../lib/errors/bad-request-parameter.err
 const initOrderService = new InitOrderService();
 
 class InitOrderController {
+
     /**
     * init order
     * @param {*} req    HTTP request object
@@ -12,9 +13,9 @@ class InitOrderController {
     * @return {callback}
     */
     initOrder(req, res, next) {
-        const orderRequest = req.body;
+        const { body: orderRequest, user} = req;
 
-        initOrderService.initOrder(orderRequest).then(response => {
+        initOrderService.initOrder(orderRequest, user).then(response => {
             res.json({ ...response });
         }).catch((err) => {
             next(err);
@@ -29,11 +30,11 @@ class InitOrderController {
     * @return {callback}
     */
     initMultipleOrder(req, res, next) {
-        const orderRequests = req.body;
+        const { body: orderRequests, user} = req;
 
         if (orderRequests && orderRequests.length) {
 
-            initOrderService.initMultipleOrder(orderRequests, req.user).then(response => {
+            initOrderService.initMultipleOrder(orderRequests, user).then(response => {
                 res.json(response);
             }).catch((err) => {
                 next(err);
@@ -70,17 +71,18 @@ class InitOrderController {
     * @return {callback}
     */
     onInitMultipleOrder(req, res, next) {
-        const { query, user } = req;
+        const { query } = req;
         const { messageIds } = query;
         
         if(messageIds && messageIds.length && messageIds.trim().length) { 
             const messageIdArray = messageIds.split(",");
             
-            initOrderService.onInitMultipleOrder(messageIdArray, user).then(orders => {
+            initOrderService.onInitMultipleOrder(messageIdArray).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);
             });
+            
         }
         else
             throw new BadRequestParameterError();

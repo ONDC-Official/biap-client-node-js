@@ -8,15 +8,16 @@ class BppInitService {
     */
     async init(context, bppUri, order) {
         try {
-            let provider = order?.items?.[0]?.provider || {};
-            
+            const provider = order?.items?.[0]?.provider || {};
             const initRequest = {
                 context: context,
                 message: {
                     order: {
-                        provider: { 
-                            id: provider.id, 
-                            locations: provider.locations 
+                        provider: {
+                            id: provider.id,
+                            locations: provider.locations.map(location => {
+                                return { id: location };
+                            })
                         },
                         items: order?.items.map(item => {
                             return {
@@ -24,12 +25,14 @@ class BppInitService {
                                 quantity: item.quantity
                             };
                         }) || [],
+                        add_ons: [],
+                        offers: [],
                         billing: order.billing_info,
                         fulfillment: {
                             end: {
                                 contact: {
-                                    email: order.delivery_info.phone,
-                                    phone: order.delivery_info.email
+                                    email: order.delivery_info.email,
+                                    phone: order.delivery_info.phone
                                 },
                                 location: order.delivery_info.location,
                             },
@@ -41,14 +44,11 @@ class BppInitService {
                             },
                             provider_id: provider.id
                         },
-                        addOns: [],
-                        offers: [],
                     }
                 }
             }
 
             bppUri = getBaseUri(bppUri);
-            
             const response = await bppInit(bppUri, initRequest);
 
             return { context: context, message: response.message };
