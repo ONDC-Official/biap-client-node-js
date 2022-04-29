@@ -3,12 +3,14 @@ import { authentication } from '../middlewares/index.js';
 
 import CancelOrderController from './cancel/cancelOrder.controller.js';
 import ConfirmOrderController from './confirm/confirmOrder.controller.js';
+import InitOrderController from './init/initOrder.controller.js';
 import OrderHistoryController from './history/orderHistory.controller.js';
 
 const rootRouter = new Router();
 
 const cancelOrderController = new CancelOrderController();
 const confirmOrderController = new ConfirmOrderController();
+const initOrderController = new InitOrderController();
 const orderHistoryController = new OrderHistoryController();
 
 //#region confirm order
@@ -49,6 +51,30 @@ rootRouter.get('/v1/on_cancel_order', authentication(), cancelOrderController.on
 
 //#region order history
 rootRouter.get('/v1/orders', authentication(), orderHistoryController.getOrdersList);
+//#endregion
+
+//#region Initialize order
+
+// initialize order v1
+rootRouter.post(
+    '/v1/initialize_order', 
+    authentication(),
+    initOrderController.initOrder,
+);
+
+// initialize order v2
+rootRouter.post(
+    '/v2/initialize_order', 
+    authentication(),
+    initOrderController.initMultipleOrder,
+);
+
+// on initialize order v1
+rootRouter.get('/v1/on_initialize_order', authentication(), initOrderController.onInitOrder);
+
+// on initialize order v2
+rootRouter.get('/v2/on_initialize_order', authentication(), initOrderController.onInitMultipleOrder);
+
 //#endregion
 
 export default rootRouter;
