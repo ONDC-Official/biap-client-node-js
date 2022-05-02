@@ -2,12 +2,34 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderCancel } from "../../utils/protocolApis/index.js";
 import {  PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
-import ContextFactory from "../../factories/ContextFactory.js";
 import BppCancelService from "./bppCancel.service.js";
+import ContextFactory from "../../factories/ContextFactory.js";
+import CustomError from "../../lib/errors/custom.error.js";
+import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
+import OrderMongooseModel from '../db/order.js';
 
 const bppCancelService = new BppCancelService();
 
 class CancelOrderService {
+
+    /**
+     * update order
+     * @param {String} transactionId 
+     * @param {Object} orderSchema 
+     */
+    async updateOrderInDb(transactionId, orderSchema = {}) {
+
+        return await OrderMongooseModel.findOneAndUpdate(
+            {
+                transactionId: transactionId
+            },
+            {
+                ...orderSchema
+            },
+            { upsert: true }
+        );
+
+    }
 
     /**
     * cancel order
@@ -27,7 +49,7 @@ class CancelOrderService {
             const {  order_id, cancellation_reason_id } = message || {};
 
             if (!(context?.bpp_id)) {
-                throw new Error("BPP Id is mandatory");
+                throw new CustomError("BPP Id is mandatory");
             }
 
             const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: context?.bpp_id });
@@ -45,21 +67,41 @@ class CancelOrderService {
     */
     async onCancelOrder(messageId) {
         try {            
-            let order = await onOrderCancel(messageId);
+            let protocolCancelResponse = await onOrderCancel(messageId);
 
-            if (!(order && order.length)) {
+            if (!(protocolCancelResponse && protocolCancelResponse.length)) {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({ messageId: messageId });
 
-                return [{
+                return {
                     context,
                     error: {
                         message: "No data found"
                     }
-                }];
+                };
             }
             else {
-                return order;
+                if(!(protocolCancelResponse?.[0].error)) {
+
+                    protocolCancelResponse = protocolCancelResponse?.[0];
+                    const dbResponse = await OrderMongooseModel.find({
+                        transactionId: protocolCancelResponse.context.transaction_id
+                    });
+                    
+                    if (!(dbResponse || dbResponse.length))
+                        throw new NoRecordFoundError();
+                    else {
+                        const orderSchema = dbResponse?.[0].toJSON();
+                        orderSchema.state = protocolCancelResponse?.message?.order?.state;
+                        
+                        await this.updateOrderInDb(
+                            protocolCancelResponse.context.transaction_id,
+                            { ...orderSchema }
+                        );
+                    }
+
+                }
+                return protocolCancelResponse;
             }
 
         }

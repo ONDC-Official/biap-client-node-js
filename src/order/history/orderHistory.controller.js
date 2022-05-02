@@ -12,9 +12,9 @@ class OrderHistoryController {
     * @return {callback}
     */
     getOrdersList(req, res, next) {
-        const { query, user } = req;
+        const { query = {}, user } = req;
 
-        orderHistoryService.getOrdersList(query, user).then(response => {
+        orderHistoryService.getOrdersList(user, query).then(response => {
             if(response?.length)
                 res.json([ ...response ]);
             else

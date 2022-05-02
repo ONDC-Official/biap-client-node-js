@@ -1,20 +1,21 @@
-import ConfirmOrderService from './confirmOrder.service.js';
+import InitOrderService from './initOrder.service.js';
 import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 
-const confirmOrderService = new ConfirmOrderService();
-class ConfirmOrderController {
+const initOrderService = new InitOrderService();
+
+class InitOrderController {
 
     /**
-    * confirm order
+    * init order
     * @param {*} req    HTTP request object
     * @param {*} res    HTTP response object
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    confirmOrder(req, res, next) {
-        const { body: orderRequest } = req;
+    initOrder(req, res, next) {
+        const { body: orderRequest, user} = req;
 
-        confirmOrderService.confirmOrder(orderRequest).then(response => {
+        initOrderService.initOrder(orderRequest, user).then(response => {
             res.json({ ...response });
         }).catch((err) => {
             next(err);
@@ -22,18 +23,18 @@ class ConfirmOrderController {
     }
 
     /**
-    * confirm multiple orders
+    * init multiple orders
     * @param {*} req    HTTP request object
     * @param {*} res    HTTP response object
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    confirmMultipleOrder(req, res, next) {
-        const { body: orderRequests } = req;
+    initMultipleOrder(req, res, next) {
+        const { body: orderRequests, user} = req;
 
         if (orderRequests && orderRequests.length) {
 
-            confirmOrderService.confirmMultipleOrder(orderRequests).then(response => {
+            initOrderService.initMultipleOrder(orderRequests, user).then(response => {
                 res.json(response);
             }).catch((err) => {
                 next(err);
@@ -45,17 +46,17 @@ class ConfirmOrderController {
     }
 
     /**
-    * on confirm order
+    * on init order
     * @param {*} req    HTTP request object
     * @param {*} res    HTTP response object
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    onConfirmOrder(req, res, next) {
+    onInitOrder(req, res, next) {
         const { query } = req;
         const { messageId } = query;
         
-        confirmOrderService.onConfirmOrder(messageId).then(order => {
+        initOrderService.onInitOrder(messageId).then(order => {
             res.json(order);
         }).catch((err) => {
             next(err);
@@ -63,20 +64,20 @@ class ConfirmOrderController {
     }
 
     /**
-    * on confirm multiple order
+    * on init multiple order
     * @param {*} req    HTTP request object
     * @param {*} res    HTTP response object
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    onConfirmMultipleOrder(req, res, next) {
+    onInitMultipleOrder(req, res, next) {
         const { query } = req;
         const { messageIds } = query;
         
         if(messageIds && messageIds.length && messageIds.trim().length) { 
             const messageIdArray = messageIds.split(",");
             
-            confirmOrderService.onConfirmMultipleOrder(messageIdArray).then(orders => {
+            initOrderService.onInitMultipleOrder(messageIdArray).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);
@@ -88,4 +89,4 @@ class ConfirmOrderController {
     }
 }
 
-export default ConfirmOrderController;
+export default InitOrderController;

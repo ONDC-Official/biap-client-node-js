@@ -25,7 +25,7 @@ class BppConfirmService {
             
             const response = await bppCancel(bppUri, cancelRequest);
             
-            return [{ context: context, message: response.message }];
+            return { context: context, message: response.message };
         }
         catch (err) {
             throw err;

@@ -4,5 +4,5 @@
  * @returns 
  */
 export const getBaseUri = (baseUrl) => {
-    return baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+    return baseUrl ? baseUrl.endsWith("/") ? baseUrl : baseUrl + "/" : "";
 }
