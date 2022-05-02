@@ -52,6 +52,7 @@ export const PROTOCOL_PAYMENT = {
 };
 
 export const PROTOCOL_VERSION = {
+    v_0_9_1: "0.9.1",
     v_0_9_3: "0.9.3"
 };
 

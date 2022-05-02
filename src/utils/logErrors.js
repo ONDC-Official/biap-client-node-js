@@ -1,12 +1,19 @@
 const logErrors = (err, req, res, next) => {
     //TODO handle errors
-    res.status(err.status).json({
+    let response = res;
+
+    if(err.status){
+        response = response.status(err.status);
+    }
+
+    response.json({
         status: err.status, 
         error: {
             name: err.name,
             message: err.message
         }
     });
+    
     next(err);
 };
 

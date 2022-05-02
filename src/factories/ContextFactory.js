@@ -33,7 +33,7 @@ class ContextFactory {
             country: this.country,
             city : this.city,
             action : action,
-            coreVersion : PROTOCOL_VERSION.v_0_9_3,
+            core_version : PROTOCOL_VERSION.v_0_9_3,
             bap_id : this.bapId,
             bap_uri : this.bapUrl,
             bpp_id : bppId,

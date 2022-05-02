@@ -15,7 +15,7 @@ const bppConfirm = async (bppUri, order) => {
         order
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
@@ -52,7 +52,7 @@ const bppInit = async (bppUri, order) => {
         order
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
