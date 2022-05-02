@@ -59,7 +59,6 @@ class ConfirmOrderService {
         const paymentDetails = await juspayService.getOrderStatus(orderId);
 
         return payment == null ||
-            payment.status != PROTOCOL_PAYMENT.PAID ||
             payment.paid_amount <= 0 ||
             (process.env.NODE_ENV === "prod" && payment.paid_amount !== paymentDetails.amount) ||
             paymentDetails.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status;
