@@ -3,8 +3,9 @@ import { onOrderInit } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { getRandomString } from '../../utils/stringHelper.js';
 
-import ContextFactory from "../../factories/ContextFactory.js";
 import BppInitService from "./bppInit.service.js";
+import ContextFactory from "../../factories/ContextFactory.js";
+import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from '../db/order.js';
 
 const bppInitService = new BppInitService();
@@ -41,7 +42,7 @@ class InitOrderService {
         });
 
         if (!(dbResponse || dbResponse.length))
-            throw new CustomError("Order not found", "404", "NOT_FOUND");
+            throw new NoRecordFoundError();
         else
             return true;
     }

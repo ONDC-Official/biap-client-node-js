@@ -3,8 +3,8 @@ import ERRORS from './errors.js';
 class CustomError extends Error {
     constructor(
             message = ERRORS.BAD_REQUEST_PARAMETER_ERROR.message, 
-            status,
-            name = "ERROR"
+            status = ERRORS.BAD_REQUEST_PARAMETER_ERROR.status,
+            name = ERRORS.BAD_REQUEST_PARAMETER_ERROR.name
         ) {
         super(message);
         this.name = name;

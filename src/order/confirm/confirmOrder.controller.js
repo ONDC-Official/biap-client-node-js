@@ -3,6 +3,7 @@ import BadRequestParameterError from '../../lib/errors/bad-request-parameter.err
 
 const confirmOrderService = new ConfirmOrderService();
 class ConfirmOrderController {
+
     /**
     * confirm order
     * @param {*} req    HTTP request object
@@ -11,7 +12,7 @@ class ConfirmOrderController {
     * @return {callback}
     */
     confirmOrder(req, res, next) {
-        const orderRequest = req.body;
+        const { body: orderRequest } = req;
 
         confirmOrderService.confirmOrder(orderRequest).then(response => {
             res.json({ ...response });
@@ -28,11 +29,11 @@ class ConfirmOrderController {
     * @return {callback}
     */
     confirmMultipleOrder(req, res, next) {
-        const orderRequests = req.body;
+        const { body: orderRequests } = req;
 
         if (orderRequests && orderRequests.length) {
 
-            confirmOrderService.confirmMultipleOrder(orderRequests, req.user).then(response => {
+            confirmOrderService.confirmMultipleOrder(orderRequests).then(response => {
                 res.json(response);
             }).catch((err) => {
                 next(err);
@@ -69,17 +70,18 @@ class ConfirmOrderController {
     * @return {callback}
     */
     onConfirmMultipleOrder(req, res, next) {
-        const { query, user } = req;
+        const { query } = req;
         const { messageIds } = query;
         
         if(messageIds && messageIds.length && messageIds.trim().length) { 
             const messageIdArray = messageIds.split(",");
             
-            confirmOrderService.onConfirmMultipleOrder(messageIdArray, user).then(orders => {
+            confirmOrderService.onConfirmMultipleOrder(messageIdArray).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);
             });
+            
         }
         else
             throw new BadRequestParameterError();

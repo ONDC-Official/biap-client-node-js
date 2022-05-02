@@ -1,6 +1,6 @@
 const logErrors = (err, req, res, next) => {
     //TODO handle errors
-    res.send({
+    res.status(err.status).json({
         status: err.status, 
         error: {
             name: err.name,
