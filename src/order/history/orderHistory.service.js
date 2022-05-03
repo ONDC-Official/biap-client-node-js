@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import OrderMongooseModel from '../db/order.js';
 
 class OrderHistoryService {
@@ -12,21 +14,44 @@ class OrderHistoryService {
      */
     async findOrders(user, params = {}) {
         try {
-            const { orderId, parentOrderId, transactionId, skip = 0, limit = 10} = params;  
-
             let orders = [];
+            let totalCount = 1;
 
-            if (orderId) {
-                orders = await OrderMongooseModel.find({ id: orderId }).limit(1).skip(skip);
-            } else if (parentOrderId) {
-                orders = await OrderMongooseModel.find({ parentOrderId: parentOrderId }).limit(limit).skip(skip);
-            } else if (transactionId) {
-                orders = await OrderMongooseModel.find({ transactionId: transactionId }).limit(1).skip(skip);
-            } else {
-                orders = await OrderMongooseModel.find({ userId: user.decodedToken.uid }).limit(limit).skip(skip);
-            }
+            let {
+                limit = 10,
+                orderId,
+                pageNumber = 1,
+                parentOrderId,
+                state,
+                transactionId,
+                userId
+            } = params;
+
+
+            limit = parseInt(limit);
+            let skip = (pageNumber - 1) * limit;
             
-            return orders;
+            let clonedFilterObj = {};
+
+            if (orderId)
+                clonedFilterObj = { ...clonedFilterObj, id: { "$in": orderId.split(",") } };
+            if (parentOrderId)
+                clonedFilterObj = { ...clonedFilterObj, parentOrderId: { "$in": parentOrderId.split(",") } };
+            if (transactionId)
+                clonedFilterObj = { ...clonedFilterObj, transactionId: { "$in": transactionId.split(",") } };
+            if (state) {
+                clonedFilterObj = { ...clonedFilterObj, state: { "$in": state.split(",") } };
+            }
+            if (userId)
+                clonedFilterObj = { ...clonedFilterObj, userId: userId };
+
+            if (_.isEmpty(clonedFilterObj))
+                clonedFilterObj = { userId: user.decodedToken.uid };
+
+            orders = await OrderMongooseModel.find({ ...clonedFilterObj }).limit(limit).skip(skip);
+            totalCount = await OrderMongooseModel.countDocuments({ ...clonedFilterObj });
+
+            return { orders, totalCount };
         }
         catch (err) {
             throw err;
@@ -40,7 +65,21 @@ class OrderHistoryService {
     */
     async getOrdersList(user, params = {}) {
         try {
-            return await this.findOrders(user, params);
+            const { orders, totalCount } = await this.findOrders(user, params);
+            if (!orders.length) {
+                return {
+                    error: {
+                        message: "No data found",
+                        status: "BAP_010",
+                    }
+                };
+            }
+            else {
+                return {
+                    totalCount: totalCount,
+                    orders: [...orders],
+                }
+            }
         }
         catch (err) {
             throw err;

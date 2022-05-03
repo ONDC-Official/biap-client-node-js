@@ -3,7 +3,7 @@ import BadRequestParameterError from '../../lib/errors/bad-request-parameter.err
 
 const cancelOrderService = new CancelOrderService();
 
-class ConfirmOrderController {
+class CancelOrderController {
     /**
     * cancel order
     * @param {*} req    HTTP request object
@@ -47,4 +47,4 @@ class ConfirmOrderController {
 
 }
 
-export default ConfirmOrderController;
+export default CancelOrderController;
