@@ -50,7 +50,7 @@ class BppInitService {
 
             bppUri = getBaseUri(bppUri);
             const response = await bppInit(bppUri, initRequest);
-
+            
             return { context: context, message: response.message };
         }
         catch (err) {

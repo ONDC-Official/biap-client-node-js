@@ -1,52 +1,17 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../payment/juspay.service.js";
-import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
-import OrderMongooseModel from '../db/order.js';
 
 const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
 
 class ConfirmOrderService {
-
-    /**
-     * update order
-     * @param {String} transactionId 
-     * @param {Object} orderSchema 
-     */
-    async updateOrderInDb(transactionId, orderSchema = {}) {
-
-        return await OrderMongooseModel.findOneAndUpdate(
-            {
-                transactionId: transactionId
-            },
-            {
-                ...orderSchema
-            },
-            { upsert: true }
-        );
-
-    }
-
-    /**
-     * get the order from the database
-     * @param {String} transactionId 
-     * @returns 
-     */
-    async getOrderFromDb(transactionId) {
-        const order = await OrderMongooseModel.find({
-            transactionId: transactionId
-        });
-
-        if (!(order || order.length))
-            throw new NoRecordFoundError();
-        else
-            return order?.[0];
-    }
+    
     /**
      * 
      * @param {Object} payment 
@@ -70,9 +35,8 @@ class ConfirmOrderService {
     */
     async confirmOrder(orderRequest) {
         try {
-
             const { context: requestContext, message: order = {} } = orderRequest || {};
-            const dbResponse = await this.getOrderFromDb(orderRequest?.context?.transaction_id);
+            const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -149,12 +113,12 @@ class ConfirmOrderService {
                 protocolConfirmResponse.context.transaction_id
             ) {
 
-                const dbResponse = await this.getOrderFromDb(protocolConfirmResponse.context.transaction_id);
+                const dbResponse = await getOrderByTransactionId(protocolConfirmResponse.context.transaction_id);
 
                 let orderSchema = { ...protocolConfirmResponse?.message?.order };
                 orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
 
-                await this.updateOrderInDb(
+                await addOrUpdateOrderWithTransactionId(
                     protocolConfirmResponse.context.transaction_id,
                     { ...orderSchema }
                 );

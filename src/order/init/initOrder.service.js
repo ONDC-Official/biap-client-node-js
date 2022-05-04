@@ -2,50 +2,14 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderInit } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { getRandomString } from '../../utils/stringHelper.js';
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
-import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
-import OrderMongooseModel from '../db/order.js';
 
 const bppInitService = new BppInitService();
 
 class InitOrderService {
-
-    /**
-     * add or update order
-     * @param {String} transactionId 
-     * @param {Object} orderSchema 
-     */
-    async addOrUpdateOrderInDB(transactionId, orderSchema = {}) {
-        
-        return await OrderMongooseModel.findOneAndUpdate(
-            {
-                transactionId: transactionId
-            },
-            {
-                ...orderSchema
-            },
-            { upsert: true }
-        );
-
-    }
-    
-    /**
-     * check if order is added in the database
-     * @param {String} transactionId 
-     * @returns 
-     */
-    async isOrderPresentInDb(transactionId) {
-        const dbResponse = await OrderMongooseModel.find({
-            transactionId: transactionId
-        });
-
-        if (!(dbResponse || dbResponse.length))
-            throw new NoRecordFoundError();
-        else
-            return true;
-    }
 
     /**
      * 
@@ -79,7 +43,7 @@ class InitOrderService {
                 transactionId: requestContext?.transaction_id, 
                 bppId: order?.items[0]?.bpp_id
             });
-
+            
             if (!(order?.items?.length)) {
                 return { 
                     context, 
@@ -103,12 +67,12 @@ class InitOrderService {
                 type: SUBSCRIBER_TYPE.BPP, 
                 subscriber_id: context.bpp_id 
             });
-
+                        
             const bppResponse = await bppInitService.init(context, subscriberDetails?.[0]?.subscriber_url, order);
             
             if(bppResponse) {
 
-                await this.addOrUpdateOrderInDB(
+                await addOrUpdateOrderWithTransactionId(
                     bppResponse.context.transaction_id, 
                     {
                         userId: user?.decodedToken?.uid,
@@ -178,7 +142,7 @@ class InitOrderService {
             } else {
                 protocolResponse = protocolResponse?.[0] || {};
 
-                if(await this.isOrderPresentInDb(protocolResponse?.context?.transaction_id)) {
+                if(await getOrderByTransactionId(protocolResponse?.context?.transaction_id)) {
                     
                     let orderSchema = { ...protocolResponse.message.order };
                     orderSchema.provider = {
@@ -186,7 +150,7 @@ class InitOrderService {
                         locations: [ orderSchema.provider_location ]
                     }
 
-                    await this.addOrUpdateOrderInDB(
+                    await addOrUpdateOrderWithTransactionId(
                         protocolResponse?.context?.transaction_id,
                         { ...orderSchema }
                     );
