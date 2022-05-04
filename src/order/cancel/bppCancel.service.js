@@ -1,7 +1,7 @@
 import { bppCancel } from "../../utils/bppApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
-class BppConfirmService {
+class BppCancelService {
     
     /**
      * 
@@ -33,4 +33,4 @@ class BppConfirmService {
     }
 }
 
-export default BppConfirmService;
+export default BppCancelService;

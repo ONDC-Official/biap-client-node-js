@@ -324,7 +324,7 @@ const OrderSchema = new mongoose.Schema(
         quote: { type: QuotationSchema, default: null },
         payment: { type: PaymentSchema, default: null },
         id: { type: String, default: null },
-        state: { type: String, default: null },
+        state: { type: String, default: null }, //["PENDING-CONFIRMATION", "Ordered", "CANCELLED", "Pending", "Active", "Processing"]
         userId: String,
         transactionId: { type: String, default: null },
         messageId: { type: String, default: null },
@@ -333,6 +333,8 @@ const OrderSchema = new mongoose.Schema(
     },
     { _id: true, timestamps: true }
 );
+
+OrderSchema.index({userId: 1, createdAt: -1});
 
 const Order = mongoose.model('order', OrderSchema, "order");
 

@@ -1,6 +1,7 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderCancel } from "../../utils/protocolApis/index.js";
 import {  PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { addOrUpdateOrderWithTransactionId } from "../db/dbService.js";
 
 import BppCancelService from "./bppCancel.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -11,25 +12,6 @@ import OrderMongooseModel from '../db/order.js';
 const bppCancelService = new BppCancelService();
 
 class CancelOrderService {
-
-    /**
-     * update order
-     * @param {String} transactionId 
-     * @param {Object} orderSchema 
-     */
-    async updateOrderInDb(transactionId, orderSchema = {}) {
-
-        return await OrderMongooseModel.findOneAndUpdate(
-            {
-                transactionId: transactionId
-            },
-            {
-                ...orderSchema
-            },
-            { upsert: true }
-        );
-
-    }
 
     /**
     * cancel order
@@ -94,7 +76,7 @@ class CancelOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
                         
-                        await this.updateOrderInDb(
+                        await addOrUpdateOrderWithTransactionId(
                             protocolCancelResponse.context.transaction_id,
                             { ...orderSchema }
                         );
