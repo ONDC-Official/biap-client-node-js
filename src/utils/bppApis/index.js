@@ -37,7 +37,6 @@ const bppCancel = async (bppUri, order) => {
     return result.data;
 };
 
-
 /**
  * initialize order
  * @param {Object} orderDetails 
@@ -56,4 +55,22 @@ const bppInit = async (bppUri, order) => {
     return result.data;
 };
 
-export { bppCancel, bppConfirm, bppInit };
+/**
+ * track order
+ * @param {Object} orderDetails 
+ * @param {Object} user 
+ */
+const bppTrack = async (bppUri, trackRequest) => {
+
+    const apiCall = new HttpRequest(
+        bppUri,
+        BPP_API_URLS.TRACK,
+        "POST",
+        trackRequest
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+export { bppCancel, bppConfirm, bppInit, bppTrack };

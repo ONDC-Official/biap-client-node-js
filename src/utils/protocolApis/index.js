@@ -16,7 +16,6 @@ const onOrderConfirm = async (messageId) => {
     return result.data;
 };
 
-
 /**
  * on cancel order
  * @param {String} messageId 
@@ -47,4 +46,19 @@ const onOrderInit = async (messageId) => {
     return result.data;
 };
 
-export { onOrderCancel, onOrderConfirm, onOrderInit };
+/**
+ * on track order
+ * @param {String} messageId 
+ */
+const onOrderTrack = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_TRACK + "?messageId="+ messageId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+export { onOrderCancel, onOrderConfirm, onOrderInit, onOrderTrack };
