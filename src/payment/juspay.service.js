@@ -2,37 +2,45 @@ import NodeRSA from "node-rsa";
 import fs from "fs";
 import util from "util";
 
+import MESSAGES from "../utils/messages.js";
+import { PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../utils/constants.js";
+
 // import { accessSecretVersion } from "../utils/accessSecretKey.js";
 import { getJuspayOrderStatus } from "../utils/juspayApis.js";
-import MESSAGES from "../utils/messages.js";
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../order/db/dbService.js";
 import { NoRecordFoundError } from "../lib/errors/index.js";
+import { lookupBppById } from "../utils/registryApis/index.js";
+
+import ContextFactory from "../factories/ContextFactory.js";
+import BppConfirmService from "../order/confirm/bppConfirm.service.js";
+import { onOrderConfirm } from "../utils/protocolApis/index.js";
+import { poll } from "../utils/apiUtil.js";
+
+const bppConfirmService = new BppConfirmService();
 
 const readFile = util.promisify(fs.readFile);
-class JuspayService 
-{
+class JuspayService {
+
     /**
     * sign payload using juspay's private key
     * @param {Object} data
     */
-    async signPayload(data) 
-    {
-        try
-        {
-            const { payload } = data;     
+    async signPayload(data) {
+        try {
+            const { payload } = data;
             let result = null;
 
-            if(payload) {
+            if (payload) {
                 // const privateKeyHyperBeta = await accessSecretVersion(process.env.JUSPAY_SECRET_KEY_PATH);
                 const privateKeyHyperBeta = await readFile(process.env.JUSPAY_SECRET_KEY_PATH, 'utf-8');
-                
+
                 const encryptKey = new NodeRSA(privateKeyHyperBeta, 'pkcs1');
-                result = encryptKey.sign(payload,'base64','utf8');
+                result = encryptKey.sign(payload, 'base64', 'utf8');
             }
             return result;
 
-        } 
-        catch (err) 
-        {
+        }
+        catch (err) {
             throw err;
         }
     }
@@ -41,19 +49,16 @@ class JuspayService
     * get order status
     * @param {Object} data
     */
-    async getOrderStatus(orderId, user) 
-    {
-        try 
-        {
+    async getOrderStatus(orderId, user) {
+        try {
             let paymentDetails = await getJuspayOrderStatus(orderId);
 
-            if(!paymentDetails)
+            if (!paymentDetails)
                 throw new NoRecordFoundError(MESSAGES.ORDER_NOT_EXIST);
 
             return paymentDetails;
-        } 
-        catch (err) 
-        {
+        }
+        catch (err) {
             throw err;
         }
     }
@@ -62,15 +67,17 @@ class JuspayService
     * verify payment webhook
     * @param {Object} data
     */
-    async verifyPayment(data) 
-    {
-        try
-        {
-            const { id, date_created, event_name, content = {}} = data;     
+    async verifyPayment(data) {
+        try {
+            const { date_created, event_name, content = {} } = data || {};
+            const { order = {} } = content || {};
+            const { amount, order_id } = order;
+
+            let status = PROTOCOL_PAYMENT["NOT-PAID"];
 
             switch (event_name) {
                 case "ORDER_SUCCEEDED":
-                    // TODO : Process the payment
+                    status = PROTOCOL_PAYMENT.PAID;
                     break;
                 case "ORDER_FAILED":
 
@@ -80,12 +87,71 @@ class JuspayService
                     break;
                 default:
                     break;
-            }
-            
+            };
 
-        } 
-        catch (err) 
-        {
+            const orderRequest = {
+                payment: {
+                    paid_amount: amount,
+                    status: status,
+                    transaction_id: order_id,
+                    type: PAYMENT_TYPES["ON-ORDER"],
+                }
+            };
+
+            const dbResponse = await getOrderByTransactionId(order_id);
+
+            if (dbResponse?.state === null) {
+
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.CONFIRM,
+                    transactionId: order_id,
+                    bppId: dbResponse.bppId
+                });
+
+                const subscriberDetails = await lookupBppById({
+                    type: SUBSCRIBER_TYPE.BPP,
+                    subscriber_id: context.bpp_id
+                });
+
+                const bppConfirmResponse = await bppConfirmService.confirm(
+                    context,
+                    subscriberDetails?.[0]?.subscriber_url,
+                    orderRequest,
+                    dbResponse
+                );
+
+                if (bppConfirmResponse?.message?.ack) {
+                    let protocolConfirmResponse = await poll(async ()=> { 
+                        return await onOrderConfirm(bppConfirmResponse?.context?.message_id);
+                    });
+
+                    protocolConfirmResponse = protocolConfirmResponse?.[0] || {};
+
+                    if (
+                        protocolConfirmResponse?.context &&
+                        protocolConfirmResponse?.message?.order &&
+                        protocolConfirmResponse.context.message_id &&
+                        protocolConfirmResponse.context.transaction_id
+                    ) {
+
+                        let orderSchema = { ...protocolConfirmResponse?.message?.order };
+                        orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
+
+                        await addOrUpdateOrderWithTransactionId(
+                            protocolConfirmResponse.context.transaction_id,
+                            { ...orderSchema }
+                        );
+
+                        protocolConfirmResponse.parentOrderId = dbResponse?.parentOrderId;
+                        protocolConfirmResponse;
+                    }
+
+                    return;
+                }
+            }
+        }
+        catch (err) {
             throw err;
         }
     }

@@ -11,7 +11,7 @@ const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
 
 class ConfirmOrderService {
-    
+
     /**
      * 
      * @param {Object} payment 
@@ -38,38 +38,58 @@ class ConfirmOrderService {
             const { context: requestContext, message: order = {} } = orderRequest || {};
             const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
 
-            const contextFactory = new ContextFactory();
-            const context = contextFactory.create({
-                action: PROTOCOL_CONTEXT.CONFIRM,
-                transactionId: requestContext?.transaction_id,
-                bppId: dbResponse.bppId
-            });
+            if (dbResponse?.state === null) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.CONFIRM,
+                    transactionId: requestContext?.transaction_id,
+                    bppId: dbResponse.bppId
+                });
 
-            if (await this.arePaymentsPending(
-                order?.payment,
-                orderRequest?.context?.transaction_id
-            )) {
-                return {
+                if (await this.arePaymentsPending(
+                    order?.payment,
+                    orderRequest?.context?.transaction_id
+                )) {
+                    return {
+                        context,
+                        error: {
+                            message: "BAP hasn't received payment yet",
+                            status: "BAP_015",
+                            name: "PAYMENT_PENDING"
+                        }
+                    };
+                }
+
+                const subscriberDetails = await lookupBppById({
+                    type: SUBSCRIBER_TYPE.BPP,
+                    subscriber_id: context.bpp_id
+                });
+
+                return await bppConfirmService.confirm(
                     context,
-                    error: {
-                        message: "BAP hasn't received payment yet",
-                        status: "BAP_015",
-                        name: "PAYMENT_PENDING"
+                    subscriberDetails?.[0]?.subscriber_url,
+                    order,
+                    dbResponse
+                );
+            } else {
+
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.CONFIRM,
+                    transactionId: requestContext?.transaction_id,
+                    bppId: dbResponse.bppId,
+                    messageId: dbResponse.messageId
+                });
+
+                return {
+                    context: context,
+                    message: {
+                        ack: {
+                            status: "ACK"
+                        }
                     }
                 };
             }
-
-            const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
-                subscriber_id: context.bpp_id
-            });
-
-            return await bppConfirmService.confirm(
-                context,
-                subscriberDetails?.[0]?.subscriber_url,
-                order,
-                dbResponse
-            );
         }
         catch (err) {
             throw err;
