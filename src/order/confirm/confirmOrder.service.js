@@ -1,6 +1,6 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -38,7 +38,7 @@ class ConfirmOrderService {
             const { context: requestContext, message: order = {} } = orderRequest || {};
             const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
 
-            if (dbResponse?.state === null) {
+            if (dbResponse?.paymentStatus === null) {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
                     action: PROTOCOL_CONTEXT.CONFIRM,
@@ -65,13 +65,29 @@ class ConfirmOrderService {
                     subscriber_id: context.bpp_id
                 });
 
-                return await bppConfirmService.confirm(
+                const bppConfirmResponse = await bppConfirmService.confirm(
                     context,
                     subscriberDetails?.[0]?.subscriber_url,
                     order,
                     dbResponse
                 );
-            } else {
+                
+                if (bppConfirmResponse?.message?.ack) {
+                    let orderSchema = dbResponse?.toJSON();
+                    
+                    orderSchema.messageId = bppConfirmResponse?.context?.message_id;
+                    if(order?.payment?.type === PAYMENT_TYPES["ON-ORDER"])
+                        orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
+
+                    await addOrUpdateOrderWithTransactionId(
+                        bppConfirmResponse?.context?.transaction_id,
+                        { ...orderSchema }
+                    );
+                }
+
+                return bppConfirmResponse;
+
+            } else {    
 
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({

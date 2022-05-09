@@ -100,7 +100,7 @@ class JuspayService {
 
             const dbResponse = await getOrderByTransactionId(order_id);
 
-            if (dbResponse?.state === null) {
+            if (dbResponse?.paymentStatus === null || dbResponse?.paymentStatus !== status) {
 
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
@@ -122,34 +122,18 @@ class JuspayService {
                 );
 
                 if (bppConfirmResponse?.message?.ack) {
-                    let protocolConfirmResponse = await poll(async ()=> { 
-                        return await onOrderConfirm(bppConfirmResponse?.context?.message_id);
-                    });
+                    let orderSchema = dbResponse?.toJSON();
+                    orderSchema.messageId = bppConfirmResponse?.context?.message_id;
+                    orderSchema.paymentStatus = status;
 
-                    protocolConfirmResponse = protocolConfirmResponse?.[0] || {};
-
-                    if (
-                        protocolConfirmResponse?.context &&
-                        protocolConfirmResponse?.message?.order &&
-                        protocolConfirmResponse.context.message_id &&
-                        protocolConfirmResponse.context.transaction_id
-                    ) {
-
-                        let orderSchema = { ...protocolConfirmResponse?.message?.order };
-                        orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
-
-                        await addOrUpdateOrderWithTransactionId(
-                            protocolConfirmResponse.context.transaction_id,
-                            { ...orderSchema }
-                        );
-
-                        protocolConfirmResponse.parentOrderId = dbResponse?.parentOrderId;
-                        protocolConfirmResponse;
-                    }
-
-                    return;
+                    await addOrUpdateOrderWithTransactionId(
+                        bppConfirmResponse?.context?.transaction_id,
+                        { ...orderSchema }
+                    );
                 }
             }
+
+            return;
         }
         catch (err) {
             throw err;
