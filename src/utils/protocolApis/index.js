@@ -47,6 +47,21 @@ const onOrderInit = async (messageId) => {
 };
 
 /**
+ * on search products
+ * @param {String} messageId 
+ */
+const onSearch = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_SEARCH + "?messageId="+ messageId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+/**
  * on track order
  * @param {String} messageId 
  */
@@ -61,4 +76,4 @@ const onOrderTrack = async (messageId) => {
     return result.data;
 };
 
-export { onOrderCancel, onOrderConfirm, onOrderInit, onOrderTrack };
+export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderTrack };

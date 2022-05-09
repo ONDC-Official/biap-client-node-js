@@ -56,6 +56,24 @@ const bppInit = async (bppUri, order) => {
 };
 
 /**
+ * search
+ * @param {Object} orderDetails 
+ * @param {Object} user 
+ */
+const bppSearch = async (bppUri, criteria) => {
+
+    const apiCall = new HttpRequest(
+        bppUri,
+        BPP_API_URLS.SEARCH,
+        "POST",
+        criteria
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+/**
  * track order
  * @param {Object} orderDetails 
  * @param {Object} user 
@@ -73,4 +91,4 @@ const bppTrack = async (bppUri, trackRequest) => {
     return result.data;
 };
 
-export { bppCancel, bppConfirm, bppInit, bppTrack };
+export { bppCancel, bppConfirm, bppInit, bppSearch, bppTrack };

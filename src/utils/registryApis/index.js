@@ -1,3 +1,4 @@
+import { SUBSCRIBER_TYPE } from "../constants.js";
 import HttpRequest from "../HttpRequest.js";
 import { REGISTRY_SERVICE, REGISTRY_SERVICE_API_URLS } from "./routes.js";
 
@@ -6,8 +7,13 @@ import { REGISTRY_SERVICE, REGISTRY_SERVICE_API_URLS } from "./routes.js";
  * @param {Object} subscriberDetails 
  *  
  */
-const lookupBppById = async ({subscriber_id, type, domain="nic2004:52110", city="std:080", country="IND"}) => {
-
+const lookupBppById = async ({
+    subscriber_id, 
+    type, 
+    domain = process.env.DOMAIN, 
+    city = process.env.CITY, 
+    country = process.env.COUNTRY
+}) => {
     const apiCall = new HttpRequest(
         REGISTRY_SERVICE.url,
         REGISTRY_SERVICE_API_URLS.LOOKUP,
@@ -20,4 +26,28 @@ const lookupBppById = async ({subscriber_id, type, domain="nic2004:52110", city=
     return result.data;
 };
 
-export { lookupBppById };
+/**
+ * lookup gateways
+ * @param {Object} subscriberDetails 
+ *  
+ */
+const lookupGateways = async () => {
+    
+    const apiCall = new HttpRequest(
+        REGISTRY_SERVICE.url,
+        REGISTRY_SERVICE_API_URLS.LOOKUP,
+        "POST",
+        {
+            type: SUBSCRIBER_TYPE.BG,
+            domain: process.env.DOMAIN, 
+            city: process.env.CITY, 
+            country: process.env.COUNTRY
+        }
+    );
+
+    let result = await apiCall.send();
+
+    return result.data;
+};
+
+export { lookupBppById, lookupGateways };
