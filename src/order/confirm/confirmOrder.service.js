@@ -1,6 +1,6 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -11,7 +11,7 @@ const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
 
 class ConfirmOrderService {
-    
+
     /**
      * 
      * @param {Object} payment 
@@ -38,38 +38,74 @@ class ConfirmOrderService {
             const { context: requestContext, message: order = {} } = orderRequest || {};
             const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
 
-            const contextFactory = new ContextFactory();
-            const context = contextFactory.create({
-                action: PROTOCOL_CONTEXT.CONFIRM,
-                transactionId: requestContext?.transaction_id,
-                bppId: dbResponse.bppId
-            });
+            if (dbResponse?.paymentStatus === null) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.CONFIRM,
+                    transactionId: requestContext?.transaction_id,
+                    bppId: dbResponse.bppId
+                });
 
-            if (await this.arePaymentsPending(
-                order?.payment,
-                orderRequest?.context?.transaction_id
-            )) {
-                return {
+                if (await this.arePaymentsPending(
+                    order?.payment,
+                    orderRequest?.context?.transaction_id
+                )) {
+                    return {
+                        context,
+                        error: {
+                            message: "BAP hasn't received payment yet",
+                            status: "BAP_015",
+                            name: "PAYMENT_PENDING"
+                        }
+                    };
+                }
+
+                const subscriberDetails = await lookupBppById({
+                    type: SUBSCRIBER_TYPE.BPP,
+                    subscriber_id: context.bpp_id
+                });
+
+                const bppConfirmResponse = await bppConfirmService.confirm(
                     context,
-                    error: {
-                        message: "BAP hasn't received payment yet",
-                        status: "BAP_015",
-                        name: "PAYMENT_PENDING"
+                    subscriberDetails?.[0]?.subscriber_url,
+                    order,
+                    dbResponse
+                );
+                
+                if (bppConfirmResponse?.message?.ack) {
+                    let orderSchema = dbResponse?.toJSON();
+                    
+                    orderSchema.messageId = bppConfirmResponse?.context?.message_id;
+                    if(order?.payment?.type === PAYMENT_TYPES["ON-ORDER"])
+                        orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
+
+                    await addOrUpdateOrderWithTransactionId(
+                        bppConfirmResponse?.context?.transaction_id,
+                        { ...orderSchema }
+                    );
+                }
+
+                return bppConfirmResponse;
+
+            } else {    
+
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.CONFIRM,
+                    transactionId: requestContext?.transaction_id,
+                    bppId: dbResponse.bppId,
+                    messageId: dbResponse.messageId
+                });
+
+                return {
+                    context: context,
+                    message: {
+                        ack: {
+                            status: "ACK"
+                        }
                     }
                 };
             }
-
-            const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
-                subscriber_id: context.bpp_id
-            });
-
-            return await bppConfirmService.confirm(
-                context,
-                subscriberDetails?.[0]?.subscriber_url,
-                order,
-                dbResponse
-            );
         }
         catch (err) {
             throw err;

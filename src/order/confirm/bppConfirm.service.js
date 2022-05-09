@@ -3,10 +3,15 @@ import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
+    
     /**
-    * bpp confirm order
-    * @param {Object} orderRequest
-    */
+     * bpp confirm order
+     * @param {Object} context 
+     * @param {String} bppUri 
+     * @param {Object} order 
+     * @param {Object} storedOrder 
+     * @returns 
+     */
     async confirm(context, bppUri, order = {}, storedOrder = {}) {
         try {
 
