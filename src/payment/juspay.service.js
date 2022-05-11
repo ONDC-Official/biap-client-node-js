@@ -114,7 +114,7 @@ class JuspayService {
                     subscriber_id: context.bpp_id
                 });
 
-                const bppConfirmResponse = await bppConfirmService.confirm(
+                const bppConfirmResponse = await bppConfirmService.confirmV2(
                     context,
                     subscriberDetails?.[0]?.subscriber_url,
                     orderRequest,

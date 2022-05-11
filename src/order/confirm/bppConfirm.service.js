@@ -13,7 +13,6 @@ class BppConfirmService {
     async confirm(bppUri, confirmRequest = {}) {
         try {
             
-            console.log(JSON.stringify(confirmRequest), bppUri);
             bppUri = getBaseUri(bppUri);
             const response = await bppConfirm(bppUri, confirmRequest);
 
