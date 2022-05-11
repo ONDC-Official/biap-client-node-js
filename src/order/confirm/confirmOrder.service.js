@@ -14,6 +14,24 @@ class ConfirmOrderService {
 
     /**
      * 
+     * @param {Array} items 
+     * @returns Boolean
+     */
+    areMultipleBppItemsSelected(items) {
+        return items ? [...new Set(items.map(item => item.bpp_id))].length > 1 : false;
+    }
+
+    /**
+     * 
+     * @param {Array} items 
+     * @returns Boolean
+     */
+    areMultipleProviderItemsSelected(items) {
+        return items ? [...new Set(items.map(item => item.provider.id))].length > 1 : false;
+    }
+
+    /**
+     * 
      * @param {Object} payment 
      * @returns Boolean
      */
@@ -36,76 +54,54 @@ class ConfirmOrderService {
     async confirmOrder(orderRequest) {
         try {
             const { context: requestContext, message: order = {} } = orderRequest || {};
-            const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
 
-            if (dbResponse?.paymentStatus === null) {
-                const contextFactory = new ContextFactory();
-                const context = contextFactory.create({
-                    action: PROTOCOL_CONTEXT.CONFIRM,
-                    transactionId: requestContext?.transaction_id,
-                    bppId: dbResponse.bppId
-                });
+            const contextFactory = new ContextFactory();
+            const context = contextFactory.create({
+                action: PROTOCOL_CONTEXT.CONFIRM,
+                transactionId: requestContext?.transaction_id,
+            });
 
-                if (await this.arePaymentsPending(
-                    order?.payment,
-                    orderRequest?.context?.transaction_id
-                )) {
-                    return {
-                        context,
-                        error: {
-                            message: "BAP hasn't received payment yet",
-                            status: "BAP_015",
-                            name: "PAYMENT_PENDING"
-                        }
-                    };
-                }
-
-                const subscriberDetails = await lookupBppById({
-                    type: SUBSCRIBER_TYPE.BPP,
-                    subscriber_id: context.bpp_id
-                });
-
-                const bppConfirmResponse = await bppConfirmService.confirm(
-                    context,
-                    subscriberDetails?.[0]?.subscriber_url,
-                    order,
-                    dbResponse
-                );
-                
-                if (bppConfirmResponse?.message?.ack) {
-                    let orderSchema = dbResponse?.toJSON();
-                    
-                    orderSchema.messageId = bppConfirmResponse?.context?.message_id;
-                    if(order?.payment?.type === PAYMENT_TYPES["ON-ORDER"])
-                        orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
-
-                    await addOrUpdateOrderWithTransactionId(
-                        bppConfirmResponse?.context?.transaction_id,
-                        { ...orderSchema }
-                    );
-                }
-
-                return bppConfirmResponse;
-
-            } else {    
-
-                const contextFactory = new ContextFactory();
-                const context = contextFactory.create({
-                    action: PROTOCOL_CONTEXT.CONFIRM,
-                    transactionId: requestContext?.transaction_id,
-                    bppId: dbResponse.bppId,
-                    messageId: dbResponse.messageId
-                });
-
+            if (!(order?.items?.length)) {
                 return {
-                    context: context,
-                    message: {
-                        ack: {
-                            status: "ACK"
-                        }
+                    context,
+                    error: { message: "Empty order received" }
+                };
+            }
+            else if (this.areMultipleBppItemsSelected(order?.items)) {
+                return {
+                    context,
+                    error: { message: "More than one BPP's item(s) selected/initialized" }
+                };
+            }
+            else if (this.areMultipleProviderItemsSelected(order?.items)) {
+                return {
+                    context,
+                    error: { message: "More than one Provider's item(s) selected/initialized" }
+                };
+            } else if (await this.arePaymentsPending(
+                order?.payment,
+                orderRequest?.context?.transaction_id
+            )) {
+                return {
+                    context,
+                    error: {
+                        message: "BAP hasn't received payment yet",
+                        status: "BAP_015",
+                        name: "PAYMENT_PENDING"
                     }
                 };
             }
+
+            const subscriberDetails = await lookupBppById({
+                type: SUBSCRIBER_TYPE.BPP,
+                subscriber_id: order?.items[0]?.bpp_id
+            });
+
+            return await bppConfirmService.confirmV1(
+                context,
+                subscriberDetails?.[0]?.subscriber_url,
+                order
+            );
         }
         catch (err) {
             throw err;
@@ -119,10 +115,83 @@ class ConfirmOrderService {
     async confirmMultipleOrder(orders) {
 
         const confirmOrderResponse = await Promise.all(
-            orders.map(async order => {
+            orders.map(async orderRequest => {
                 try {
-                    const orderResponse = await this.confirmOrder(order);
-                    return orderResponse;
+                    const { 
+                        context: requestContext, 
+                        message: order = {} 
+                    } = orderRequest || {};
+
+                    const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
+
+                    if (dbResponse?.paymentStatus === null) {
+                        
+                        const contextFactory = new ContextFactory();
+                        const context = contextFactory.create({
+                            action: PROTOCOL_CONTEXT.CONFIRM,
+                            transactionId: requestContext?.transaction_id,
+                            bppId: dbResponse.bppId
+                        });
+
+                        if (await this.arePaymentsPending(
+                            order?.payment,
+                            orderRequest?.context?.transaction_id
+                        )) {
+                            return {
+                                context,
+                                error: {
+                                    message: "BAP hasn't received payment yet",
+                                    status: "BAP_015",
+                                    name: "PAYMENT_PENDING"
+                                }
+                            };
+                        }
+
+                        const subscriberDetails = await lookupBppById({
+                            type: SUBSCRIBER_TYPE.BPP,
+                            subscriber_id: context.bpp_id
+                        });
+
+                        const bppConfirmResponse = await bppConfirmService.confirmV2(
+                            context,
+                            subscriberDetails?.[0]?.subscriber_url,
+                            order,
+                            dbResponse
+                        );
+                        
+                        if (bppConfirmResponse?.message?.ack) {
+                            let orderSchema = dbResponse?.toJSON();
+                            
+                            orderSchema.messageId = bppConfirmResponse?.context?.message_id;
+                            if(order?.payment?.type === PAYMENT_TYPES["ON-ORDER"])
+                                orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
+
+                            await addOrUpdateOrderWithTransactionId(
+                                bppConfirmResponse?.context?.transaction_id,
+                                { ...orderSchema }
+                            );
+                        }
+
+                        return bppConfirmResponse;
+
+                    } else {
+                        const contextFactory = new ContextFactory();
+                        const context = contextFactory.create({
+                            action: PROTOCOL_CONTEXT.CONFIRM,
+                            transactionId: requestContext?.transaction_id,
+                            bppId: dbResponse.bppId,
+                            messageId: dbResponse.messageId
+                        });
+
+                        return {
+                            context: context,
+                            message: {
+                                ack: {
+                                    status: "ACK"
+                                }
+                            }
+                        };
+                    }
                 }
                 catch (err) {
                     throw err;
@@ -148,18 +217,6 @@ class ConfirmOrderService {
                 protocolConfirmResponse.context.message_id &&
                 protocolConfirmResponse.context.transaction_id
             ) {
-
-                const dbResponse = await getOrderByTransactionId(protocolConfirmResponse.context.transaction_id);
-
-                let orderSchema = { ...protocolConfirmResponse?.message?.order };
-                orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
-
-                await addOrUpdateOrderWithTransactionId(
-                    protocolConfirmResponse.context.transaction_id,
-                    { ...orderSchema }
-                );
-
-                protocolConfirmResponse.parentOrderId = dbResponse?.[0]?.parentOrderId;
                 return protocolConfirmResponse;
 
             } else {
@@ -192,8 +249,23 @@ class ConfirmOrderService {
             const onConfirmOrderResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onConfirmResponse = await this.onConfirmOrder(messageId);
-                        return { ...onConfirmResponse };
+                        let protocolConfirmResponse = await this.onConfirmOrder(messageId);
+
+                        if(protocolConfirmResponse?.message?.order) {
+                            const dbResponse = await getOrderByTransactionId(protocolConfirmResponse?.context?.transaction_id);
+
+                            let orderSchema = { ...protocolConfirmResponse?.message?.order };
+                            orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
+
+                            await addOrUpdateOrderWithTransactionId(
+                                protocolConfirmResponse.context.transaction_id,
+                                { ...orderSchema }
+                            );
+
+                            protocolConfirmResponse.parentOrderId = dbResponse?.[0]?.parentOrderId;
+                        }
+
+                        return { ...protocolConfirmResponse };
                     }
                     catch (err) {
                         throw err;

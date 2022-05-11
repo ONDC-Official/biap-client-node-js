@@ -13,9 +13,9 @@ class InitOrderController {
     * @return {callback}
     */
     initOrder(req, res, next) {
-        const { body: orderRequest, user} = req;
+        const { body: orderRequest } = req;
 
-        initOrderService.initOrder(orderRequest, user).then(response => {
+        initOrderService.initOrder(orderRequest).then(response => {
             res.json({ ...response });
         }).catch((err) => {
             next(err);
@@ -30,7 +30,7 @@ class InitOrderController {
     * @return {callback}
     */
     initMultipleOrder(req, res, next) {
-        const { body: orderRequests, user} = req;
+        const { body: orderRequests, user } = req;
 
         if (orderRequests && orderRequests.length) {
 
@@ -55,7 +55,7 @@ class InitOrderController {
     onInitOrder(req, res, next) {
         const { query } = req;
         const { messageId } = query;
-        
+
         initOrderService.onInitOrder(messageId).then(order => {
             res.json(order);
         }).catch((err) => {
@@ -73,16 +73,16 @@ class InitOrderController {
     onInitMultipleOrder(req, res, next) {
         const { query } = req;
         const { messageIds } = query;
-        
-        if(messageIds && messageIds.length && messageIds.trim().length) { 
+
+        if (messageIds && messageIds.length && messageIds.trim().length) {
             const messageIdArray = messageIds.split(",");
-            
+
             initOrderService.onInitMultipleOrder(messageIdArray).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);
             });
-            
+
         }
         else
             throw new BadRequestParameterError();

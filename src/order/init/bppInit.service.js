@@ -4,11 +4,14 @@ import { getBaseUri } from "../../utils/urlHelper.js";
 class BppInitService {
     /**
     * bpp init order
-    * @param {Object} orderRequest
+    * @param {Object} context
+    * @param {String} bppUri
+    * @param {Object} order
     */
-    async init(context, bppUri, order) {
+    async init(context, bppUri, order = {}) {
         try {
             const provider = order?.items?.[0]?.provider || {};
+            
             const initRequest = {
                 context: context,
                 message: {

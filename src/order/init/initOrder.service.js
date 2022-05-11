@@ -33,56 +33,46 @@ class InitOrderService {
     * init order
     * @param {Object} orderRequest
     */
-    async initOrder(orderRequest, user, parentOrderId = null) {
+    async initOrder(orderRequest) {
         try {
             const { context: requestContext = {}, message: order = {} } = orderRequest || {};
 
             const contextFactory = new ContextFactory();
-            const context = contextFactory.create({ 
-                action: PROTOCOL_CONTEXT.INIT, 
-                transactionId: requestContext?.transaction_id, 
+            const context = contextFactory.create({
+                action: PROTOCOL_CONTEXT.INIT,
+                transactionId: requestContext?.transaction_id,
                 bppId: order?.items[0]?.bpp_id
             });
-            
+
             if (!(order?.items?.length)) {
-                return { 
-                    context, 
+                return {
+                    context,
                     error: { message: "Empty order received" }
                 };
             }
             else if (this.areMultipleBppItemsSelected(order?.items)) {
-                return { 
-                    context, 
+                return {
+                    context,
                     error: { message: "More than one BPP's item(s) selected/initialized" }
                 };
             }
             else if (this.areMultipleProviderItemsSelected(order?.items)) {
-                return { 
-                    context, 
+                return {
+                    context,
                     error: { message: "More than one Provider's item(s) selected/initialized" }
                 };
             }
 
-            const subscriberDetails = await lookupBppById({ 
-                type: SUBSCRIBER_TYPE.BPP, 
-                subscriber_id: context.bpp_id 
+            const subscriberDetails = await lookupBppById({
+                type: SUBSCRIBER_TYPE.BPP,
+                subscriber_id: context.bpp_id
             });
-                        
-            const bppResponse = await bppInitService.init(context, subscriberDetails?.[0]?.subscriber_url, order);
-            
-            if(bppResponse) {
 
-                await addOrUpdateOrderWithTransactionId(
-                    bppResponse.context.transaction_id, 
-                    {
-                        userId: user?.decodedToken?.uid,
-                        messageId: bppResponse?.context?.message_id,
-                        transactionId: bppResponse?.context?.transaction_id,
-                        parentOrderId: parentOrderId,
-                        bppId: bppResponse?.context?.bpp_id
-                    }
-                );
-            }
+            const bppResponse = await bppInitService.init(
+                context, 
+                subscriberDetails?.[0]?.subscriber_url, 
+                order
+            );
 
             return bppResponse;
         }
@@ -94,6 +84,7 @@ class InitOrderService {
     /**
      * init multiple orders
      * @param {Array} orders 
+     * @param {Object} user
      */
     async initMultipleOrder(orders, user) {
 
@@ -101,10 +92,23 @@ class InitOrderService {
 
         const initOrderResponse = await Promise.all(
             orders.map(async order => {
-
                 try {
-                    const orderResponse = await this.initOrder(order, user, parentOrderId);
-                    return orderResponse;
+                    const bppResponse = await this.initOrder(order, user);
+
+                    if (bppResponse) {
+                        await addOrUpdateOrderWithTransactionId(
+                            bppResponse.context.transaction_id,
+                            {
+                                userId: user?.decodedToken?.uid,
+                                messageId: bppResponse?.context?.message_id,
+                                transactionId: bppResponse?.context?.transaction_id,
+                                parentOrderId: parentOrderId,
+                                bppId: bppResponse?.context?.bpp_id
+                            }
+                        );
+                    }
+
+                    return bppResponse;
                 }
                 catch (err) {
                     throw err;
@@ -122,15 +126,15 @@ class InitOrderService {
     */
     async onInitOrder(messageId) {
         try {
-            let protocolResponse = await onOrderInit(messageId);
+            let protocolInitResponse = await onOrderInit(messageId);
 
-            if (!(protocolResponse && protocolResponse.length) || 
-                protocolResponse?.[0]?.error
-                ) {
+            if (!(protocolInitResponse && protocolInitResponse.length) ||
+                protocolInitResponse?.[0]?.error
+            ) {
                 const contextFactory = new ContextFactory();
-                const context = contextFactory.create({ 
-                    messageId: messageId, 
-                    action: PROTOCOL_CONTEXT.ON_INIT 
+                const context = contextFactory.create({
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_INIT
                 });
 
                 return {
@@ -140,24 +144,8 @@ class InitOrderService {
                     }
                 };
             } else {
-                protocolResponse = protocolResponse?.[0] || {};
-
-                if(await getOrderByTransactionId(protocolResponse?.context?.transaction_id)) {
-                    
-                    let orderSchema = { ...protocolResponse.message.order };
-                    orderSchema.provider = {
-                        ...orderSchema.provider,
-                        locations: [ orderSchema.provider_location ]
-                    }
-
-                    await addOrUpdateOrderWithTransactionId(
-                        protocolResponse?.context?.transaction_id,
-                        { ...orderSchema }
-                    );
-                    
-                }
-
-                return protocolResponse;
+                protocolInitResponse = protocolInitResponse?.[0];
+                return protocolInitResponse;
             }
         }
         catch (err) {
@@ -167,7 +155,7 @@ class InitOrderService {
 
     /**
     * on init multiple order
-    * @param {Object} messageId
+    * @param {Object} messageIds
     */
     async onInitMultipleOrder(messageIds) {
         try {
@@ -175,8 +163,25 @@ class InitOrderService {
             const onInitOrderResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const protocolResponse = await this.onInitOrder(messageId);
-                        return protocolResponse;
+                        const protocolInitResponse = await this.onInitOrder(messageId);
+                        
+                        if (protocolInitResponse?.message?.order && 
+                            await getOrderByTransactionId(protocolInitResponse?.context?.transaction_id)) {
+
+                            let orderSchema = { ...protocolInitResponse.message.order };
+
+                            orderSchema.provider = {
+                                ...orderSchema.provider,
+                                locations: [orderSchema.provider_location]
+                            }
+
+                            await addOrUpdateOrderWithTransactionId(
+                                protocolInitResponse?.context?.transaction_id,
+                                { ...orderSchema }
+                            );
+                        }
+
+                        return protocolInitResponse;
                     }
                     catch (err) {
                         throw err;
@@ -185,7 +190,6 @@ class InitOrderService {
             );
 
             return onInitOrderResponse;
-
         }
         catch (err) {
             throw err;
