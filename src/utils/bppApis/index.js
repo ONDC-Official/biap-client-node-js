@@ -73,4 +73,23 @@ const bppTrack = async (bppUri, trackRequest) => {
     return result.data;
 };
 
-export { bppCancel, bppConfirm, bppInit, bppTrack };
+
+/**
+ * support
+ * @param {String} bppUri 
+ * @param {Object} trackRequest 
+ */
+const bppSupport = async (bppUri, trackRequest) => {
+
+    const apiCall = new HttpRequest(
+        bppUri,
+        BPP_API_URLS.SUPPORT,
+        "POST",
+        trackRequest
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+export { bppCancel, bppConfirm, bppInit, bppTrack, bppSupport };

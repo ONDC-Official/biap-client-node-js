@@ -44,7 +44,9 @@ export const PROTOCOL_CONTEXT = {
     ON_INIT: "on_init",
     SEARCH: "search",
     TRACK: "track",
-    ON_TRACK: "track"
+    ON_TRACK: "track",
+    SUPPORT: "support",
+    ON_SUPPORT: "on_support"
 };
 
 export const PROTOCOL_PAYMENT = {
