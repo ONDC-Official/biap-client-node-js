@@ -9,7 +9,6 @@ const trackController = new TrackController();
 // track v1
 router.post(
     '/v1/track', 
-    authentication(),
     trackController.track,
 );
 // track v2
@@ -20,7 +19,7 @@ router.post(
 );
 
 // on track v1
-router.get('/v1/on_track', authentication(), trackController.onTrack);
+router.get('/v1/on_track', trackController.onTrack);
 // on track v2
 router.get('/v2/on_track', authentication(), trackController.onTrackMultipleOrder);
 

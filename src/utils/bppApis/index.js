@@ -3,8 +3,8 @@ import BPP_API_URLS from "./routes.js";
 
 /**
  * confirm order
- * @param {Object} orderDetails 
- * @param {Object} user 
+ * @param {String} bppUri 
+ * @param {Object} order 
  */
 const bppConfirm = async (bppUri, order) => {
 
@@ -21,8 +21,8 @@ const bppConfirm = async (bppUri, order) => {
 
 /**
  * cancel order
- * @param {Object} orderDetails 
- * @param {Object} user 
+ * @param {String} bppUri 
+ * @param {Object} order 
  */
 const bppCancel = async (bppUri, order) => {
 
@@ -39,8 +39,8 @@ const bppCancel = async (bppUri, order) => {
 
 /**
  * initialize order
- * @param {Object} orderDetails 
- * @param {Object} user 
+ * @param {String} bppUri 
+ * @param {Object} order 
  */
 const bppInit = async (bppUri, order) => {
 
@@ -57,8 +57,8 @@ const bppInit = async (bppUri, order) => {
 
 /**
  * search
- * @param {Object} orderDetails 
- * @param {Object} user 
+ * @param {String} bppUri 
+ * @param {Object} criteria 
  */
 const bppSearch = async (bppUri, criteria) => {
 
@@ -75,8 +75,8 @@ const bppSearch = async (bppUri, criteria) => {
 
 /**
  * track order
- * @param {Object} orderDetails 
- * @param {Object} user 
+ * @param {String} bppUri 
+ * @param {Object} trackRequest 
  */
 const bppTrack = async (bppUri, trackRequest) => {
 
@@ -91,4 +91,22 @@ const bppTrack = async (bppUri, trackRequest) => {
     return result.data;
 };
 
-export { bppCancel, bppConfirm, bppInit, bppSearch, bppTrack };
+/**
+ * support
+ * @param {String} bppUri 
+ * @param {Object} supportRequest 
+ */
+const bppSupport = async (bppUri, supportRequest) => {
+
+    const apiCall = new HttpRequest(
+        bppUri,
+        BPP_API_URLS.SUPPORT,
+        "POST",
+        trackRequest
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+export { bppCancel, bppConfirm, bppInit, bppSearch, bppSupport, bppTrack };

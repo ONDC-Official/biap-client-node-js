@@ -3,6 +3,7 @@ const CONFIRM = "confirm";
 const INIT = "init";
 const SEARCH = "search";
 const TRACK = "track";
+const SUPPORT = "support";
 
 const BPP_API_URLS = {
     CANCEL,
@@ -10,6 +11,7 @@ const BPP_API_URLS = {
     INIT,
     SEARCH,
     TRACK,
+    SUPPORT,
 }
 
 export default BPP_API_URLS;

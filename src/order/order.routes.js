@@ -17,8 +17,7 @@ const orderHistoryController = new OrderHistoryController();
 
 // confirm order v1
 rootRouter.post(
-    '/v1/confirm_order', 
-    authentication(),
+    '/v1/confirm_order',
     confirmOrderController.confirmOrder,
 );
 
@@ -30,7 +29,7 @@ rootRouter.post(
 );
 
 // on confirm order v1
-rootRouter.get('/v1/on_confirm_order', authentication(), confirmOrderController.onConfirmOrder);
+rootRouter.get('/v1/on_confirm_order', confirmOrderController.onConfirmOrder);
 
 // on confirm order v2
 rootRouter.get('/v2/on_confirm_order', authentication(), confirmOrderController.onConfirmMultipleOrder);
@@ -57,8 +56,7 @@ rootRouter.get('/v1/orders', authentication(), orderHistoryController.getOrdersL
 
 // initialize order v1
 rootRouter.post(
-    '/v1/initialize_order', 
-    authentication(),
+    '/v1/initialize_order',
     initOrderController.initOrder,
 );
 
@@ -70,7 +68,7 @@ rootRouter.post(
 );
 
 // on initialize order v1
-rootRouter.get('/v1/on_initialize_order', authentication(), initOrderController.onInitOrder);
+rootRouter.get('/v1/on_initialize_order', initOrderController.onInitOrder);
 
 // on initialize order v2
 rootRouter.get('/v2/on_initialize_order', authentication(), initOrderController.onInitMultipleOrder);

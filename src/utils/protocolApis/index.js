@@ -76,4 +76,19 @@ const onOrderTrack = async (messageId) => {
     return result.data;
 };
 
-export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderTrack };
+/**
+ * on support
+ * @param {String} messageId 
+ */
+const onOrderSupport = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_SUPPORT + "?messageId="+ messageId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderSupport, onOrderTrack };
