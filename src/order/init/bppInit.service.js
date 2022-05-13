@@ -30,14 +30,26 @@ class BppInitService {
                         }) || [],
                         add_ons: [],
                         offers: [],
-                        billing: order.billing_info,
+                        billing: { 
+                            ...order.billing_info,
+                            address: {
+                                ...order.billing_info.address,
+                                name: order.billing_info.name
+                            }
+                        },
                         fulfillment: {
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
                                     phone: order.delivery_info.phone
                                 },
-                                location: order.delivery_info.location,
+                                location: { 
+                                    ...order.delivery_info.location,
+                                    address : {
+                                        ...order.delivery_info.location.address,
+                                        name: order.delivery_info.name
+                                    }
+                                },
                             },
                             type: order.delivery_info.type,
                             customer: {
@@ -53,7 +65,7 @@ class BppInitService {
 
             bppUri = getBaseUri(bppUri);
             const response = await bppInit(bppUri, initRequest);
-            
+
             return { context: context, message: response.message };
         }
         catch (err) {

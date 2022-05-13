@@ -255,7 +255,28 @@ class ConfirmOrderService {
                             const dbResponse = await getOrderByTransactionId(protocolConfirmResponse?.context?.transaction_id);
 
                             let orderSchema = { ...protocolConfirmResponse?.message?.order };
+
                             orderSchema.messageId = protocolConfirmResponse?.context?.message_id;
+                            orderSchema.billing = {
+                                ...orderSchema.billing,
+                                address: {
+                                    ...orderSchema.billing.address,
+                                    areaCode: orderSchema.billing.address.area_code
+                                }
+                            };
+                            orderSchema.fulfillment = {
+                                ...orderSchema.fulfillment,
+                                end: {
+                                    ...orderSchema?.fulfillment?.end,
+                                    location: {
+                                        ...orderSchema?.fulfillment?.end?.location,
+                                        address: {
+                                            ...orderSchema?.fulfillment?.end?.location?.address,
+                                            areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+                                        }
+                                    }
+                                },
+                            };
 
                             await addOrUpdateOrderWithTransactionId(
                                 protocolConfirmResponse.context.transaction_id,

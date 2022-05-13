@@ -100,15 +100,41 @@ class BppConfirmService {
      */
     async confirmV2(context, bppUri, order = {}, storedOrder = {}) {
         try {
+            storedOrder = storedOrder?.toJSON();
 
             const confirmRequest = {
                 context: context,
                 message: {
                     order: {
-                        billing: storedOrder?.billing,
-                        items: storedOrder?.items|| [],
+                        billing: {
+                            ...storedOrder?.billing,
+                            address: {
+                                ...storedOrder.billing.address,
+                                area_code: storedOrder.billing.address.areaCode
+                            }
+                        },
+                        items: [ ...storedOrder?.items ].map(item=>{
+                            return {
+                                id: item.id,
+                                quantity: {
+                                    count: item.quantity.count
+                                }
+                            };
+                        }) || [],
                         provider: storedOrder?.provider,
-                        fulfillment: storedOrder?.fulfillment,
+                        fulfillment: {
+                            ...storedOrder.fulfillment,
+                            end: {
+                                ...storedOrder?.fulfillment?.end,
+                                location: {
+                                    ...storedOrder?.fulfillment?.end?.location,
+                                    address: {
+                                        ...storedOrder?.fulfillment?.end?.location?.address,
+                                        area_code: storedOrder?.fulfillment?.end?.location?.address?.areaCode
+                                    }
+                                }
+                            },
+                        },
                         addOns: [],
                         offers: [],
                         payment: {
@@ -124,7 +150,7 @@ class BppConfirmService {
                     }
                 }
             }
-            
+
             return await this.confirm(bppUri, confirmRequest);
         }
         catch (err) {
