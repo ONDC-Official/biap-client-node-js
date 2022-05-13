@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { ORDER_STATUS } from "../../utils/constants.js";
 
 import OrderMongooseModel from '../db/order.js';
 
@@ -20,6 +21,7 @@ class OrderHistoryService {
             let {
                 limit = 10,
                 orderId,
+                orderStatus,
                 pageNumber = 1,
                 parentOrderId,
                 state,
@@ -39,15 +41,25 @@ class OrderHistoryService {
                 clonedFilterObj = { ...clonedFilterObj, parentOrderId: { "$in": parentOrderId.split(",") } };
             if (transactionId)
                 clonedFilterObj = { ...clonedFilterObj, transactionId: { "$in": transactionId.split(",") } };
-            if (state) {
+            if (state) 
                 clonedFilterObj = { ...clonedFilterObj, state: { "$in": state.split(",") } };
-            }
             if (userId)
                 clonedFilterObj = { ...clonedFilterObj, userId: userId };
 
             if (_.isEmpty(clonedFilterObj))
                 clonedFilterObj = { userId: user.decodedToken.uid };
 
+            switch (orderStatus) {
+                case ORDER_STATUS.COMPLETED:
+                    clonedFilterObj = { ...clonedFilterObj, id: { "$ne": null } };
+                    break;
+                case ORDER_STATUS["IN-PROGRESS"]:
+                    clonedFilterObj = { ...clonedFilterObj, id: { "$eq": null } };
+                    break;
+                default:
+                    break;
+            }
+            
             orders = await OrderMongooseModel.find({ ...clonedFilterObj }).limit(limit).skip(skip);
             totalCount = await OrderMongooseModel.countDocuments({ ...clonedFilterObj });
 
