@@ -85,6 +85,10 @@ export const JUSPAY_PAYMENT_STATUS = {
     VOID_INITIATED: { id: 32, status: "VOID_INITIATED" },
     VOIDED: { id: 31, status: "VOIDED" },
     VOID_FAILED: { id: 35, status: "VOID_FAILED" },
-    NOT_FOUND: { id: 40, status: "NOT_FOUND" },
+    NOT_FOUND: { id: 40, status: "NOT_FOUND" }
+}
 
+export const ORDER_STATUS = {
+    COMPLETED: "completed",
+    "IN-PROGRESS": "in-progress"
 }

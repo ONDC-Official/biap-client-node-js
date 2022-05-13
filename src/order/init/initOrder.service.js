@@ -172,7 +172,27 @@ class InitOrderService {
 
                             orderSchema.provider = {
                                 ...orderSchema.provider,
-                                locations: [orderSchema.provider_location]
+                                locations: [orderSchema.provider_location],
+                            }
+                            orderSchema.billing = {
+                                ...orderSchema.billing,
+                                address: {
+                                    ...orderSchema.billing.address,
+                                    areaCode: orderSchema.billing.address.area_code
+                                }
+                            };
+                            orderSchema.fulfillment = {
+                                ...orderSchema.fulfillment,
+                                end: {
+                                    ...orderSchema?.fulfillment?.end,
+                                    location: {
+                                        ...orderSchema?.fulfillment?.end?.location,
+                                        address: {
+                                            ...orderSchema?.fulfillment?.end?.location?.address,
+                                            areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+                                        }
+                                    }
+                                },
                             }
 
                             await addOrUpdateOrderWithTransactionId(
