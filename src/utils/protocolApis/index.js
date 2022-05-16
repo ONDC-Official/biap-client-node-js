@@ -91,4 +91,20 @@ const onOrderSupport = async (messageId) => {
     return result.data;
 };
 
-export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderSupport, onOrderTrack };
+
+/**
+ * on order status
+ * @param {String} orderId 
+ */
+const onOrderStatus = async (orderId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_STATUS + "?orderId="+ orderId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderStatus, onOrderSupport, onOrderTrack };

@@ -5,6 +5,7 @@ import CancelOrderController from './cancel/cancelOrder.controller.js';
 import ConfirmOrderController from './confirm/confirmOrder.controller.js';
 import InitOrderController from './init/initOrder.controller.js';
 import OrderHistoryController from './history/orderHistory.controller.js';
+import OrderStatusController from './status/orderStatus.controller.js';
 
 const rootRouter = new Router();
 
@@ -12,6 +13,7 @@ const cancelOrderController = new CancelOrderController();
 const confirmOrderController = new ConfirmOrderController();
 const initOrderController = new InitOrderController();
 const orderHistoryController = new OrderHistoryController();
+const orderStatusController = new OrderStatusController();
 
 //#region confirm order
 
@@ -75,4 +77,26 @@ rootRouter.get('/v2/on_initialize_order', authentication(), initOrderController.
 
 //#endregion
 
+//#region order status
+
+// order status v1
+rootRouter.post(
+    '/v1/order_status', 
+    orderStatusController.orderStatus,
+);
+
+// order status v2
+rootRouter.post(
+    '/v2/order_status', 
+    authentication(),
+    orderStatusController.orderStatusV2,
+);
+
+// on order status v1
+rootRouter.get('/v1/on_order_status', orderStatusController.onOrderStatus);
+
+// on order status v2
+rootRouter.get('/v2/on_order_status', authentication(), orderStatusController.onOrderStatusV2);
+
+//#endregion
 export default rootRouter;
