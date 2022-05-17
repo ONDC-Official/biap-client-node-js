@@ -102,7 +102,7 @@ const bppSupport = async (bppUri, supportRequest) => {
         bppUri,
         BPP_API_URLS.SUPPORT,
         "POST",
-        trackRequest
+        supportRequest
     );
 
     const result = await apiCall.send();

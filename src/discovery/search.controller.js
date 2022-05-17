@@ -36,9 +36,31 @@ class SearchController {
     onSearch(req, res, next) {
         const { query } = req;
         const { messageId } = query;
+
+        if(messageId) {
+            searchService.onSearch(query).then(result => {
+                res.json(result);
+            }).catch((err) => {
+                next(err);
+            });
+        }
+        else
+            throw new BadRequestParameterError();
+    }
+
+    /**
+    * filter 
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getFilterParams(req, res, next) {
+        const { query } = req;
+        const { messageId } = query;
         
         if(messageId) {
-            searchService.onSearch(messageId).then(result => {
+            searchService.getFilterParams(query).then(result => {
                 res.json(result);
             }).catch((err) => {
                 next(err);

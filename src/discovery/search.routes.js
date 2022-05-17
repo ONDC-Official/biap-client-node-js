@@ -16,4 +16,7 @@ router.post(
 // on search
 router.get('/v1/on_search', authentication(), searchController.onSearch);
 
+// filter
+router.get('/v1/getFilterParams', authentication(), searchController.getFilterParams);
+
 export default router;

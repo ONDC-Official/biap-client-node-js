@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 import HttpRequest from "../HttpRequest.js";
 import PROTOCOL_API_URLS from "./routes.js";
 
@@ -48,17 +50,23 @@ const onOrderInit = async (messageId) => {
 
 /**
  * on search products
- * @param {String} messageId 
+ * @param {Object} query 
  */
-const onSearch = async (messageId) => {
-    const apiCall = new HttpRequest(
-        process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_SEARCH + "?messageId="+ messageId,
-        "get",
-    );
+const onSearch = async (query) => {
 
-    let result = await apiCall.send();
-    return result.data;
+    const queryString = Object.keys(query).map(key => {
+        if(typeof key !== "undefined" && typeof query[key] !== "undefined")
+            return encodeURIComponent(key) + '=' + encodeURIComponent(query[key]);
+    }).join('&');
+
+    const apiCall = await fetch(
+        process.env.PROTOCOL_BASE_URL 
+        + "/" + 
+        PROTOCOL_API_URLS.ON_SEARCH + "?"+ queryString
+    );
+    
+    const result = await apiCall.json();
+    return result;
 };
 
 /**

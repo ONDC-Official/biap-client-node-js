@@ -33,12 +33,10 @@ class HttpRequest {
         try 
         {
             let headers = {...this.headers, 'Content-Type': 'application/json'};
+            let result;
 
-
-            let result
             if (this.method.toLowerCase() == 'get') 
             {
-
                 result = await axios({
                     baseURL: this.baseUrl,
                     url: this.url,

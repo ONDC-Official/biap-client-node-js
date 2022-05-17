@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { lookupBppById, lookupGateways } from "../utils/registryApis/index.js";
 import { SUBSCRIBER_TYPE } from "../utils/constants.js";
 import { onSearch } from "../utils/protocolApis/index.js";
@@ -63,36 +65,73 @@ class SearchService {
      * transform search results
      * @param {Array} searchResults 
      */
-    transform(searchResults) {
-        let results = [];
-        searchResults.forEach(result => {
-            if(result?.message?.catalog && 
-                result?.message?.catalog?.["bpp/providers"] &&
-                result?.context?.bpp_id
-                ) {
-                results.push({
-                    bpp_descriptor: {
-                        ...result?.message?.catalog?.["bpp/descriptor"]
-                    },
-                    bpp_providers: [
-                        ...result?.message?.catalog?.["bpp/providers"]
-                    ],
-                    bpp_id: result?.context?.bpp_id
-                });
-            }
+    transform(searchResults = []) {
+        let data = [];
+        
+        searchResults && searchResults.length && searchResults.forEach(result => {
+            let searchObj = { ...result };
+            delete searchObj?.["context"];
+
+            data.push({
+                ...searchObj
+            });
         });
 
-        return results;
+        return data;
+    }
+
+    /**
+     * return filtering items
+     * @param {Array} searchResults 
+     */
+    getFilter(searchResults = []) {
+        let providerList = new Map();
+        let categoryList = new Map();
+        let fulfillmentList = new Map();
+        let minPrice = Infinity; 
+        let maxPrice = -Infinity; 
+
+        searchResults.forEach(result => {
+
+            if(!_.isEmpty(result?.["provider_details"]))
+                providerList.set(
+                    result?.["provider_details"]?.id, 
+                    result?.["provider_details"]?.descriptor?.name
+                );
+
+            if(!_.isEmpty(result?.["category_details"]))
+                categoryList.set(
+                    result?.["category_details"]?.id, 
+                    result?.["category_details"]?.descriptor?.name
+                );
+
+            if(!_.isEmpty(result?.["fulfillment_details"]))
+                fulfillmentList.set(
+                    result?.["fulfillment_details"]?.id, 
+                    result?.["fulfillment_details"]
+                );
+
+            const value = parseFloat(result?.price?.value);
+            if(maxPrice < value) 
+                maxPrice = value;
+
+            if(minPrice > value) 
+                minPrice = value;
+        });
+
+        return { categoryList, fulfillmentList, minPrice, maxPrice, providerList };
     }
 
     /**
     * on search
-    * @param {Object} messageId
+    * @param {Object} queryParams
     */
-    async onSearch(messageId) {
+    async onSearch(queryParams) {
         try {            
-            const protocolSearchResponse = await onSearch(messageId);
-            const transformedResponse = this.transform(protocolSearchResponse);
+            const { messageId } = queryParams;
+
+            const protocolSearchResponse = await onSearch(queryParams);
+            const searchResult = this.transform(protocolSearchResponse);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -102,8 +141,37 @@ class SearchService {
             return {
                 context,
                 message: {
-                    catalogs: [ ...transformedResponse ],
-                }
+                    catalogs: [ ...searchResult ]
+                },
+            };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+    * get filter params
+    * @param {String} query
+    */
+    async getFilterParams(query) {
+        try {            
+            const protocolSearchResponse = await onSearch(query);
+
+            const { 
+                categoryList = {}, 
+                fulfillmentList = {}, 
+                minPrice, 
+                maxPrice, 
+                providerList = {}
+            } = this.getFilter(protocolSearchResponse);
+
+            return {
+                categories: Array.from(categoryList, ([id, name]) => ({ id, name })),
+                fulfillment: Array.from(fulfillmentList, ([id, value]) => ({ id, value })),
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                providers: Array.from(providerList, ([id, name]) => ({ id, name })),
             };
         }
         catch (err) {
