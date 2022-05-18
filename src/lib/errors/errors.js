@@ -10,7 +10,7 @@ const ERRORS = {
         message: 'Permission denied'
     },
     NO_RECORD_FOUND_ERROR: {
-        status: 400,
+        status: 404,
         name: 'NO_RECORD_FOUND_ERROR',
         message: 'Record not found'
     },
@@ -33,6 +33,11 @@ const ERRORS = {
         status: 428,
         name: 'PRECONDITION_REQUIRED_ERROR',
         message: 'Precondition required'
+    },
+    INTERNAL_SERVER_ERROR: {
+        status: 500,
+        name: 'INTERNAL_SERVER_ERROR',
+        message: 'Internal server error occurred'
     }
 }
 
