@@ -2,18 +2,20 @@ const CANCEL = "cancel";
 const CONFIRM = "confirm";
 const INIT = "init";
 const SEARCH = "search";
-const TRACK = "track";
-const SUPPORT = "support";
+const SELECT = "select";
 const STATUS = "status";
+const SUPPORT = "support";
+const TRACK = "track";
 
 const BPP_API_URLS = {
     CANCEL,
     CONFIRM,
     INIT,
     SEARCH,
-    TRACK,
+    SELECT,
+    STATUS,
     SUPPORT,
-    STATUS
+    TRACK,
 }
 
 export default BPP_API_URLS;

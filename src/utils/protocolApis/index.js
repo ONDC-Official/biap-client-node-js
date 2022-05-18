@@ -115,4 +115,28 @@ const onOrderStatus = async (orderId) => {
     return result.data;
 };
 
-export { onOrderCancel, onOrderConfirm, onOrderInit, onSearch, onOrderStatus, onOrderSupport, onOrderTrack };
+/**
+ * on quote order
+ * @param {String} messageId 
+ */
+const onOrderQuote = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_SELECT + "?messageId="+ messageId,
+        "get",
+    );
+
+    let result = await apiCall.send();
+    return result.data;
+};
+
+export { 
+    onOrderCancel, 
+    onOrderConfirm, 
+    onOrderInit, 
+    onSearch, 
+    onOrderStatus, 
+    onOrderSupport, 
+    onOrderTrack, 
+    onOrderQuote 
+};
