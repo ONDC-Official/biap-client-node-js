@@ -50,6 +50,7 @@ class Gateway {
             }
             
             let baseUrl = getBaseUri(gateway.subscriber_url);
+
             const response = await bppSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };
