@@ -70,7 +70,7 @@ const bppSearch = async (bppUri, message) => {
         "POST",
         message,
         {
-            "X-Gateway-Authorization": authHeader,
+            "Authorization": authHeader,
             "Accept": "application/json"
         }
     );
