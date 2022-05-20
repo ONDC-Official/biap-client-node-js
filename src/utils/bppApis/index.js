@@ -1,5 +1,6 @@
 import HttpRequest from "../HttpRequest.js";
 import BPP_API_URLS from "./routes.js";
+import { createAuthorizationHeader } from "../cryptic.js";
 
 /**
  * confirm order
@@ -58,17 +59,21 @@ const bppInit = async (bppUri, order) => {
 /**
  * search
  * @param {String} bppUri 
- * @param {Object} criteria 
+ * @param {Object} message 
  */
-const bppSearch = async (bppUri, criteria) => {
+const bppSearch = async (bppUri, message) => {
+    const authHeader = await createAuthorizationHeader(message);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.SEARCH,
         "POST",
-        criteria
+        message,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
-
     const result = await apiCall.send();
     return result.data;
 };

@@ -50,9 +50,9 @@ class SearchService {
             }
             
             const subscriberDetails = await lookupGateways();
-            if(subscriberDetails && subscriberDetails.length) {
+            
+            if(subscriberDetails && subscriberDetails.length)
                 return gateway.search(subscriberDetails[0], protocolContext, criteria);
-            }
             
             return null; 
         }
