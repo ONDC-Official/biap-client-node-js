@@ -16,41 +16,43 @@ class Gateway {
             const searchRequest = {
                 context: context,
                 message: {
-                    item: {
-                        descriptor: {
-                            name: criteria.search_string
-                        }
-                    },
-                    provider: {
-                        id: criteria.provider_id,
-                        category_id: criteria.category_id,
-                        descriptor: {
-                            name: criteria.provider_name
-                        }
-                    },
-                    fulfillment: criteria.delivery_location ? {
-                        start: {
-                            location: {
-                                gps: criteria.pickup_location
+                    intent: {
+                        item: {
+                            descriptor: {
+                                name: criteria.search_string
                             }
                         },
-                        end: {
-                            location: {
-                                gps: criteria.delivery_location
+                        provider: {
+                            id: criteria.provider_id,
+                            category_id: criteria.category_id,
+                            descriptor: {
+                                name: criteria.provider_name
                             }
-                        }
-                    }: null,
-                    category: {
-                        id: criteria.category_id,
-                        descriptor: {
-                            name: criteria.category_name
+                        },
+                        fulfillment: criteria.delivery_location ? {
+                            start: {
+                                location: {
+                                    gps: criteria.pickup_location
+                                }
+                            },
+                            end: {
+                                location: {
+                                    gps: criteria.delivery_location
+                                }
+                            }
+                        }: null,
+                        category: {
+                            id: criteria.category_id,
+                            descriptor: {
+                                name: criteria.category_name
+                            }
                         }
                     }
                 }
             }
             
             let baseUrl = getBaseUri(gateway.subscriber_url);
-
+            
             const response = await bppSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };
