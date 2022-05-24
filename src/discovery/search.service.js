@@ -131,7 +131,7 @@ class SearchService {
             const { messageId } = queryParams;
 
             const protocolSearchResponse = await onSearch(queryParams);
-            const searchResult = this.transform(protocolSearchResponse);
+            const searchResult = this.transform(protocolSearchResponse?.data);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -141,7 +141,8 @@ class SearchService {
             return {
                 context,
                 message: {
-                    catalogs: [ ...searchResult ]
+                    catalogs: [ ...searchResult ],
+                    count: protocolSearchResponse?.count
                 },
             };
         }
@@ -164,7 +165,7 @@ class SearchService {
                 minPrice, 
                 maxPrice, 
                 providerList = {}
-            } = this.getFilter(protocolSearchResponse);
+            } = this.getFilter(protocolSearchResponse?.data);
 
             return {
                 categories: Array.from(categoryList, ([id, name]) => ({ id, name })),
