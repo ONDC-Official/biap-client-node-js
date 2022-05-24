@@ -91,7 +91,7 @@ class SearchService {
         let minPrice = Infinity; 
         let maxPrice = -Infinity; 
 
-        searchResults.forEach(result => {
+        searchResults && searchResults.length && searchResults.forEach(result => {
 
             if(!_.isEmpty(result?.["provider_details"]))
                 providerList.set(
