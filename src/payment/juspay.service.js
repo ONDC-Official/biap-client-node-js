@@ -45,9 +45,9 @@ class JuspayService {
 
     /**
     * get order status
-    * @param {Object} data
+    * @param {String} orderId
     */
-    async getOrderStatus(orderId, user) {
+    async getOrderStatus(orderId) {
         try {
             let paymentDetails = await getJuspayOrderStatus(orderId);
 

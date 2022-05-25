@@ -34,10 +34,10 @@ class PaymentController
     * @return {callback}
     */
     getOrderStatus(req, res, next) {
-        const { params, user } = req;
-        const { orderId: orderId } = params;     
+        const { params } = req;
+        const { orderId } = params;     
         
-        juspayService.getOrderStatus(orderId, user).then(orderStatus => {
+        juspayService.getOrderStatus(orderId).then(orderStatus => {
             res.json({data: orderStatus});
         }).catch((err) => {
             next(err);
