@@ -1,18 +1,22 @@
-export function poll(fn, retry = 3, interval = 1000) {
-    let counter = 0;
+export function poll(fn, validate, maxAttempts = 3, interval = 1000) {
 
-    let checkCondition = async function(resolve, reject) {
+    let attempt = 0;
+
+    const executePoll = async function(resolve, reject) {
         let result = await fn();
-
-        if(result && result.length) 
+        attempt++;
+        
+        if(typeof validate !== "undefined" && validate(result, attempt)) {
             resolve(result);
-        else if (counter < retry) {
-            counter++;
-            setTimeout(checkCondition, interval, resolve, reject);
         }
-        else 
+        else if (attempt <= maxAttempts) {
+            setTimeout(executePoll, interval, resolve, reject);
+        }
+        else {
             resolve([]);
+        }
     };
 
-    return new Promise(checkCondition);
+    return new Promise(executePoll);
 }
+

@@ -1,8 +1,11 @@
 import SearchService from './search.service.js';
+import CscSearchService from './cscSearch.service.js';
+
 import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
 import NoRecordFoundError from "../lib/errors/no-record-found.error.js";
 
 const searchService = new SearchService();
+const cscSearchService = new CscSearchService();
 
 class SearchController {
 
@@ -68,6 +71,26 @@ class SearchController {
         }
         else
             throw new BadRequestParameterError();
+    }
+
+    /**
+    * sync search
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    syncSearch(req, res, next) {
+        const searchRequest = req.body;
+
+        cscSearchService.search(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
     }
 }
 

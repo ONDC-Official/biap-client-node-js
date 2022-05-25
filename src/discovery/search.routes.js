@@ -19,4 +19,9 @@ router.get('/v1/on_search', authentication(), searchController.onSearch);
 // filter
 router.get('/v1/getFilterParams', authentication(), searchController.getFilterParams);
 
+// sync search
+router.post(
+    '/v1/sync/search', 
+    searchController.syncSearch,
+);
 export default router;
