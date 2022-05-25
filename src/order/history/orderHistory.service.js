@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _isEmpty from "lodash/isEmpty.js";
 import { ORDER_STATUS } from "../../utils/constants.js";
 
 import OrderMongooseModel from '../db/order.js';
@@ -46,7 +46,7 @@ class OrderHistoryService {
             if (userId)
                 clonedFilterObj = { ...clonedFilterObj, userId: userId };
 
-            if (_.isEmpty(clonedFilterObj))
+            if (_isEmpty(clonedFilterObj))
                 clonedFilterObj = { userId: user.decodedToken.uid };
 
             switch (orderStatus) {

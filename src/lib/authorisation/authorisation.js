@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {UnauthorisedError} from "../errors/index.js";
 
 class Authorisation {

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _isEmpty from "lodash/isEmpty.js";
 
 import { lookupBppById, lookupGateways } from "../utils/registryApis/index.js";
 import { SUBSCRIBER_TYPE } from "../utils/constants.js";
@@ -93,19 +93,19 @@ class SearchService {
 
         searchResults && searchResults.length && searchResults.forEach(result => {
 
-            if(!_.isEmpty(result?.["provider_details"]))
+            if(!_isEmpty(result?.["provider_details"]))
                 providerList.set(
                     result?.["provider_details"]?.id, 
                     result?.["provider_details"]?.descriptor?.name
                 );
 
-            if(!_.isEmpty(result?.["category_details"]))
+            if(!_isEmpty(result?.["category_details"]))
                 categoryList.set(
                     result?.["category_details"]?.id, 
                     result?.["category_details"]?.descriptor?.name
                 );
 
-            if(!_.isEmpty(result?.["fulfillment_details"]))
+            if(!_isEmpty(result?.["fulfillment_details"]))
                 fulfillmentList.set(
                     result?.["fulfillment_details"]?.id, 
                     result?.["fulfillment_details"]
