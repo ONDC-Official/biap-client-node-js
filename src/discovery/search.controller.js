@@ -84,7 +84,7 @@ class SearchController {
         const searchRequest = req.body;
 
         cscSearchService.search(searchRequest).then(response => {
-            if(!response || response === null)
+            if(!response || !response?.length)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
