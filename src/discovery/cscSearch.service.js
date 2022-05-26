@@ -35,7 +35,7 @@ class CscSearchService {
                             async ()=>{
                                 return await searchService.onSearch({ 
                                     messageId: searchBppResponse?.context?.message_id 
-                                });
+                                }, true);
                             }, 
                             (result, count) => {
                                 return count >= 6;

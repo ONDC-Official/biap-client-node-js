@@ -63,15 +63,19 @@ class SearchService {
 
     /**
      * transform search results
-     * @param {Array} searchResults 
+     * @param {Array} searchResults
+     * @param {String} transaction_id
      */
-    transform(searchResults = []) {
+    transform(searchResults = [], transaction_id = false) {
         let data = [];
         
         searchResults && searchResults.length && searchResults.forEach(result => {
             let searchObj = { ...result };
             delete searchObj?.["context"];
 
+            if(transaction_id)
+                searchObj.transaction_id = transaction_id;
+            
             data.push({
                 ...searchObj
             });
@@ -125,18 +129,22 @@ class SearchService {
     /**
     * on search
     * @param {Object} queryParams
+    * @param {Boolean} addTransactionIdToItem
     */
-    async onSearch(queryParams) {
+    async onSearch(queryParams, addTransactionIdToItem = false) {
         try {            
             const { messageId } = queryParams;
-
-            const protocolSearchResponse = await onSearch(queryParams);
-            const searchResult = this.transform(protocolSearchResponse?.data);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 messageId: messageId
             });
+
+            const protocolSearchResponse = await onSearch(queryParams);
+            const searchResult = this.transform(
+                protocolSearchResponse?.data, 
+                addTransactionIdToItem ? context.transaction_id : null
+            );
 
             return {
                 context,
