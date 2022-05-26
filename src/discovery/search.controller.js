@@ -20,7 +20,7 @@ class SearchController {
         const searchRequest = req.body;
 
         searchService.search(searchRequest).then(response => {
-            if(!response || response === null)
+            if (!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -40,7 +40,7 @@ class SearchController {
         const { query } = req;
         const { messageId } = query;
 
-        if(messageId) {
+        if (messageId) {
             searchService.onSearch(query).then(result => {
                 res.json(result);
             }).catch((err) => {
@@ -61,8 +61,8 @@ class SearchController {
     getFilterParams(req, res, next) {
         const { query } = req;
         const { messageId } = query;
-        
-        if(messageId) {
+
+        if (messageId) {
             searchService.getFilterParams(query).then(result => {
                 res.json(result);
             }).catch((err) => {
@@ -84,7 +84,7 @@ class SearchController {
         const searchRequest = req.body;
 
         cscSearchService.search(searchRequest).then(response => {
-            if(!response || !response?.length)
+            if (!response || !response?.length)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);

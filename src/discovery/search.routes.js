@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { authentication } from '../middlewares/index.js';
 
 import SearchController from './search.controller.js';
@@ -8,7 +8,7 @@ const searchController = new SearchController();
 
 // search
 router.post(
-    '/v1/search', 
+    '/v1/search',
     authentication(),
     searchController.search,
 );
@@ -21,7 +21,7 @@ router.get('/v1/getFilterParams', authentication(), searchController.getFilterPa
 
 // sync search
 router.post(
-    '/v1/sync/search', 
+    '/v1/sync/search',
     searchController.syncSearch,
 );
 export default router;
