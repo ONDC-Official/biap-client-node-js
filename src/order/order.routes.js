@@ -124,6 +124,11 @@ rootRouter.get('/v1/on_get_quote', authentication(), quoteOrderController.onQuot
 // on quote order v2
 rootRouter.get('/v2/on_get_quote', authentication(), quoteOrderController.onQuoteMultipleOrder);
 
+// sync quote
+rootRouter.post(
+    '/v1/sync/get_quote', 
+    quoteOrderController.syncQuoteOrder,
+);
 //#endregion
 
 export default rootRouter;

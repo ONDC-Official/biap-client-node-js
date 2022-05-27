@@ -1,7 +1,9 @@
 import QuoteOrderService from './quoteOrder.service.js';
+import CscQuoteService from './cscQuote.service.js';
 import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 
 const quoteOrderService = new QuoteOrderService();
+const cscQuoteService = new CscQuoteService();
 
 class QuoteOrderController {
 
@@ -85,6 +87,23 @@ class QuoteOrderController {
         }
         else
             throw new BadRequestParameterError();
+    }
+
+    /**
+    * quote order
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    syncQuoteOrder(req, res, next) {
+        const { body: request } = req;
+        
+        cscQuoteService.quoteOrder(request).then(response => {
+            res.json({ ...response });
+        }).catch((err) => {
+            next(err);
+        });
     }
 }
 
