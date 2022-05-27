@@ -3,7 +3,7 @@ import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
-    
+
     /**
      * bpp confirm order
      * @param {String} bppUri 
@@ -12,7 +12,7 @@ class BppConfirmService {
      */
     async confirm(bppUri, confirmRequest = {}) {
         try {
-            
+
             bppUri = getBaseUri(bppUri);
             const response = await bppConfirm(bppUri, confirmRequest);
 
@@ -74,15 +74,15 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
                             },
-                            status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
-                                PROTOCOL_PAYMENT.PAID : 
+                            status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
                         }
                     }
                 }
             }
-            
+
             return await this.confirm(bppUri, confirmRequest);
         }
         catch (err) {
@@ -109,18 +109,19 @@ class BppConfirmService {
                         billing: {
                             ...storedOrder?.billing,
                             address: {
-                                ...storedOrder.billing.address,
-                                area_code: storedOrder.billing.address.areaCode
+                                ...storedOrder?.billing?.address,
+                                area_code: storedOrder?.billing?.address?.areaCode
                             }
                         },
-                        items: [ ...storedOrder?.items ].map(item=>{
-                            return {
-                                id: item.id,
-                                quantity: {
-                                    count: item.quantity.count
-                                }
-                            };
-                        }) || [],
+                        items: storedOrder?.items && storedOrder?.items?.length &&
+                            [...storedOrder?.items].map(item => {
+                                return {
+                                    id: item.id,
+                                    quantity: {
+                                        count: item.quantity.count
+                                    }
+                                };
+                            }) || [],
                         provider: storedOrder?.provider,
                         fulfillment: {
                             ...storedOrder.fulfillment,
@@ -142,8 +143,8 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
                             },
-                            status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
-                                PROTOCOL_PAYMENT.PAID : 
+                            status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
                         }
