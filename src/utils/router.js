@@ -1,18 +1,20 @@
 
 import { Router } from 'express';
 
-import paymentRoutes from "../payment/payment.routes.js";
+import accountRoutes from "../accounts/accounts.routes.js";
 import orderRoutes from "../order/order.routes.js";
+import paymentRoutes from "../payment/payment.routes.js";
 import searchRoutes from "../discovery/search.routes.js";
-import trackRoutes from "../fulfillment/track.routes.js";
 import supportRoutes from "../support/support.routes.js";
+import trackRoutes from "../fulfillment/track.routes.js";
 
 const router = new Router();
 
-router.use(paymentRoutes);
+router.use(accountRoutes);
 router.use(orderRoutes);
+router.use(paymentRoutes);
 router.use(searchRoutes);
-router.use(trackRoutes);
 router.use(supportRoutes);
+router.use(trackRoutes);
 
 export default router;
