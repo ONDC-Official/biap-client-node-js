@@ -4,6 +4,7 @@ import BadRequestParameterError from '../../lib/errors/bad-request-parameter.err
 const billingService = new BillingService();
 
 class BillingController {
+
     /**
     * add billing address
     * @param {*} req    HTTP request object
@@ -21,7 +22,6 @@ class BillingController {
         });
     }
 
-
     /**
     * get billing address
     * @param {*} req    HTTP request object
@@ -34,6 +34,24 @@ class BillingController {
 
         billingService.onBillingDetails(user).then(order => {
             res.json(order);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
+    * update billing address
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    updateBillingAddress(req, res, next) {
+        const { body: request, params } = req;
+        const { id } = params;
+
+        billingService.updateBillingAddress(id, request).then(response => {
+            res.json(response);
         }).catch((err) => {
             next(err);
         });

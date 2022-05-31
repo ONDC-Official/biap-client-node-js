@@ -27,6 +27,7 @@ class BillingService {
             storedBillingAddress = storedBillingAddress.toJSON();
 
             return {
+                id: storedBillingAddress?.id,
                 address: {
                     ...storedBillingAddress?.address,
                 },
@@ -53,6 +54,50 @@ class BillingService {
                 userId: user.decodedToken.uid
             });
             return billingDetails;
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+    * update billing address
+    * @param {String} id
+    * @param {Object} request
+    */
+    async updateBillingAddress(id, request = {}) {
+        try {
+            const billingSchema = {
+                address: { ...request?.address },
+                organization: request?.organization,
+                locationId: request?.locationId,
+                email: request?.email,
+                phone: request?.phone,
+                taxNumber: request?.taxNumber,
+                name: request?.name,
+            };
+
+            let storedBillingAddress = await BillingMongooseModel.findOneAndUpdate(
+                { id: id },
+                { ...billingSchema },
+                {
+                    returnDocument: "after",
+                }
+            );
+            storedBillingAddress = storedBillingAddress.toJSON();
+
+            return {
+                id: storedBillingAddress?.id,
+                address: {
+                    ...storedBillingAddress?.address,
+                },
+                organization: storedBillingAddress?.organization,
+                locationId: storedBillingAddress?.locationId,
+                email: storedBillingAddress?.email,
+                phone: storedBillingAddress?.phone,
+                taxNumber: storedBillingAddress?.taxNumber,
+                name: storedBillingAddress?.name,
+            };
         }
         catch (err) {
             throw err;

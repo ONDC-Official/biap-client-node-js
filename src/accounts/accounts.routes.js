@@ -19,6 +19,12 @@ rootRouter.post(
 
 rootRouter.get('/v1/billing_details', authentication(), billingController.onBillingDetails);
 
+rootRouter.post(
+    '/v1/update_billing_details/:id', 
+    authentication(),
+    billingController.updateBillingAddress,
+);
+
 //#endregion
 
 //#region delivery address details
