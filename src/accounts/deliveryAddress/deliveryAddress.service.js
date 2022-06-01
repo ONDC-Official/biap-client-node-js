@@ -60,6 +60,50 @@ class DeliveryAddressService {
         }
     }
 
+    /**
+    * add delivery address
+    * @param {String} id
+    * @param {Object} request
+    * @param {String} userId
+    */
+    async updateDeliveryAddress(id, request = {}, userId) {
+        try {
+            
+            const deliveryAddressSchema = {
+                descriptor: request.descriptor,
+                gps: request.gps,
+                defaultAddress: request.defaultAddress,
+                address: request.address,
+            };
+
+            if(request.defaultAddress)
+                await DeliveryAddressMongooseModel.updateMany(
+                    { userId: userId },
+                    { defaultAddress: false}
+                );
+
+            let storedDeliveryAddress = await DeliveryAddressMongooseModel.findOneAndUpdate(
+                { id: id },
+                { ...deliveryAddressSchema},
+                {
+                    returnDocument: "after",
+                }
+            );
+            storedDeliveryAddress = storedDeliveryAddress.toJSON();
+
+            return {
+                id: storedDeliveryAddress?.id,
+                descriptor: storedDeliveryAddress?.descriptor,
+                gps: storedDeliveryAddress?.gps,
+                defaultAddress: storedDeliveryAddress?.defaultAddress,
+                address: storedDeliveryAddress?.address
+            };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 }
 
 export default DeliveryAddressService;

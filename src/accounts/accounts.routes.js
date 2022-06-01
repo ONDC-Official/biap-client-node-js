@@ -41,5 +41,10 @@ rootRouter.get(
     deliveryAddressController.onDeliveryAddressDetails
 );
 
+rootRouter.post(
+    '/v1/update_delivery_address/:id', 
+    authentication(),
+    deliveryAddressController.updateDeliveryAddress,
+);
 //#endregion
 export default rootRouter;
