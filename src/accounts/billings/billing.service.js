@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import NoRecordFoundError from '../../lib/errors/no-record-found.error.js';
 
 import BillingMongooseModel from './db/billing.js';
 
@@ -24,7 +25,7 @@ class BillingService {
             };
 
             let storedBillingAddress = await BillingMongooseModel.create({ ...billingSchema });
-            storedBillingAddress = storedBillingAddress.toJSON();
+            storedBillingAddress = storedBillingAddress?.toJSON();
 
             return {
                 id: storedBillingAddress?.id,
@@ -48,11 +49,12 @@ class BillingService {
      * get billing address details
      * @param {Object} user
      */
-    async onBillingDetails(user) {
+    async onBillingDetails(user = {}) {
         try {
             const billingDetails = await BillingMongooseModel.find({
-                userId: user.decodedToken.uid
+                userId: user?.decodedToken?.uid
             });
+
             return billingDetails;
         }
         catch (err) {
@@ -84,20 +86,23 @@ class BillingService {
                     returnDocument: "after",
                 }
             );
-            storedBillingAddress = storedBillingAddress.toJSON();
-
-            return {
-                id: storedBillingAddress?.id,
-                address: {
-                    ...storedBillingAddress?.address,
-                },
-                organization: storedBillingAddress?.organization,
-                locationId: storedBillingAddress?.locationId,
-                email: storedBillingAddress?.email,
-                phone: storedBillingAddress?.phone,
-                taxNumber: storedBillingAddress?.taxNumber,
-                name: storedBillingAddress?.name,
-            };
+            storedBillingAddress = storedBillingAddress?.toJSON();
+            
+            if(storedBillingAddress)
+                return {
+                    id: storedBillingAddress?.id,
+                    address: {
+                        ...storedBillingAddress?.address,
+                    },
+                    organization: storedBillingAddress?.organization,
+                    locationId: storedBillingAddress?.locationId,
+                    email: storedBillingAddress?.email,
+                    phone: storedBillingAddress?.phone,
+                    taxNumber: storedBillingAddress?.taxNumber,
+                    name: storedBillingAddress?.name,
+                };
+            else
+                throw new NoRecordFoundError(`Billing address with ${id} not found`);
         }
         catch (err) {
             throw err;

@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import NoRecordFoundError from '../../lib/errors/no-record-found.error.js';
 
 import DeliveryAddressMongooseModel from './db/deliveryAddress.js';
 
@@ -9,15 +10,15 @@ class DeliveryAddressService {
     * @param {Object} request
     * @param {Object} user
     */
-    async deliveryAddress(request, user) {
+    async deliveryAddress(request = {}, user = {}) {
         try {
             const deliveryAddressSchema = {
-                userId: user.decodedToken.uid,
+                userId: user?.decodedToken?.uid,
                 id: uuidv4(),
-                descriptor: request.descriptor,
-                gps: request.gps,
+                descriptor: request?.descriptor,
+                gps: request?.gps,
                 defaultAddress: true,
-                address: request.address,
+                address: request?.address,
             };
                         
             await DeliveryAddressMongooseModel.updateMany(
@@ -28,7 +29,7 @@ class DeliveryAddressService {
             let storedDeliveryAddress = await DeliveryAddressMongooseModel.create(
                 { ...deliveryAddressSchema}
             );
-            storedDeliveryAddress = storedDeliveryAddress.toJSON();
+            storedDeliveryAddress = storedDeliveryAddress?.toJSON();
 
             return {
                 id: storedDeliveryAddress?.id,
@@ -47,10 +48,10 @@ class DeliveryAddressService {
      * get delivery address
      * @param {Object} user
      */
-    async onDeliveryAddressDetails(user) {
+    async onDeliveryAddressDetails(user = {}) {
         try {
             const deliveryAddressDetails = await DeliveryAddressMongooseModel.find({ 
-                userId: user.decodedToken.uid
+                userId: user?.decodedToken?.uid
             });
             
             return deliveryAddressDetails;
@@ -70,13 +71,13 @@ class DeliveryAddressService {
         try {
             
             const deliveryAddressSchema = {
-                descriptor: request.descriptor,
-                gps: request.gps,
-                defaultAddress: request.defaultAddress,
-                address: request.address,
+                descriptor: request?.descriptor,
+                gps: request?.gps,
+                defaultAddress: request?.defaultAddress,
+                address: request?.address,
             };
 
-            if(request.defaultAddress)
+            if(request?.defaultAddress)
                 await DeliveryAddressMongooseModel.updateMany(
                     { userId: userId },
                     { defaultAddress: false}
@@ -89,15 +90,18 @@ class DeliveryAddressService {
                     returnDocument: "after",
                 }
             );
-            storedDeliveryAddress = storedDeliveryAddress.toJSON();
+            storedDeliveryAddress = storedDeliveryAddress?.toJSON();
 
-            return {
-                id: storedDeliveryAddress?.id,
-                descriptor: storedDeliveryAddress?.descriptor,
-                gps: storedDeliveryAddress?.gps,
-                defaultAddress: storedDeliveryAddress?.defaultAddress,
-                address: storedDeliveryAddress?.address
-            };
+            if(storedDeliveryAddress)
+                return {
+                    id: storedDeliveryAddress?.id,
+                    descriptor: storedDeliveryAddress?.descriptor,
+                    gps: storedDeliveryAddress?.gps,
+                    defaultAddress: storedDeliveryAddress?.defaultAddress,
+                    address: storedDeliveryAddress?.address
+                };
+            else
+                throw new NoRecordFoundError(`Delivery address with ${id} not found`);
         }
         catch (err) {
             throw err;
