@@ -132,14 +132,12 @@ const bppOrderStatus = async (bppUri, order) => {
     return result.data;
 };
 
-
 /**
  * quote order
  * @param {String} bppUri 
  * @param {Object} request 
  */
 const bppQuote = async (bppUri, request) => {
-
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.SELECT,

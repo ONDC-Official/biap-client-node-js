@@ -22,12 +22,12 @@ class BppQuoteService {
                     order: {
                         items: cart.items.map(cartItem => {
                             return {
-                                id: cartItem.id,
-                                quantity: cartItem.quantity
+                                id: cartItem?.id?.toString(),
+                                quantity: cartItem?.quantity
                             }
                         }) || [],
                         provider: {
-                            id: provider.id,
+                            id: provider?.id,
                             locations: provider.locations.map(location => {
                                 return { id: location };
                             })
@@ -35,7 +35,7 @@ class BppQuoteService {
                     }
                 }
             }
-            
+    
             bppUri = getBaseUri(bppUri);
             const response = await bppQuote(bppUri, selectRequest);
 
