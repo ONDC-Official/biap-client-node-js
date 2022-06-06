@@ -24,7 +24,7 @@ class BppInitService {
                         },
                         items: order?.items.map(item => {
                             return {
-                                id: item.id,
+                                id: item?.id?.toString(),
                                 quantity: item.quantity
                             };
                         }) || [],
