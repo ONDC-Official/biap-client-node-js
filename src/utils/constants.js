@@ -38,11 +38,13 @@ export const PAYMENT_TYPES = {
 
 export const PROTOCOL_CONTEXT = {
     CANCEL: "cancel",
+    ON_CANCEL: "on_cancel",
     CONFIRM: "confirm",
-    INIT: "init",
     ON_CONFIRM: "on_confirm",
+    INIT: "init",
     ON_INIT: "on_init",
     SEARCH: "search",
+    ON_SEARCH: "on_search",
     TRACK: "track",
     ON_TRACK: "track",
     SUPPORT: "support",

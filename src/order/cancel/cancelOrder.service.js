@@ -34,9 +34,17 @@ class CancelOrderService {
                 throw new CustomError("BPP Id is mandatory");
             }
 
-            const subscriberDetails = await lookupBppById({ type: SUBSCRIBER_TYPE.BPP, subscriber_id: context?.bpp_id });
+            const subscriberDetails = await lookupBppById({ 
+                type: SUBSCRIBER_TYPE.BPP, 
+                subscriber_id: context?.bpp_id 
+            });
 
-            return await bppCancelService.cancelOrder(subscriberDetails?.[0]?.subscriber_url,context, order_id, cancellation_reason_id);
+            return await bppCancelService.cancelOrder(
+                subscriberDetails?.[0]?.subscriber_url, 
+                context, 
+                order_id, 
+                cancellation_reason_id
+            );
         }
         catch (err) {
             throw err;
@@ -53,7 +61,10 @@ class CancelOrderService {
 
             if (!(protocolCancelResponse && protocolCancelResponse.length)) {
                 const contextFactory = new ContextFactory();
-                const context = contextFactory.create({ messageId: messageId });
+                const context = contextFactory.create({ 
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_CANCEL
+                });
 
                 return {
                     context,
