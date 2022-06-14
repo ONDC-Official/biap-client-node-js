@@ -8,12 +8,17 @@ import { createAuthorizationHeader } from "../cryptic.js";
  * @param {Object} order 
  */
 const bppConfirm = async (bppUri, order) => {
-
+    const authHeader = await createAuthorizationHeader(order);
+    
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.CONFIRM,
         "POST",
-        order
+        order,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -26,12 +31,17 @@ const bppConfirm = async (bppUri, order) => {
  * @param {Object} order 
  */
 const bppCancel = async (bppUri, order) => {
+    const authHeader = await createAuthorizationHeader(order);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.CANCEL,
         "POST",
-        order
+        order,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -44,12 +54,17 @@ const bppCancel = async (bppUri, order) => {
  * @param {Object} order 
  */
 const bppInit = async (bppUri, order) => {
+    const authHeader = await createAuthorizationHeader(order);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.INIT,
         "POST",
-        order
+        order,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -84,12 +99,17 @@ const bppSearch = async (bppUri, message) => {
  * @param {Object} trackRequest 
  */
 const bppTrack = async (bppUri, trackRequest) => {
+    const authHeader = await createAuthorizationHeader(trackRequest);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.TRACK,
         "POST",
-        trackRequest
+        trackRequest,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -102,12 +122,17 @@ const bppTrack = async (bppUri, trackRequest) => {
  * @param {Object} supportRequest 
  */
 const bppSupport = async (bppUri, supportRequest) => {
+    const authHeader = await createAuthorizationHeader(supportRequest);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.SUPPORT,
         "POST",
-        supportRequest
+        supportRequest,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -120,12 +145,17 @@ const bppSupport = async (bppUri, supportRequest) => {
  * @param {Object} order 
  */
 const bppOrderStatus = async (bppUri, order) => {
+    const authHeader = await createAuthorizationHeader(order);
 
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.STATUS,
         "POST",
-        order
+        order,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();
@@ -138,11 +168,17 @@ const bppOrderStatus = async (bppUri, order) => {
  * @param {Object} request 
  */
 const bppQuote = async (bppUri, request) => {
+    const authHeader = await createAuthorizationHeader(request);
+    
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.SELECT,
         "POST",
-        request
+        request,
+        {
+            "Authorization": authHeader,
+            "Accept": "application/json"
+        }
     );
 
     const result = await apiCall.send();

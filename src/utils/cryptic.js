@@ -1,5 +1,7 @@
 import _sodium from 'libsodium-wrappers';
 import _ from 'lodash'
+import { SUBSCRIBER_TYPE } from './constants.js';
+import { lookupBppById } from './registryApis/index.js';
 
 export const createSigningString = async (message, created, expires) => {
     if (!created) created = Math.floor(new Date().getTime() / 1000).toString();
@@ -57,6 +59,59 @@ export const createKeyPair = async () => {
     return { publicKey: publicKey_base64, privateKey: privateKey_base64 };
 }
 
+
+const getProviderPublicKey = async (providers, keyId) => {
+    try {
+
+        const provider = _.find(providers, ['ukId', keyId]);
+        return provider?.signing_public_key || false;
+
+    } catch (e) {
+        return false;
+    }
+}
+
+const lookupRegistry = async (subscriber_id, unique_key_id) => {
+    try {
+
+        const response = await lookupBppById({
+            type: SUBSCRIBER_TYPE.BAP,
+            subscriber_id: subscriber_id
+        });
+
+        if (!response) {
+            return false;
+        }
+
+        const public_key = await getProviderPublicKey(response, unique_key_id)
+
+        if (!public_key)
+            return false;
+
+        return public_key;
+
+    } catch (e) {
+        return false;
+    }
+}
+
+const remove_quotes = (a) => {
+    return a.replace(/^["'](.+(?=["']$))["']$/, '$1');
+}
+
+const split_auth_header = (auth_header) => {
+    const header = auth_header.replace('Signature ', '');
+    let re = /\s*([^=]+)=([^,]+)[,]?/g;
+    let m;
+    let parts = {}
+    while ((m = re.exec(header)) !== null) {
+        if (m) {
+            parts[m[1]] = remove_quotes(m[2]);
+        }
+    }
+    return parts;
+}
+
 const verifyMessage = async (signedString, signingString, publicKey) => {
     try {
         await _sodium.ready;
@@ -69,15 +124,11 @@ const verifyMessage = async (signedString, signingString, publicKey) => {
 
 const verifyHeader = async (headerParts, body, public_key) => {
     const { signing_string } = await createSigningString(JSON.stringify(body), headerParts['created'], headerParts['expires']);
-    console.log("recreated signing string:");
-    console.log(signing_string);
     const verified = await verifyMessage(headerParts['signature'], signing_string, public_key);
-
-    console.log('verified', verified);
     return verified;
 }
 
-const isSignatureValid = async (header, body) => {
+export const isSignatureValid = async (header, body) => {
     try{
         const headerParts = split_auth_header(header);
         const keyIdSplit = headerParts['keyId'].split('|')
@@ -88,7 +139,6 @@ const isSignatureValid = async (header, body) => {
         const isValid = await verifyHeader(headerParts, body, public_key)
         return isValid
     } catch(e){
-        console.log('Error', e)
         return false
     }
 }
