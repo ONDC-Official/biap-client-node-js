@@ -121,7 +121,8 @@ class QuoteOrderService {
         try {
             const protocolQuoteResponse = await onOrderQuote(messageId);
 
-            if (!(protocolQuoteResponse && protocolQuoteResponse.length)) {
+            if (!(protocolQuoteResponse && protocolQuoteResponse.length)  ||
+                protocolQuoteResponse?.[0]?.error) {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
                     messageId: messageId,
