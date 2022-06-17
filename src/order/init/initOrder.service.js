@@ -1,7 +1,6 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderInit } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
-import { getRandomString } from '../../utils/stringHelper.js';
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import BppInitService from "./bppInit.service.js";
@@ -35,8 +34,39 @@ class InitOrderService {
      * @param {String} userId
      * @param {String} parentOrderId
      */
-    async createOrder(response, userId = null, parentOrderId = null) {
+    async createOrder(response, userId = null, orderRequest) {
         if (response) {
+            const provider = orderRequest?.items?.[0]?.provider || {};
+
+            const providerDetails = {
+                id: provider.id,
+                locations: provider.locations.map(location => {
+                    return { id: location };
+                })
+            };
+
+            const fulfillment = {
+                end: {
+                    contact: {
+                        email: orderRequest?.delivery_info?.email,
+                        phone: orderRequest?.delivery_info?.phone
+                    },
+                    location: {
+                        ...orderRequest?.delivery_info?.location,
+                        address: {
+                            ...orderRequest?.delivery_info?.location?.address,
+                            name: orderRequest?.delivery_info?.name
+                        }
+                    },
+                },
+                type: orderRequest?.delivery_info?.type,
+                customer: {
+                    person: {
+                        name: orderRequest?.delivery_info?.name
+                    }
+                },
+                provider_id: provider?.id
+            };
 
             await addOrUpdateOrderWithTransactionId(
                 response.context.transaction_id,
@@ -44,8 +74,16 @@ class InitOrderService {
                     userId: userId,
                     messageId: response?.context?.message_id,
                     transactionId: response?.context?.transaction_id,
-                    parentOrderId: parentOrderId,
-                    bppId: response?.context?.bpp_id
+                    parentOrderId: response?.context?.parent_order_id,
+                    bppId: response?.context?.bpp_id,
+                    fulfillment: fulfillment,
+                    provider: { ...providerDetails },
+                    items: orderRequest?.items.map(item => {
+                        return {
+                            id: item?.id?.toString(),
+                            quantity: item.quantity
+                        };
+                    }) || [],
                 }
             );
         }
@@ -54,37 +92,53 @@ class InitOrderService {
     /**
      * update order in the db
      * @param {Object} response 
+     * @param {Object} dbResponse
      */
-    async updateOrder(response) {
+    async updateOrder(response, dbResponse) {
 
-        if (response?.message?.order &&
-            await getOrderByTransactionId(response?.context?.transaction_id)) {
+        if (response?.message?.order && dbResponse) {
+            dbResponse = dbResponse?.toJSON();
 
             let orderSchema = { ...response.message.order };
 
+            orderSchema.items = dbResponse?.items.map(item => {
+                return {
+                    id: item?.id?.toString(),
+                    quantity: item.quantity
+                };
+            }) || [];
+
             orderSchema.provider = {
-                ...orderSchema.provider,
-                locations: [orderSchema.provider_location],
-            }
+                id: orderSchema?.provider?.id,
+                locations: orderSchema?.provider_location ?
+                    orderSchema?.provider_location :
+                    dbResponse?.provider?.locations ?
+                        dbResponse?.provider?.locations :
+                        [],
+            };
+
             orderSchema.billing = {
-                ...orderSchema.billing,
+                ...orderSchema?.billing,
                 address: {
-                    ...orderSchema.billing.address,
-                    areaCode: orderSchema.billing.address.area_code
+                    ...orderSchema?.billing.address,
+                    areaCode: orderSchema?.billing?.address?.area_code
                 }
             };
-            orderSchema.fulfillment = {
-                ...orderSchema.fulfillment,
-                end: {
-                    ...orderSchema?.fulfillment?.end,
-                    location: {
-                        ...orderSchema?.fulfillment?.end?.location,
-                        address: {
-                            ...orderSchema?.fulfillment?.end?.location?.address,
-                            areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+
+            if (orderSchema.fulfillment) {
+                orderSchema.fulfillment = {
+                    ...orderSchema.fulfillment,
+                    end: {
+                        ...orderSchema?.fulfillment?.end,
+                        location: {
+                            ...orderSchema?.fulfillment?.end?.location,
+                            address: {
+                                ...orderSchema?.fulfillment?.end?.location?.address,
+                                areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+                            }
                         }
-                    }
-                },
+                    },
+                };
             }
 
             await addOrUpdateOrderWithTransactionId(
@@ -97,16 +151,18 @@ class InitOrderService {
     /**
     * init order
     * @param {Object} orderRequest
+    * @param {Boolean} isMultiSellerRequest
     */
-    async initOrder(orderRequest) {
+    async initOrder(orderRequest, isMultiSellerRequest = false) {
         try {
             const { context: requestContext = {}, message: order = {} } = orderRequest || {};
+            const parentOrderId = requestContext?.transaction_id;
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.INIT,
-                transactionId: requestContext?.transaction_id,
-                bppId: order?.items[0]?.bpp_id
+                bppId: order?.items[0]?.bpp_id,
+                ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 
             if (!(order?.items?.length)) {
@@ -136,7 +192,8 @@ class InitOrderService {
             const bppResponse = await bppInitService.init(
                 context,
                 subscriberDetails?.[0]?.subscriber_url,
-                order
+                order,
+                parentOrderId
             );
 
             return bppResponse;
@@ -153,13 +210,11 @@ class InitOrderService {
      */
     async initMultipleOrder(orders, user) {
 
-        const parentOrderId = getRandomString();
-
         const initOrderResponse = await Promise.all(
             orders.map(async order => {
                 try {
-                    const bppResponse = await this.initOrder(order);
-                    await this.createOrder(bppResponse, user?.decodedToken?.uid, parentOrderId);
+                    const bppResponse = await this.initOrder(order, orders.length > 1);
+                    await this.createOrder(bppResponse, user?.decodedToken?.uid, order?.message);
 
                     return bppResponse;
                 }
@@ -217,8 +272,17 @@ class InitOrderService {
             const onInitOrderResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const protocolInitResponse = await this.onInitOrder(messageId);
-                        await this.updateOrder(protocolInitResponse);
+                        let protocolInitResponse = await this.onInitOrder(messageId);
+                        let dbResponse = await getOrderByTransactionId(protocolInitResponse?.context?.transaction_id);
+
+                        await this.updateOrder(protocolInitResponse, dbResponse);
+
+                        dbResponse = dbResponse?.toJSON();
+
+                        protocolInitResponse.context = {
+                            ...protocolInitResponse?.context,
+                            parent_order_id: dbResponse?.parentOrderId
+                        };
 
                         return protocolInitResponse;
                     }

@@ -95,7 +95,7 @@ class ConfirmOrderService {
 
             if (await this.arePaymentsPending(
                 order?.payment,
-                orderRequest?.context?.transaction_id,
+                orderRequest?.context?.parent_order_id,
                 confirmPayment
             )) {
                 return {
