@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { bppConfirm } from "../../utils/bppApis/index.js";
 import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
@@ -28,7 +30,6 @@ class BppConfirmService {
      * @param {Object} context 
      * @param {String} bppUri 
      * @param {Object} order 
-     * @param {Object} storedOrder 
      * @returns 
      */
     async confirmV1(context, bppUri, order = {}) {
@@ -40,6 +41,7 @@ class BppConfirmService {
                 context: context,
                 message: {
                     order: {
+                        id: uuidv4(),
                         billing: order.billing_info,
                         items: order?.items.map(item => {
                             return {
@@ -49,7 +51,9 @@ class BppConfirmService {
                         }) || [],
                         provider: {
                             id: provider.id,
-                            locations: provider.locations
+                            locations: provider.locations.map(location => {
+                                return { id: location }
+                            })
                         },
                         fulfillment: {
                             end: {
@@ -106,12 +110,23 @@ class BppConfirmService {
                 context: context,
                 message: {
                     order: {
+                        id: uuidv4(),
                         billing: {
-                            ...storedOrder?.billing,
                             address: {
-                                ...storedOrder?.billing?.address,
+                                door: storedOrder?.billing?.address?.door,
+                                name: storedOrder?.billing?.address?.name,
+                                building: storedOrder?.billing?.address?.building,
+                                street: storedOrder?.billing?.address?.street,
+                                locality: storedOrder?.billing?.address?.locality,
+                                ward: storedOrder?.billing?.address?.ward,
+                                city: storedOrder?.billing?.address?.city,
+                                state: storedOrder?.billing?.address?.state,
+                                country: storedOrder?.billing?.address?.country,
                                 area_code: storedOrder?.billing?.address?.areaCode
-                            }
+                            },
+                            phone: storedOrder?.billing?.phone,
+                            name: storedOrder?.billing?.name,
+                            email: storedOrder?.billing?.email,
                         },
                         items: storedOrder?.items && storedOrder?.items?.length &&
                             [...storedOrder?.items].map(item => {
@@ -124,17 +139,33 @@ class BppConfirmService {
                             }) || [],
                         provider: storedOrder?.provider,
                         fulfillment: {
-                            ...storedOrder.fulfillment,
                             end: {
-                                ...storedOrder?.fulfillment?.end,
+                                contact: {
+                                    email: storedOrder?.fulfillment?.end?.contact?.email,
+                                    phone: storedOrder?.fulfillment?.end?.contact?.phone,
+                                },
                                 location: {
-                                    ...storedOrder?.fulfillment?.end?.location,
                                     address: {
-                                        ...storedOrder?.fulfillment?.end?.location?.address,
+                                        door: storedOrder?.fulfillment?.end?.location?.address?.door,
+                                        name: storedOrder?.fulfillment?.end?.location?.address?.name,
+                                        building: storedOrder?.fulfillment?.end?.location?.address?.building,
+                                        street: storedOrder?.fulfillment?.end?.location?.address?.street,
+                                        locality: storedOrder?.fulfillment?.end?.location?.address?.locality,
+                                        ward: storedOrder?.fulfillment?.end?.location?.address?.ward,
+                                        city: storedOrder?.fulfillment?.end?.location?.address?.city,
+                                        state: storedOrder?.fulfillment?.end?.location?.address?.state,
+                                        country: storedOrder?.fulfillment?.end?.location?.address?.country,
                                         area_code: storedOrder?.fulfillment?.end?.location?.address?.areaCode
                                     }
                                 }
                             },
+                            type: storedOrder?.fulfillment?.type,
+                            customer: {
+                                person: {
+                                    name: storedOrder?.fulfillment?.customer?.person?.name
+                                }
+                            },
+                            provider_id: storedOrder?.provider?.id
                         },
                         addOns: [],
                         offers: [],
@@ -150,7 +181,7 @@ class BppConfirmService {
                         }
                     }
                 }
-            }
+            };
 
             return await this.confirm(bppUri, confirmRequest);
         }

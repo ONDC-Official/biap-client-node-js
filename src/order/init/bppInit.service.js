@@ -7,11 +7,12 @@ class BppInitService {
     * @param {Object} context
     * @param {String} bppUri
     * @param {Object} order
+    * @param {String} parentOrderId
     */
-    async init(context, bppUri, order = {}) {
+    async init(context, bppUri, order = {}, parentOrderId) {
         try {
             const provider = order?.items?.[0]?.provider || {};
-            
+
             const initRequest = {
                 context: context,
                 message: {
@@ -30,11 +31,12 @@ class BppInitService {
                         }) || [],
                         add_ons: [],
                         offers: [],
-                        billing: { 
+                        billing: {
                             ...order.billing_info,
                             address: {
                                 ...order.billing_info.address,
-                                name: order.billing_info.name
+                                name: order.billing_info.name,
+                                area_code: order?.billing_info?.address?.areaCode
                             }
                         },
                         fulfillment: {
@@ -43,11 +45,12 @@ class BppInitService {
                                     email: order.delivery_info.email,
                                     phone: order.delivery_info.phone
                                 },
-                                location: { 
+                                location: {
                                     ...order.delivery_info.location,
-                                    address : {
+                                    address: {
                                         ...order.delivery_info.location.address,
-                                        name: order.delivery_info.name
+                                        name: order.delivery_info.name,
+                                        area_code: order?.delivery_info?.location?.address?.areaCode
                                     }
                                 },
                             },
@@ -61,12 +64,18 @@ class BppInitService {
                         },
                     }
                 }
-            }
+            };
 
             bppUri = getBaseUri(bppUri);
             const response = await bppInit(bppUri, initRequest);
 
-            return { context: context, message: response.message };
+            return {
+                context: {
+                    ...context,
+                    parent_order_id: parentOrderId
+                },
+                message: response.message
+            };
         }
         catch (err) {
             throw err;
