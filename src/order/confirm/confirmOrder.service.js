@@ -37,18 +37,19 @@ class ConfirmOrderService {
      * @param {Boolean} confirmPayment
      * @returns Boolean
      */
-    async arePaymentsPending(payment, orderId, confirmPayment = true) {
+    async arePaymentsPending(payment, orderId, total, confirmPayment = true) {
         if (payment?.type !== PAYMENT_TYPES["ON-ORDER"])
             return false;
 
         const paymentDetails = (confirmPayment && await juspayService.getOrderStatus(orderId)) || {};
 
         return payment == null ||
-            payment.paid_amount <= 0 ||
+            payment.paid_amount <= 0 || 
+            total <= 0 ||
             (
                 confirmPayment &&
                 ((process.env.NODE_ENV === "prod" &&
-                    payment.paid_amount !== paymentDetails?.amount) ||
+                    total !== paymentDetails?.amount) ||
                     paymentDetails?.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status)
             );
     }
@@ -74,9 +75,10 @@ class ConfirmOrderService {
     /**
      * confirm and update order in db
      * @param {Object} orderRequest 
+     * @param {Number} total
      * @param {Boolean} confirmPayment
      */
-    async confirmAndUpdateOrder(orderRequest = {}, confirmPayment = true) {
+    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true) {
         const {
             context: requestContext,
             message: order = {}
@@ -96,7 +98,8 @@ class ConfirmOrderService {
             if (await this.arePaymentsPending(
                 order?.payment,
                 orderRequest?.context?.parent_order_id,
-                confirmPayment
+                total,
+                confirmPayment,
             )) {
                 return {
                     context,
@@ -229,7 +232,8 @@ class ConfirmOrderService {
                 };
             } else if (await this.arePaymentsPending(
                 order?.payment,
-                orderRequest?.context?.transaction_id
+                orderRequest?.context?.transaction_id,
+                order?.payment?.paid_amount
             )) {
                 return {
                     context,
@@ -263,10 +267,15 @@ class ConfirmOrderService {
      */
     async confirmMultipleOrder(orders) {
 
+        let total = 0;
+        orders.forEach(order => {
+            total += order?.message?.payment?.paid_amount;
+        });
+
         const confirmOrderResponse = await Promise.all(
             orders.map(async orderRequest => {
                 try {
-                    return await this.confirmAndUpdateOrder(orderRequest, true);
+                    return await this.confirmAndUpdateOrder(orderRequest, total, true);
                 }
                 catch (err) {
                     throw err;
