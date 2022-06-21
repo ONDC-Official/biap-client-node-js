@@ -72,7 +72,8 @@ class BppInitService {
             return {
                 context: {
                     ...context,
-                    parent_order_id: parentOrderId
+                    parent_order_id: parentOrderId,
+                    provider_id: provider.id
                 },
                 message: response.message
             };
