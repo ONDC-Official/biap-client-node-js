@@ -1,6 +1,7 @@
 import SearchService from './search.service.js';
 import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
 import NoRecordFoundError from "../lib/errors/no-record-found.error.js";
+import { SSE_CONNECTIONS } from '../utils/sse.js';
 
 const searchService = new SearchService();
 
@@ -40,6 +41,13 @@ class SearchController {
         if(messageId) {
             searchService.onSearch(query).then(result => {
                 res.json(result);
+        
+                console.log("query message id in search controller ----------", messageId);
+                SSE_CONNECTIONS?.[messageId]?.send({
+                    "available": true,
+                    "totalCount": result?.message?.count 
+                }, "on_search", messageId);
+
             }).catch((err) => {
                 next(err);
             });
