@@ -32,7 +32,11 @@ class HttpRequest {
     
         try 
         {
-            let headers = {...this.headers, 'Content-Type': 'application/json'};
+            let headers = {
+                ...this.headers, 
+                ...(this.method.toLowerCase() != "get" && {'Content-Type': 'application/json'})
+            };
+            
             let result;
 
             if (this.method.toLowerCase() == 'get') 
