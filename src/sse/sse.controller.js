@@ -20,14 +20,14 @@ class SseController {
             const { query = {} } = req;
             const { messageId } = query;
 
-            // const message = await sseProtocolService.getDataFromProtocol(action, messageId);
             if (messageId) {
                 const configureSse = new ConfigureSse(req, res, messageId);
                 const initSSE = configureSse.initialize();
 
                 addSSEConnection(messageId, initSSE);
             }
-            else throw BadRequestParameterError();
+            else
+                throw new BadRequestParameterError();
         }
         catch (err) {
             throw err;
