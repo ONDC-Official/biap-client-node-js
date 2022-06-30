@@ -9,7 +9,7 @@ import { createAuthorizationHeader } from "../cryptic.js";
  */
 const bppConfirm = async (bppUri, order) => {
     const authHeader = await createAuthorizationHeader(order);
-    
+
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.CONFIRM,
@@ -169,7 +169,7 @@ const bppOrderStatus = async (bppUri, order) => {
  */
 const bppQuote = async (bppUri, request) => {
     const authHeader = await createAuthorizationHeader(request);
-    
+
     const apiCall = new HttpRequest(
         bppUri,
         BPP_API_URLS.SELECT,
@@ -185,13 +185,13 @@ const bppQuote = async (bppUri, request) => {
     return result.data;
 };
 
-export { 
-    bppCancel, 
-    bppConfirm, 
-    bppInit, 
-    bppSearch, 
-    bppOrderStatus, 
-    bppSupport, 
-    bppTrack, 
-    bppQuote 
+export {
+    bppCancel,
+    bppConfirm,
+    bppInit,
+    bppSearch,
+    bppOrderStatus,
+    bppSupport,
+    bppTrack,
+    bppQuote
 };
