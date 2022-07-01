@@ -55,7 +55,7 @@ class BppInitService {
                                     }
                                 },
                             },
-                            type: order.delivery_info.type,
+                            type: "Delivery",
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
