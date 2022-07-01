@@ -1,6 +1,6 @@
 import { SUBSCRIBER_TYPE } from "../constants.js";
 import HttpRequest from "../HttpRequest.js";
-import { REGISTRY_SERVICE, REGISTRY_SERVICE_API_URLS } from "./routes.js";
+import { REGISTRY_SERVICE_API_URLS } from "./routes.js";
 
 /**
  * lookup bpp by Id
@@ -15,7 +15,7 @@ const lookupBppById = async ({
     country = process.env.COUNTRY
 }) => {
     const apiCall = new HttpRequest(
-        REGISTRY_SERVICE.url,
+        process.env.REGISTRY_BASE_URL,
         REGISTRY_SERVICE_API_URLS.LOOKUP,
         "POST",
         {subscriber_id, type, domain, city, country}
@@ -32,9 +32,9 @@ const lookupBppById = async ({
  *  
  */
 const lookupGateways = async () => {
-    
+
     const apiCall = new HttpRequest(
-        REGISTRY_SERVICE.url,
+        process.env.REGISTRY_BASE_URL,
         REGISTRY_SERVICE_API_URLS.LOOKUP,
         "POST",
         {
