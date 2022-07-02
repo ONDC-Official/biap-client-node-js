@@ -33,6 +33,7 @@ class BppQuoteService {
                             })
                         },
                         fulfillment: {
+                            type: "Delivery",
                             end: {
                                 location: {
                                     gps: "12.974002, 77.613458",
@@ -48,6 +49,7 @@ class BppQuoteService {
 
             bppUri = getBaseUri(bppUri);
             
+
             const response = await bppQuote(bppUri, selectRequest);
 
             return { context: context, message: response.message };

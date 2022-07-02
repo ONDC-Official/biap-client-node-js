@@ -78,9 +78,6 @@ class BppInitService {
             };
 
             bppUri = getBaseUri(bppUri);
-            
-            console.log(JSON.stringify(initRequest));
-
 
             const response = await bppInit(bppUri, initRequest);
 
