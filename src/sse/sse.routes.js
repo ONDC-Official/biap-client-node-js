@@ -1,11 +1,12 @@
 import { Router } from 'express';
+import authentication from '../middlewares/authentication.js';
 
 import SseController from './sse.controller.js';
 
 const sseController = new SseController();
 const rootRouter = new Router();
 
-rootRouter.get('/events', sseController.onEvent);
+rootRouter.get('/events', authentication(),  sseController.onEvent);
 
 rootRouter.post('/response/on_cancel', sseController.onCancel);
 rootRouter.post('/response/on_confirm', sseController.onConfirm);

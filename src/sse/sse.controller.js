@@ -17,47 +17,18 @@ class SseController {
     */
     async onEvent(req, res, next) {
 
-        const headers = {
-            'Content-Type': 'text/event-stream',
-            'Connection': 'keep-alive',
-            'Cache-Control': 'no-cache',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': 'true'
-          };
-
-        res.writeHead(200, headers);
-
-        console.log('yo');
-        console.log('headers', req.headers);
-
-        res.write(JSON.stringify({"data": "test"}));
-        
-        countdown(res, 10)
-
-        function countdown(res, count) {
-            res.write("data: " + count + "\n\n")
-            if (count)
-              setTimeout(() => countdown(res, count-1), 1000)
-            else
-              res.end()
-          }
-
-        return res;
-
         try {
             const { query = {} } = req;
             const { messageId } = query;
 
-            if (messageId) {
+            if (messageId && messageId.length) {
                 const configureSse = new ConfigureSse(req, res, messageId);
                 const initSSE = configureSse.initialize();
 
                 addSSEConnection(messageId, initSSE);
 
-                text/event-stream
             }
-            else
-                throw new BadRequestParameterError();
+
         }
         catch (err) {
             throw err;

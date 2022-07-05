@@ -32,8 +32,10 @@ class SseEvent extends EventEmitter {
         res.statusCode = 200;
 
         res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Connection', 'keep-alive');
         res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('X-Accel-Buffering', 'no');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
 
         // res.setHeader('Cache-Control', 'no-cache');
         // res.setHeader('Content-Type', 'text/event-stream');
