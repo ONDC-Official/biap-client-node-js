@@ -20,12 +20,12 @@ class ConfigureSSE {
 
             const sse = new SseEvent(
                 message,
-                { 
-                    initialEvent: this.action, 
-                    eventId: this.messageId 
+                {
+                    initialEvent: this.action,
+                    eventId: this.messageId
                 }
             );
-            
+
             sse.init(this.req, this.res);
 
             return sse;

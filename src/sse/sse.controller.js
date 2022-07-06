@@ -61,7 +61,7 @@ class SseController {
     */
     onConfirm(req, res, next) {
         const { body: response } = req;
-        
+
         sseProtocolService.onConfirm(response).then(result => {
             res.json(result);
         }).catch((err) => {
@@ -163,7 +163,7 @@ class SseController {
     */
     onTrack(req, res, next) {
         const { body: response } = req;
-        
+
         sseProtocolService.onTrack(response).then(result => {
             res.json(result);
         }).catch((err) => {

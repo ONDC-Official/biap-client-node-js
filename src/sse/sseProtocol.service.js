@@ -36,7 +36,7 @@ class SseProtocol {
     async onConfirm(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_CONFIRM,
@@ -63,7 +63,7 @@ class SseProtocol {
     async onInit(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_INIT,
@@ -90,7 +90,7 @@ class SseProtocol {
     async onSearch(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SEARCH,
@@ -117,7 +117,7 @@ class SseProtocol {
     async onQuote(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SELECT,
@@ -144,7 +144,7 @@ class SseProtocol {
     async onStatus(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_STATUS,
@@ -171,7 +171,7 @@ class SseProtocol {
     async onSupport(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SUPPORT,
@@ -198,7 +198,7 @@ class SseProtocol {
     async onTrack(response) {
         try {
             const { messageId } = response;
-            
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_TRACK,
