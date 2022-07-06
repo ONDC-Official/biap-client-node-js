@@ -37,11 +37,6 @@ class SseEvent extends EventEmitter {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-        // res.setHeader('Cache-Control', 'no-cache');
-        // res.setHeader('Content-Type', 'text/event-stream');
-        // res.setHeader('Access-Control-Allow-Origin', '*');
-        // res.setHeader('Connection', 'keep-alive');
-
         if (req.httpVersion !== '2.0')
             res.setHeader('Connection', 'keep-alive');
 
@@ -52,7 +47,6 @@ class SseEvent extends EventEmitter {
         this.setMaxListeners(this.getMaxListeners() + 2);
 
         const dataListener = data => {
-            console.log(data.id);
 
             if (data.id)
                 res.write(`id: ${data.id}\n`);

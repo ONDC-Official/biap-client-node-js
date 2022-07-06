@@ -43,10 +43,9 @@ class SseController {
     * @return {callback}
     */
     onCancel(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onCancel(response, messageId).then(result => {
+        sseProtocolService.onCancel(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -61,10 +60,9 @@ class SseController {
     * @return {callback}
     */
     onConfirm(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
         
-        sseProtocolService.onConfirm(response, messageId).then(result => {
+        sseProtocolService.onConfirm(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -79,10 +77,9 @@ class SseController {
     * @return {callback}
     */
     onInit(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onInit(response, messageId).then(result => {
+        sseProtocolService.onInit(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -97,10 +94,9 @@ class SseController {
     * @return {callback}
     */
     onSearch(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onSearch(response, messageId).then(result => {
+        sseProtocolService.onSearch(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -115,10 +111,9 @@ class SseController {
     * @return {callback}
     */
     onQuote(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onQuote(response, messageId).then(result => {
+        sseProtocolService.onQuote(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -133,10 +128,9 @@ class SseController {
     * @return {callback}
     */
     onStatus(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onStatus(response, messageId).then(result => {
+        sseProtocolService.onStatus(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -151,10 +145,9 @@ class SseController {
     * @return {callback}
     */
     onSupport(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
 
-        sseProtocolService.onSupport(response, messageId).then(result => {
+        sseProtocolService.onSupport(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);
@@ -169,10 +162,9 @@ class SseController {
     * @return {callback}
     */
     onTrack(req, res, next) {
-        const { body: response, query = {} } = req;
-        const { messageId } = query;
+        const { body: response } = req;
         
-        sseProtocolService.onTrack(response, messageId).then(result => {
+        sseProtocolService.onTrack(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);

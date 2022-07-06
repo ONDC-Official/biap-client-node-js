@@ -1,66 +1,15 @@
 import { PROTOCOL_CONTEXT } from '../utils/constants.js';
 import { SSE_CONNECTIONS } from '../utils/sse.js';
-
-import CancelOrder from "../order/cancel/cancelOrder.service.js";
-import ConfirmOrder from "../order/confirm/confirmOrder.service.js";
-import InitOrder from "../order/init/initOrder.service.js";
-import SearchService from '../discovery/search.service.js';
-import QuoteOrder from "../order/quote/quoteOrder.service.js";
-import OrderStatus from "../order/status/orderStatus.service.js";
-import SupportService from "../support/support.service.js";
-import TrackService from "../fulfillment/track.service.js";
-
-const cancelOrder = new CancelOrder();
-const confirmOrder = new ConfirmOrder();
-const initOrder = new InitOrder();
-const searchService = new SearchService();
-const quoteOrder = new QuoteOrder();
-const orderStatus = new OrderStatus();
-const supportService = new SupportService();
-const trackService = new TrackService();
-
 class SseProtocol {
-
-    /**
-     * 
-     * @param {String} action 
-     * @param {String} messageId 
-     * @returns 
-     */
-    async getDataFromProtocol(action, messageId) {
-        try {
-            switch (action) {
-                case PROTOCOL_CONTEXT.ON_CANCEL:
-                    return await cancelOrder.onCancelOrder(messageId);
-                case PROTOCOL_CONTEXT.ON_CONFIRM:
-                    return await confirmOrder.onConfirmMultipleOrder([messageId]);
-                case PROTOCOL_CONTEXT.ON_INIT:
-                    return await initOrder.onInitMultipleOrder([messageId]);
-                case PROTOCOL_CONTEXT.ON_SEARCH:
-                    return await searchService.onSearch({ messageId: messageId });
-                case PROTOCOL_CONTEXT.ON_SELECT:
-                    return await quoteOrder.onQuoteOrder(messageId);
-                case PROTOCOL_CONTEXT.ON_STATUS:
-                    return await orderStatus.onOrderStatus(messageId);
-                case PROTOCOL_CONTEXT.ON_SUPPORT:
-                    return await supportService.onSupport(messageId);
-                case PROTOCOL_CONTEXT.ON_TRACK:
-                    return await trackService.onTrack(messageId);
-
-            }
-        }
-        catch (err) {
-            throw err;
-        }
-    }
 
     /**
     * on cancel
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onCancel(response, messageId) {
+    async onCancel(response) {
         try {
+            const { messageId } = response;
+
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_CANCEL,
@@ -83,10 +32,11 @@ class SseProtocol {
     /**
      * on confirm
      * @param {Object} response 
-     * @param {String} messageId
      */
-    async onConfirm(response, messageId) {
+    async onConfirm(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_CONFIRM,
@@ -109,10 +59,11 @@ class SseProtocol {
     /**
     * on init
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onInit(response, messageId) {
+    async onInit(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_INIT,
@@ -135,10 +86,11 @@ class SseProtocol {
     /**
     * on search
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onSearch(response, messageId) {
+    async onSearch(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SEARCH,
@@ -161,10 +113,11 @@ class SseProtocol {
     /**
     * on quote
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onQuote(response, messageId) {
+    async onQuote(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SELECT,
@@ -187,10 +140,11 @@ class SseProtocol {
     /**
     * on status
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onStatus(response, messageId) {
+    async onStatus(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_STATUS,
@@ -213,10 +167,11 @@ class SseProtocol {
     /**
     * on support
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onSupport(response, messageId) {
+    async onSupport(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SUPPORT,
@@ -239,10 +194,11 @@ class SseProtocol {
     /**
     * on track
     * @param {Object} response 
-    * @param {String} messageId
     */
-    async onTrack(response, messageId) {
+    async onTrack(response) {
         try {
+            const { messageId } = response;
+            
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_TRACK,
