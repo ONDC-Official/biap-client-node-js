@@ -1,4 +1,4 @@
-import { bppTrack } from "../utils/bppApis/index.js";
+import { protocolTrack } from "../utils/protocolApis/index.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class BppTrackService {
@@ -21,7 +21,7 @@ class BppTrackService {
             }
             bppUri = getBaseUri(bppUri);
             
-            const response = await bppTrack(bppUri, trackRequest);
+            const response = await protocolTrack(bppUri, trackRequest);
             
             return { context: context, message: response.message };
         }

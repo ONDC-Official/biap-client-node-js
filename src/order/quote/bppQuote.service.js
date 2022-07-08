@@ -1,4 +1,4 @@
-import { bppQuote } from "../../utils/bppApis/index.js";
+import { protocolQuote } from "../../utils/protocolApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppQuoteService {
@@ -32,22 +32,12 @@ class BppQuoteService {
                                 return { id: location };
                             })
                         },
-                        fulfillment: {
-                            end: {
-                                location: {
-                                    gps: "12.974002, 77.613458",
-                                    address: {
-                                        area_code: "560001"
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
 
             bppUri = getBaseUri(bppUri);
-            const response = await bppQuote(bppUri, selectRequest);
+            const response = await protocolQuote(bppUri, selectRequest);
 
             return { context: context, message: response.message };
         }

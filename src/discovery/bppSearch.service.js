@@ -1,4 +1,4 @@
-import { bppSearch } from "../utils/bppApis/index.js";
+import { protocolSearch } from "../utils/protocolApis/index.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class BppSearchService {
@@ -52,7 +52,7 @@ class BppSearchService {
             }
             
             bppUri = getBaseUri(bppUri);
-            const response = await bppSearch(bppUri, searchRequest);
+            const response = await protocolSearch(bppUri, searchRequest);
 
             return { context: context, message: response.message };
         }

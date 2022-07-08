@@ -1,4 +1,4 @@
-import { bppCancel } from "../../utils/bppApis/index.js";
+import { protocolCancel } from "../../utils/protocolApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppCancelService {
@@ -23,7 +23,7 @@ class BppCancelService {
             }
             bppUri = getBaseUri(bppUri);
             
-            const response = await bppCancel(bppUri, cancelRequest);
+            const response = await protocolCancel(bppUri, cancelRequest);
             
             return { context: context, message: response.message };
         }

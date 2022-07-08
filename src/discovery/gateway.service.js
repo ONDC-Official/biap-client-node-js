@@ -1,4 +1,4 @@
-import { bppSearch } from "../utils/bppApis/index.js";
+import { protocolSearch } from "../utils/protocolApis/index.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class Gateway {
@@ -53,7 +53,7 @@ class Gateway {
             
             let baseUrl = getBaseUri(gateway.subscriber_url);
             
-            const response = await bppSearch(baseUrl, searchRequest);
+            const response = await protocolSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };
         }

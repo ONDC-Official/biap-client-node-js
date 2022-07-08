@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
-import { createAuthorizationHeader } from '../cryptic.js';
 
+import { createAuthorizationHeader } from '../cryptic.js';
 import HttpRequest from "../HttpRequest.js";
+
 import PROTOCOL_API_URLS from "./routes.js";
 
 /**
@@ -348,20 +349,20 @@ const onOrderQuote = async (messageId) => {
 };
 
 export {
-    protocolCancel,
     onOrderCancel,
-    protocolConfirm,
     onOrderConfirm,
-    protocolInit,
     onOrderInit,
-    protocolSearch,
     onSearch,
-    protocolOrderStatus,
     onOrderStatus,
-    protocolSupport,
     onOrderSupport,
-    protocolTrack,
     onOrderTrack,
+    onOrderQuote,
+    protocolCancel,
+    protocolConfirm,
+    protocolInit,
+    protocolSearch,
+    protocolOrderStatus,
+    protocolSupport,
+    protocolTrack,
     protocolQuote,
-    onOrderQuote
 };

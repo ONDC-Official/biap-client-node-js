@@ -1,4 +1,4 @@
-import { bppInit } from "../../utils/bppApis/index.js";
+import { protocolInit } from "../../utils/protocolApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppInitService {
@@ -67,7 +67,7 @@ class BppInitService {
             };
 
             bppUri = getBaseUri(bppUri);
-            const response = await bppInit(bppUri, initRequest);
+            const response = await protocolInit(bppUri, initRequest);
 
             return {
                 context: {

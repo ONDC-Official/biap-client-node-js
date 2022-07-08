@@ -1,4 +1,4 @@
-import { bppSupport } from "../utils/bppApis/index.js";
+import { protocolSupport } from "../utils/protocolApis/index.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class BppSupportService {
@@ -21,7 +21,7 @@ class BppSupportService {
             }
             bppUri = getBaseUri(bppUri);
             
-            const response = await bppSupport(bppUri, supportRequest);
+            const response = await protocolSupport(bppUri, supportRequest);
             return { context: context, message: response.message };
         }
         catch (err) {

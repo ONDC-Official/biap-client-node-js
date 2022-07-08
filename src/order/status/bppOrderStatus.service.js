@@ -1,5 +1,4 @@
-import { bppOrderStatus } from "../../utils/bppApis/index.js";
-import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
+import { protocolOrderStatus } from "../../utils/protocolApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppOrderStatusService {
@@ -20,7 +19,7 @@ class BppOrderStatusService {
             }
             
             bppUri = getBaseUri(bppUri);
-            const response = await bppOrderStatus(bppUri, orderStatusRequest);
+            const response = await protocolOrderStatus(bppUri, orderStatusRequest);
 
             return { context: context, message: response.message };
         }

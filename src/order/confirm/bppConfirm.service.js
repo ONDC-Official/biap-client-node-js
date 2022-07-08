@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { bppConfirm } from "../../utils/bppApis/index.js";
 import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
+import { protocolConfirm } from '../../utils/protocolApis/index.js';
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
@@ -16,7 +16,7 @@ class BppConfirmService {
         try {
 
             bppUri = getBaseUri(bppUri);
-            const response = await bppConfirm(bppUri, confirmRequest);
+            const response = await protocolConfirm(bppUri, confirmRequest);
 
             return { context: confirmRequest.context, message: response.message };
         }
