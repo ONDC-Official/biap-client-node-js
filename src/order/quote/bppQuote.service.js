@@ -32,11 +32,24 @@ class BppQuoteService {
                                 return { id: location };
                             })
                         },
+                        fulfillment: {
+                            type: "Delivery",
+                            end: {
+                                location: {
+                                    gps: "12.974002, 77.613458",
+                                    address: {
+                                        area_code: "560001"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-    
+
             bppUri = getBaseUri(bppUri);
+            
+
             const response = await bppQuote(bppUri, selectRequest);
 
             return { context: context, message: response.message };

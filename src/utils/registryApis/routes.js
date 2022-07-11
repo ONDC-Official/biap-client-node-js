@@ -1,5 +1,4 @@
 const REGISTRY_SERVICE = {
-    url: "https://pilot-gateway-1.beckn.nsdl.co.in",
     retry: {
         maxAttempts: 3,
         initialIntervalInMillis: 1000,
