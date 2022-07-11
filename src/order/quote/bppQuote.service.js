@@ -31,7 +31,7 @@ class BppQuoteService {
                             locations: provider.locations.map(location => {
                                 return { id: location };
                             })
-                        },
+                        }
                     }
                 }
             }

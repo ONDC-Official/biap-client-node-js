@@ -61,7 +61,7 @@ class BppInitService {
                                 }
                             },
                             provider_id: provider.id
-                        },
+                        }
                     }
                 }
             };
