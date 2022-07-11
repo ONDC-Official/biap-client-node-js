@@ -31,17 +31,6 @@ class BppQuoteService {
                             locations: provider.locations.map(location => {
                                 return { id: location };
                             })
-                        },
-                        fulfillment: {
-                            type: "Delivery",
-                            end: {
-                                location: {
-                                    gps: "12.974002, 77.613458",
-                                    address: {
-                                        area_code: "560001"
-                                    }
-                                }
-                            }
                         }
                     }
                 }
