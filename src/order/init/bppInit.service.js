@@ -47,7 +47,6 @@ class BppInitService {
                                 },
                                 location: {
                                     ...order.delivery_info.location,
-                                    gps: "12.974002, 77.613458",
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
@@ -55,23 +54,13 @@ class BppInitService {
                                     }
                                 },
                             },
-                            type: "Delivery",
+                            type: order.delivery_info.type,
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
                                 }
                             },
-                            provider_id: provider.id,
-                        },
-                        payment: {
-                            type: "ON-ORDER",
-                            collected_by: "BAP",
-                            "@ondc/org/buyer_app_finder_fee_type": "Percent",
-                            "@ondc/org/buyer_app_finder_fee_amount": 0.0,
-                            "@ondc/org/ondc-withholding_amount": 0.0,
-                            "@ondc/org/ondc-return_window": 0.0,
-                            "@ondc/org/ondc-settlement_basis": "Collection",
-                            "@ondc/org/ondc-settlement_window": "PT2D"
+                            provider_id: provider.id
                         }
                     }
                 }
