@@ -33,12 +33,11 @@ class BppQuoteService {
                             })
                         },
                         fulfillment: {
-                            type: "Delivery",
                             end: {
                                 location: {
-                                    gps: "12.974002, 77.613458",
+                                    gps: cart?.gps,
                                     address: {
-                                        area_code: "560001"
+                                        area_code: cart?.area_code
                                     }
                                 }
                             }

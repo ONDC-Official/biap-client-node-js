@@ -47,7 +47,6 @@ class BppInitService {
                                 },
                                 location: {
                                     ...order.delivery_info.location,
-                                    gps: "12.974002, 77.613458",
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
@@ -65,7 +64,7 @@ class BppInitService {
                         },
                         payment: {
                             type: "ON-ORDER",
-                            collected_by: "BAP",
+                            collected_by: "BAP", //TODO: add conditions and configure finder fee
                             "@ondc/org/buyer_app_finder_fee_type": "Percent",
                             "@ondc/org/buyer_app_finder_fee_amount": 0.0,
                             "@ondc/org/ondc-withholding_amount": 0.0,
