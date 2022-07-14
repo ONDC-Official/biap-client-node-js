@@ -35,9 +35,9 @@ class BppQuoteService {
                         fulfillment: {
                             end: {
                                 location: {
-                                    gps: cart?.gps,
+                                    gps: cart?.location?.gps,
                                     address: {
-                                        area_code: cart?.area_code
+                                        area_code: cart?.location?.area_code
                                     }
                                 }
                             }
@@ -47,7 +47,6 @@ class BppQuoteService {
             }
 
             bppUri = getBaseUri(bppUri);
-            
 
             const response = await bppQuote(bppUri, selectRequest);
 
