@@ -7,11 +7,11 @@ import PROTOCOL_API_URLS from "./routes.js";
 
 /**
  * order confirm
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolConfirm = async (uri, data) => {
+const protocolConfirm = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -19,7 +19,7 @@ const protocolConfirm = async (uri, data) => {
         PROTOCOL_API_URLS.CONFIRM,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -49,11 +49,11 @@ const onOrderConfirm = async (messageId) => {
 
 /**
  * order cancel
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolCancel = async (uri, data) => {
+const protocolCancel = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -61,7 +61,7 @@ const protocolCancel = async (uri, data) => {
         PROTOCOL_API_URLS.CANCEL,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -91,11 +91,11 @@ const onOrderCancel = async (messageId) => {
 
 /**
  * init order
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolInit = async (uri, data) => {
+const protocolInit = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -103,7 +103,7 @@ const protocolInit = async (uri, data) => {
         PROTOCOL_API_URLS.INIT,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -133,11 +133,11 @@ const onOrderInit = async (messageId) => {
 
 /**
  * search
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolSearch = async (uri, data) => {
+const protocolSearch = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -145,7 +145,7 @@ const protocolSearch = async (uri, data) => {
         PROTOCOL_API_URLS.SEARCH,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -181,11 +181,11 @@ const onSearch = async (query) => {
 
 /**
  * track order
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolTrack = async (uri, data) => {
+const protocolTrack = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -193,7 +193,7 @@ const protocolTrack = async (uri, data) => {
         PROTOCOL_API_URLS.TRACK,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -223,11 +223,11 @@ const onOrderTrack = async (messageId) => {
 
 /**
  * order support
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolSupport = async (uri, data) => {
+const protocolSupport = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -235,7 +235,7 @@ const protocolSupport = async (uri, data) => {
         PROTOCOL_API_URLS.SUPPORT,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -265,11 +265,11 @@ const onOrderSupport = async (messageId) => {
 
 /**
  * order status
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolOrderStatus = async (uri, data) => {
+const protocolOrderStatus = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -277,7 +277,7 @@ const protocolOrderStatus = async (uri, data) => {
         PROTOCOL_API_URLS.STATUS,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
@@ -308,11 +308,11 @@ const onOrderStatus = async (orderId) => {
 
 /**
  * quote order
- * @param {String} uri 
+ * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolQuote = async (uri, data) => {
+const protocolQuote = async (url, data) => {
     const authHeader = await createAuthorizationHeader(data);
 
     const apiCall = new HttpRequest(
@@ -320,7 +320,7 @@ const protocolQuote = async (uri, data) => {
         PROTOCOL_API_URLS.SELECT,
         "POST",
         {
-            uri: uri,
+            url: url,
             data: data
         },
         {
