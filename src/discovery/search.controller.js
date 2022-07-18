@@ -41,11 +41,6 @@ class SearchController {
         if(messageId) {
             searchService.onSearch(query).then(result => {
                 res.json(result);
-                SSE_CONNECTIONS?.[messageId]?.send({
-                    "available": true,
-                    "totalCount": result?.message?.count 
-                }, "on_search", messageId);
-
             }).catch((err) => {
                 next(err);
             });
