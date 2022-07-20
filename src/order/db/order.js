@@ -331,6 +331,7 @@ const OrderSchema = new mongoose.Schema(
         parentOrderId: { type: String, default: null },
         paymentStatus: { type: String, enum: ['PAID', 'NOT-PAID'], default: null },
         bppId: { type: String, default: null },
+        bapOrderId: { type: String, default: null }
     },
     { _id: true, timestamps: true }
 );

@@ -6,11 +6,11 @@ import OrderMongooseModel from './order.js';
  * @param {String} transactionId 
  * @param {Object} orderSchema 
  */
-const addOrUpdateOrderWithTransactionId = async (transactionId, orderSchema = {}) => {
+const addOrUpdateOrderWithTransactionId = async (bapOrderId, orderSchema = {}) => {
 
     return await OrderMongooseModel.findOneAndUpdate(
         {
-            transactionId: transactionId
+            bapOrderId: bapOrderId
         },
         {
             ...orderSchema
@@ -22,12 +22,12 @@ const addOrUpdateOrderWithTransactionId = async (transactionId, orderSchema = {}
 
 /**
  * get the order with passed transaction id from the database
- * @param {String} transactionId 
+ * @param {String} bapOrderId 
  * @returns 
  */
-const getOrderByTransactionId = async (transactionId) => {
+const getOrderByTransactionId = async (bapOrderId) => {
     const order = await OrderMongooseModel.find({
-        transactionId: transactionId
+        bapOrderId: bapOrderId
     });
 
     if (!(order || order.length))

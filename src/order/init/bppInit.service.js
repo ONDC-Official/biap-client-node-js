@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import { bppInit } from "../../utils/bppApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
@@ -19,7 +17,6 @@ class BppInitService {
                 context: context,
                 message: {
                     order: {
-                        id: uuidv4(),
                         provider: {
                             id: provider.id,
                             locations: provider.locations.map(location => {

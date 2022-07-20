@@ -5,6 +5,7 @@ import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../d
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
+import { getBAPOrderId } from './../util/order.js';
 
 const bppInitService = new BppInitService();
 
@@ -69,7 +70,7 @@ class InitOrderService {
             };
 
             await addOrUpdateOrderWithTransactionId(
-                response.context.transaction_id,
+                getBAPOrderId(response.context.transaction_id, providerDetails.id),
                 {
                     userId: userId,
                     messageId: response?.context?.message_id,
@@ -142,7 +143,7 @@ class InitOrderService {
             }
 
             await addOrUpdateOrderWithTransactionId(
-                response?.context?.transaction_id,
+                getBAPOrderId(response?.context?.transaction_id, orderSchema.provider.id),
                 { ...orderSchema }
             );
         }
