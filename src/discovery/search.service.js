@@ -35,6 +35,7 @@ class SearchService {
                 transactionId: requestContext?.transaction_id,
                 bppId: requestContext?.bpp_id
             });
+            
 
             if(this.isBppFilterSpecified(protocolContext)) {
                 const subscriberDetails = await lookupBppById({
@@ -50,7 +51,7 @@ class SearchService {
             }
             
             const subscriberDetails = await lookupGateways();
-            
+
             if(subscriberDetails && subscriberDetails.length)
                 return gateway.search(subscriberDetails[0], protocolContext, criteria);
             

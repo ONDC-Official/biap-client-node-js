@@ -51,7 +51,7 @@ class Gateway {
                 }
             }
             
-            let baseUrl = getBaseUri(gateway.subscriber_url);
+            let baseUrl = getBaseUri(gateway?.network_participant?.[0]?.subscriber_url);
             
             const response = await bppSearch(baseUrl, searchRequest);
 

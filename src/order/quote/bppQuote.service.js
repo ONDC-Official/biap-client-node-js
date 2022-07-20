@@ -13,7 +13,6 @@ class BppQuoteService {
 
     async quote(context, bppUri, cart = {}) {
         try {
-
             const provider = cart?.items?.[0]?.provider || {};
 
             const selectRequest = {
@@ -38,9 +37,8 @@ class BppQuoteService {
 
             bppUri = getBaseUri(bppUri);
             
-
             const response = await bppQuote(bppUri, selectRequest);
-
+            
             return { context: context, message: response.message };
         }
         catch (err) {
