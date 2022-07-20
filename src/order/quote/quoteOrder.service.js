@@ -84,7 +84,7 @@ class QuoteOrderService {
 
             return await bppQuoteService.quote(
                 context,
-                subscriberDetails?.[0]?.network_participant[0]?.subscriber_url,
+                subscriberDetails?.[0]?.subscriber_id + subscriberDetails?.[0]?.network_participant[0]?.subscriber_url,
                 cart
             );
         }

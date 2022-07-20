@@ -189,9 +189,10 @@ class InitOrderService {
                 subscriber_id: context.bpp_id
             });
 
+
             const bppResponse = await bppInitService.init(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                subscriberDetails?.[0]?.subscriber_id + subscriberDetails?.[0]?.network_participant[0]?.subscriber_url,
                 order,
                 parentOrderId
             );
