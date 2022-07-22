@@ -17,8 +17,6 @@ const lookupBppById = async ({
         subscriber_id, type, domain, country
     });
 
-    console.log(JSON.stringify(request));
-
     const apiCall = new HttpRequest(
         process.env.REGISTRY_BASE_URL,
         REGISTRY_SERVICE_API_URLS.LOOKUP,
@@ -26,8 +24,7 @@ const lookupBppById = async ({
         { ...request }
     );
 
-    let result = await apiCall.send();
-
+    const result = await apiCall.send();
     return result.data;
 };
 
@@ -44,8 +41,6 @@ const lookupGateways = async () => {
         domain: process.env.DOMAIN,
     });
 
-    console.log(JSON.stringify(request));
-
     const apiCall = new HttpRequest(
         process.env.REGISTRY_BASE_URL,
         REGISTRY_SERVICE_API_URLS.LOOKUP,
@@ -55,7 +50,7 @@ const lookupGateways = async () => {
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
