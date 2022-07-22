@@ -56,6 +56,7 @@ class QuoteOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
+                bppId: cart?.items[0]?.bpp_id
             });
 
             if (!(cart?.items || cart?.items?.length)) {
@@ -78,7 +79,7 @@ class QuoteOrderService {
 
             const subscriberDetails = await lookupBppById({
                 type: SUBSCRIBER_TYPE.BPP,
-                subscriber_id: cart?.items[0]?.bpp_id
+                subscriber_id: context?.bpp_id
             });
 
             return await bppQuoteService.quote(

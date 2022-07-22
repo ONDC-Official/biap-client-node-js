@@ -63,7 +63,7 @@ class BppConfirmService {
                                 },
                                 location: order.delivery_info.location,
                             },
-                            type: order.delivery_info.type,
+                            type: "Delivery",
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
@@ -159,7 +159,7 @@ class BppConfirmService {
                                     }
                                 }
                             },
-                            type: storedOrder?.fulfillment?.type,
+                            type: "Delivery",
                             customer: {
                                 person: {
                                     name: storedOrder?.fulfillment?.customer?.person?.name
