@@ -36,7 +36,7 @@ class BppQuoteService {
             }
 
             bppUri = getBaseUri(bppUri);
-            
+
             const response = await bppQuote(bppUri, selectRequest);
             
             return { context: context, message: response.message };
