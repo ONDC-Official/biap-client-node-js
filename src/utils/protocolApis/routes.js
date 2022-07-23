@@ -3,7 +3,7 @@ const ON_CANCEL = "protocol/response/v1/on_cancel";
 const ON_INIT = "protocol/response/v1/on_init";
 const ON_SEARCH = "protocol/response/v1/on_search";
 const ON_SELECT = "protocol/response/v1/on_select";
-const ON_STATUS = "protocol/response/v1/on_order_status";
+const ON_STATUS = "protocol/response/v1/on_status";
 const ON_SUPPORT = "protocol/response/v1/on_support";
 const ON_TRACK = "protocol/response/v1/on_track";
 
