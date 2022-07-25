@@ -63,11 +63,11 @@ class OrderStatusService {
 
     /**
     * on status order
-    * @param {String} orderId
+    * @param {String} messageId
     */
-    async onOrderStatus(orderId) {
+    async onOrderStatus(messageId) {
         try {
-            let protocolOrderStatusResponse = await onOrderStatus(orderId);
+            let protocolOrderStatusResponse = await onOrderStatus(messageId);
 
             if(protocolOrderStatusResponse && protocolOrderStatusResponse.length)
                 return protocolOrderStatusResponse?.[0];
@@ -92,14 +92,14 @@ class OrderStatusService {
 
     /**
     * on multiple order status
-    * @param {String} orderIds
+    * @param {String} messageIds
     */
-    async onOrderStatusV2(orderIds) {
+    async onOrderStatusV2(messageIds) {
         try {
             const onOrderStatusResponse = await Promise.all(
-                orderIds.map(async orderId => {
+                messageIds.map(async messageId => {
                     try {
-                        const onOrderStatusResponse = await this.onOrderStatus(orderId);
+                        const onOrderStatusResponse = await this.onOrderStatus(messageId);
                         return { ...onOrderStatusResponse };
                     }
                     catch (err) {
