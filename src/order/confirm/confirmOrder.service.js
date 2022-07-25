@@ -6,6 +6,7 @@ import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../d
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../payment/juspay.service.js";
+import { getBAPOrderId } from './../util/order.js';
 
 const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
@@ -67,7 +68,7 @@ class ConfirmOrderService {
             orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
 
         await addOrUpdateOrderWithTransactionId(
-            confirmResponse?.context?.transaction_id,
+            getBAPOrderId(confirmResponse?.context?.transaction_id, orderSchema?.provider?.id),
             { ...orderSchema }
         );
     }
@@ -84,7 +85,12 @@ class ConfirmOrderService {
             message: order = {}
         } = orderRequest || {};
 
-        const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
+        const dbResponse = await getOrderByTransactionId(getBAPOrderId(
+            orderRequest?.context?.transaction_id,
+            "1"
+        ));
+
+        console.log("dbResponse", dbResponse);
 
         if (dbResponse?.paymentStatus === null) {
 
@@ -157,9 +163,12 @@ class ConfirmOrderService {
         try {
             if (response?.message?.order) {
                 const dbResponse = await getOrderByTransactionId(
-                    response?.context?.transaction_id
-                );
+                    getBAPOrderId(
+                        response?.context?.transaction_id, 
+                        response?.message?.order?.provider?.id
+                ));
 
+                console.log("dbResponse 2-----------",dbResponse);
                 let orderSchema = { ...response?.message?.order };
 
                 orderSchema.messageId = response?.context?.message_id;
@@ -185,7 +194,7 @@ class ConfirmOrderService {
                 };
 
                 await addOrUpdateOrderWithTransactionId(
-                    response.context.transaction_id,
+                    getBAPOrderId(response?.context?.transaction_id, response?.message?.order?.provider?.id),
                     { ...orderSchema }
                 );
 

@@ -70,7 +70,7 @@ class InitOrderService {
             };
 
             await addOrUpdateOrderWithTransactionId(
-                getBAPOrderId(response.context.transaction_id, providerDetails.id),
+                getBAPOrderId(response?.context?.transaction_id, providerDetails?.id),
                 {
                     userId: userId,
                     messageId: response?.context?.message_id,
@@ -143,7 +143,7 @@ class InitOrderService {
             }
 
             await addOrUpdateOrderWithTransactionId(
-                getBAPOrderId(response?.context?.transaction_id, orderSchema.provider.id),
+                getBAPOrderId(response?.context?.transaction_id, orderSchema?.provider.id),
                 { ...orderSchema }
             );
         }
@@ -274,10 +274,10 @@ class InitOrderService {
                 messageIds.map(async messageId => {
                     try {
                         let protocolInitResponse = await this.onInitOrder(messageId);
-                        let dbResponse = await getOrderByTransactionId(protocolInitResponse?.context?.transaction_id);
-
+                        let dbResponse = await getOrderByTransactionId(getBAPOrderId(protocolInitResponse?.context?.transaction_id, protocolInitResponse?.message?.order?.provider?.id));
+                        
                         await this.updateOrder(protocolInitResponse, dbResponse);
-
+                        
                         dbResponse = dbResponse?.toJSON();
 
                         protocolInitResponse.context = {
