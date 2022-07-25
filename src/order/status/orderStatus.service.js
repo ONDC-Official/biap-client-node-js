@@ -113,7 +113,7 @@ class OrderStatusService {
                                 throw new NoRecordFoundError();
                             else {
                                 const orderSchema = dbResponse?.[0].toJSON();
-                                orderSchema.state = protocolCancelResponse?.message?.order?.state;
+                                orderSchema.state = onOrderStatusResponse?.message?.order?.state;
                                 
                                 await addOrUpdateOrderWithTransactionId(
                                     onOrderStatusResponse?.context?.transaction_id,
