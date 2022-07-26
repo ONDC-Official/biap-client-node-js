@@ -7,18 +7,19 @@ class BppSupportService {
      * support
      * @param {String} bppUri 
      * @param {Object} context 
-     * @param {String} refId 
+     * @param {String} ref_id 
      * @returns 
      */
-    async support(bppUri, context = {}, refId) {
+    async support(bppUri, context = {}, ref_id) {
         try {
 
             const supportRequest = {
                 context: context,
                 message: {
-                    refId: refId
+                    ref_id: ref_id
                 }
-            }
+            };
+
             bppUri = getBaseUri(bppUri);
             
             const response = await bppSupport(bppUri, supportRequest);
