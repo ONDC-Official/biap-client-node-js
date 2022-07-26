@@ -109,9 +109,7 @@ class OrderStatusService {
                                 transactionId: onOrderStatusResponse?.context?.transaction_id
                             });
 
-                            if (!(dbResponse || dbResponse.length))
-                                throw new NoRecordFoundError();
-                            else {
+                            if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
                                 
@@ -119,6 +117,9 @@ class OrderStatusService {
                                     onOrderStatusResponse?.context?.transaction_id,
                                     { ...orderSchema }
                                 );
+                            }
+                            else {
+                                throw new NoRecordFoundError();
                             }
                         }
                         
