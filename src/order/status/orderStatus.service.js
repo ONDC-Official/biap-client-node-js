@@ -7,7 +7,6 @@ import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppOrderStatusService from "./bppOrderStatus.service.js";
-import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
 
 const bppOrderStatusService = new BppOrderStatusService();
 
@@ -117,11 +116,25 @@ class OrderStatusService {
                                     onOrderStatusResponse?.context?.transaction_id,
                                     { ...orderSchema }
                                 );
-                            }
+                                
+                                return { ...onOrderStatusResponse };
 
+                            }
+                            else {
+                                const contextFactory = new ContextFactory();
+                                const context = contextFactory.create({
+                                    action: PROTOCOL_CONTEXT.ON_STATUS
+                                });
+
+                                return {
+                                    context,
+                                    error: {
+                                        message: "No data found"
+                                    }
+                                };
+                            }
                         }
                         
-                        return { ...onOrderStatusResponse };
                     }
                     catch (err) {
                         throw err;
