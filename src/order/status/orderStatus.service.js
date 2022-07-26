@@ -118,9 +118,7 @@ class OrderStatusService {
                                     { ...orderSchema }
                                 );
                             }
-                            else {
-                                throw new NoRecordFoundError();
-                            }
+
                         }
                         
                         return { ...onOrderStatusResponse };
