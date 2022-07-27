@@ -102,12 +102,12 @@ const onOrderSupport = async (messageId) => {
 
 /**
  * on order status
- * @param {String} orderId 
+ * @param {String} messageId 
  */
-const onOrderStatus = async (orderId) => {
+const onOrderStatus = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_STATUS + "?orderId="+ orderId,
+        PROTOCOL_API_URLS.ON_STATUS + "?messageId="+ messageId,
         "get",
     );
 

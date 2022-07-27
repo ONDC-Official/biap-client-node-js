@@ -60,7 +60,7 @@ class BppInitService {
                                     name: order.delivery_info.name
                                 }
                             },
-                            provider_id: provider.id,
+                            provider_id: provider.id
                         },
                         payment: {
                             type: "ON-ORDER",
