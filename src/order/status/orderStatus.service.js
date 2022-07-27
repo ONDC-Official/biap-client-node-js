@@ -2,6 +2,8 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderStatus } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
+import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppOrderStatusService from "./bppOrderStatus.service.js";
@@ -31,7 +33,7 @@ class OrderStatusService {
 
             return await bppOrderStatusService.getOrderStatus(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 message
             );
         }
@@ -63,11 +65,11 @@ class OrderStatusService {
 
     /**
     * on status order
-    * @param {String} orderId
+    * @param {String} messageId
     */
-    async onOrderStatus(orderId) {
+    async onOrderStatus(messageId) {
         try {
-            let protocolOrderStatusResponse = await onOrderStatus(orderId);
+            let protocolOrderStatusResponse = await onOrderStatus(messageId);
 
             if(protocolOrderStatusResponse && protocolOrderStatusResponse.length)
                 return protocolOrderStatusResponse?.[0];
@@ -92,15 +94,47 @@ class OrderStatusService {
 
     /**
     * on multiple order status
-    * @param {String} orderIds
+    * @param {String} messageIds
     */
-    async onOrderStatusV2(orderIds) {
+    async onOrderStatusV2(messageIds) {
         try {
             const onOrderStatusResponse = await Promise.all(
-                orderIds.map(async orderId => {
+                messageIds.map(async messageId => {
                     try {
-                        const onOrderStatusResponse = await this.onOrderStatus(orderId);
-                        return { ...onOrderStatusResponse };
+                        const onOrderStatusResponse = await this.onOrderStatus(messageId);
+
+                        if(!onOrderStatusResponse.error) {
+                            const dbResponse = await OrderMongooseModel.find({
+                                transactionId: onOrderStatusResponse?.context?.transaction_id
+                            });
+
+                            if ((dbResponse && dbResponse.length)) {
+                                const orderSchema = dbResponse?.[0].toJSON();
+                                orderSchema.state = onOrderStatusResponse?.message?.order?.state;
+                                
+                                await addOrUpdateOrderWithTransactionId(
+                                    onOrderStatusResponse?.context?.transaction_id,
+                                    { ...orderSchema }
+                                );
+                                
+                                return { ...onOrderStatusResponse };
+
+                            }
+                            else {
+                                const contextFactory = new ContextFactory();
+                                const context = contextFactory.create({
+                                    action: PROTOCOL_CONTEXT.ON_STATUS
+                                });
+
+                                return {
+                                    context,
+                                    error: {
+                                        message: "No data found"
+                                    }
+                                };
+                            }
+                        }
+                        
                     }
                     catch (err) {
                         throw err;

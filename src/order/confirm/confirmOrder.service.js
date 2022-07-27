@@ -2,6 +2,7 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -118,7 +119,7 @@ class ConfirmOrderService {
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order,
                 dbResponse
             );
@@ -252,7 +253,7 @@ class ConfirmOrderService {
 
             return await bppConfirmService.confirmV1(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order
             );
         }

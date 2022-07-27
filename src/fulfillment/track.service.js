@@ -4,6 +4,7 @@ import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../utils/constants.js";
 
 import BppTrackService from "./bppTrack.service.js";
 import ContextFactory from "../factories/ContextFactory.js";
+import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppTrackService = new BppTrackService();
 
@@ -28,7 +29,7 @@ class TrackService {
             });
 
             return await bppTrackService.track(
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 context,
                 trackRequest
             );

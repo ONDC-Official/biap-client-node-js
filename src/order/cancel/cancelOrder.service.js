@@ -8,6 +8,7 @@ import ContextFactory from "../../factories/ContextFactory.js";
 import CustomError from "../../lib/errors/custom.error.js";
 import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from '../db/order.js';
+import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppCancelService = new BppCancelService();
 
@@ -40,7 +41,7 @@ class CancelOrderService {
             });
 
             return await bppCancelService.cancelOrder(
-                subscriberDetails?.[0]?.subscriber_url, 
+                getSubscriberUrl(subscriberDetails), 
                 context, 
                 order_id, 
                 cancellation_reason_id

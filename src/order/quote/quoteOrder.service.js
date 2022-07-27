@@ -4,6 +4,7 @@ import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppQuoteService from "./bppQuote.service.js";
+import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppQuoteService = new BppQuoteService();
 
@@ -84,7 +85,7 @@ class QuoteOrderService {
 
             return await bppQuoteService.quote(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 cart
             );
         }
