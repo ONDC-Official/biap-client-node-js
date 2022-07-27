@@ -178,10 +178,14 @@ class BppConfirmService {
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
+                        },
+                        quote: {
+                            ...storedOrder.quote
                         }
                     }
                 }
             };
+
 
             return await this.confirm(bppUri, confirmRequest);
         }
