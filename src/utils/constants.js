@@ -66,9 +66,9 @@ export const PROTOCOL_VERSION = {
 };
 
 export const SUBSCRIBER_TYPE = {
-    BAP: "buyerApp",
-    BPP: "sellerApp",
-    BG: "gateway",
+    BAP: "BAP",
+    BPP: "BPP",
+    BG: "BG",
     LREG: "LREG",
     CREG: "CREG",
     RREG: "RREG"

@@ -13,7 +13,7 @@ import { lookupBppById } from "../utils/registryApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppConfirmService from "../order/confirm/bppConfirm.service.js";
-import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
+import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppConfirmService = new BppConfirmService();
 
@@ -109,7 +109,7 @@ class JuspayService {
                 });
 
                 const subscriberDetails = await lookupBppById({
-                    type: SUBSCRIBER_TYPE.BPP,
+                    type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                     subscriber_id: context.bpp_id
                 });
 

@@ -8,7 +8,7 @@ import ContextFactory from "../../factories/ContextFactory.js";
 import CustomError from "../../lib/errors/custom.error.js";
 import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from '../db/order.js';
-import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppCancelService = new BppCancelService();
 
@@ -36,7 +36,7 @@ class CancelOrderService {
             }
 
             const subscriberDetails = await lookupBppById({ 
-                type: SUBSCRIBER_TYPE.BPP, 
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP), 
                 subscriber_id: context?.bpp_id 
             });
 
@@ -78,16 +78,18 @@ class CancelOrderService {
                 if(!(protocolCancelResponse?.[0].error)) {
 
                     protocolCancelResponse = protocolCancelResponse?.[0];
+
                     const dbResponse = await OrderMongooseModel.find({
                         transactionId: protocolCancelResponse.context.transaction_id
                     });
+
                     
                     if (!(dbResponse || dbResponse.length))
                         throw new NoRecordFoundError();
                     else {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
-                        
+
                         await addOrUpdateOrderWithTransactionId(
                             protocolCancelResponse.context.transaction_id,
                             { ...orderSchema }

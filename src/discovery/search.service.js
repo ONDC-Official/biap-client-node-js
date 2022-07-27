@@ -7,7 +7,7 @@ import { onSearch } from "../utils/protocolApis/index.js";
 import ContextFactory from "../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
 import Gateway from "./gateway.service.js";
-import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
+import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppSearchService = new BppSearchService();
 const gateway = new Gateway();
@@ -37,10 +37,9 @@ class SearchService {
                 bppId: requestContext?.bpp_id
             });
             
-
             if(this.isBppFilterSpecified(protocolContext)) {
                 const subscriberDetails = await lookupBppById({
-                    type: SUBSCRIBER_TYPE.BPP,
+                    type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                     subscriber_id: protocolContext.bpp_id
                 });
 
@@ -54,7 +53,7 @@ class SearchService {
             const subscriberDetails = await lookupGateways();
 
             if(subscriberDetails && subscriberDetails.length)
-                return gateway.search(subscriberDetails[0], protocolContext, criteria);
+                return gateway.search(subscriberDetails?.[0], protocolContext, criteria);
             
             return null; 
         }

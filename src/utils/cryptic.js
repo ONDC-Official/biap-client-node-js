@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { SUBSCRIBER_TYPE } from './constants.js';
 import { lookupBppById } from './registryApis/index.js';
 import { v4 as uuidv4 } from 'uuid';
+import { getSubscriberType } from './registryApis/registryUtil.js';
 
 export const createSigningString = async (message, created, expires) => {
     if (!created) created = Math.floor(new Date().getTime() / 1000).toString();
@@ -40,10 +41,10 @@ export const createAuthorizationHeader = async (message) => {
         created
     } = await createSigningString(JSON.stringify(message));
 
-    const signature = await signMessage(signing_string, process.env.BPP_PRIVATE_KEY || "");
+    const signature = await signMessage(signing_string, process.env.BAP_PRIVATE_KEY || "");
 
     const subscriber_id = process.env.BAP_ID;
-    const unique_key_id = process.env.BPP_UNIQUE_KEY_ID;
+    const unique_key_id = process.env.BAP_UNIQUE_KEY_ID;
     const header = `Signature keyId="${subscriber_id}|${unique_key_id}|ed25519",algorithm="ed25519",created="${created}",expires="${expires}",headers="(created) (expires) digest",signature="${signature}"`
 
     return header;
@@ -76,7 +77,7 @@ const lookupRegistry = async (subscriber_id, unique_key_id) => {
     try {
 
         const response = await lookupBppById({
-            type: SUBSCRIBER_TYPE.BAP,
+            type: getSubscriberType(SUBSCRIBER_TYPE.BAP),
             subscriber_id: subscriber_id
         });
 
@@ -161,7 +162,7 @@ export const signRegistryRequest = async (request) => {
         reqObj.push(request.subscriber_id);
 
     const signingString = reqObj.join("|");
-    return await signMessage(signingString, process.env.BPP_PRIVATE_KEY || "");
+    return await signMessage(signingString, process.env.BAP_PRIVATE_KEY || "");
 }
 
 export const formatRegistryRequest = async (request) => {

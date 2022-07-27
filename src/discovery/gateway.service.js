@@ -1,4 +1,5 @@
 import { bppSearch } from "../utils/bppApis/index.js";
+import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class Gateway {
@@ -50,9 +51,10 @@ class Gateway {
                     }
                 }
             }
-            
-            let baseUrl = getBaseUri(gateway?.network_participant?.[0]?.subscriber_url);
-            
+            let baseUrl = getBaseUri(process.env.ENV_TYPE !== "STAGING" ?
+                gateway?.network_participant?.[0]?.subscriber_url : 
+                gateway?.subscriber_url);
+
             const response = await bppSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };

@@ -4,7 +4,7 @@ import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppQuoteService from "./bppQuote.service.js";
-import { getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppQuoteService = new BppQuoteService();
 
@@ -79,7 +79,7 @@ class QuoteOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: context?.bpp_id
             });
 
