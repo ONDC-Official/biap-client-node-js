@@ -1,4 +1,5 @@
 import { bppInit } from "../../utils/bppApis/index.js";
+import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppInitService {
@@ -63,10 +64,10 @@ class BppInitService {
                             provider_id: provider.id
                         },
                         payment: {
-                            type: "ON-ORDER",
-                            collected_by: "BAP", //TODO: add conditions and configure finder fee
-                            "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BUYER_APP_FINDER_FEE_TYPE,
-                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BUYER_APP_FINDER_FEE_AMOUNT,
+                            type: order?.payment?.type,
+                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
+                            "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
+                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
                             "@ondc/org/ondc-withholding_amount": 0.0,
                             "@ondc/org/ondc-return_window": 0.0,
                             "@ondc/org/ondc-settlement_basis": "Collection",
