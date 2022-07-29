@@ -31,7 +31,7 @@ class BppQuoteService {
                                 return { id: location };
                             })
                         },
-                        fulfillment: {
+                        fulfillment: [{
                             type: "Delivery",
                             end: {
                                 location: {
@@ -41,15 +41,15 @@ class BppQuoteService {
                                     }
                                 }
                             }
-                        }
+                        }]
                     }
                 }
             };
 
             bppUri = getBaseUri(bppUri);
-            
+
             const response = await bppQuote(bppUri, selectRequest);
-            
+
             return { context: context, message: response.message };
         }
         catch (err) {
