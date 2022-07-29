@@ -55,7 +55,7 @@ class BppConfirmService {
                                 return { id: location }
                             })
                         },
-                        fulfillment: {
+                        fulfillment: [{
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -70,7 +70,7 @@ class BppConfirmService {
                                 }
                             },
                             provider_id: provider.id
-                        },
+                        }],
                         addOns: [],
                         offers: [],
                         payment: {
@@ -82,6 +82,9 @@ class BppConfirmService {
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
+                        },
+                        quote: {
+                            ...order?.quote
                         }
                     }
                 }
@@ -138,7 +141,7 @@ class BppConfirmService {
                                 };
                             }) || [],
                         provider: storedOrder?.provider,
-                        fulfillment: {
+                        fulfillment: [{
                             end: {
                                 contact: {
                                     email: storedOrder?.fulfillment?.end?.contact?.email,
@@ -166,7 +169,7 @@ class BppConfirmService {
                                 }
                             },
                             provider_id: storedOrder?.provider?.id
-                        },
+                        }],
                         addOns: [],
                         offers: [],
                         payment: {
@@ -178,6 +181,9 @@ class BppConfirmService {
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
+                        },
+                        quote: {
+                            ...storedOrder?.quote
                         }
                     }
                 }

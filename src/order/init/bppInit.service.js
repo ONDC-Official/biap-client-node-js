@@ -39,7 +39,7 @@ class BppInitService {
                                 area_code: order?.billing_info?.address?.areaCode
                             }
                         },
-                        fulfillment: {
+                        fulfillment: [{
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -62,7 +62,7 @@ class BppInitService {
                                 }
                             },
                             provider_id: provider.id
-                        },
+                        }],
                         payment: {
                             type: "ON-ORDER",
                             collected_by: "BAP",
