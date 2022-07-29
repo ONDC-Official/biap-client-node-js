@@ -90,7 +90,7 @@ class SseProtocol {
     async onSearch(response) {
         try {
             const { messageId } = response;
-
+            console.log(response);
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SEARCH,
