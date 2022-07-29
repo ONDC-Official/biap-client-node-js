@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { bppConfirm } from "../../utils/bppApis/index.js";
-import { PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
+import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppConfirmService {
@@ -81,7 +81,10 @@ class BppConfirmService {
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
-                            type: order?.payment?.type
+                            type: order?.payment?.type,
+                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
+                                PAYMENT_COLLECTED_BY.BAP : 
+                                PAYMENT_COLLECTED_BY.BPP,
                         }
                     }
                 }
@@ -177,7 +180,10 @@ class BppConfirmService {
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
-                            type: order?.payment?.type
+                            type: order?.payment?.type,
+                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
+                                PAYMENT_COLLECTED_BY.BAP : 
+                                PAYMENT_COLLECTED_BY.BPP,
                         }
                     }
                 }
