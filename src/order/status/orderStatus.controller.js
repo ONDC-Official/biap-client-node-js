@@ -54,9 +54,9 @@ class OrderStatusController {
     */
     onOrderStatus(req, res, next) {
         const { query } = req;
-        const { orderId } = query;
+        const { messageId } = query;
         
-        orderStatusService.onOrderStatus(orderId).then(order => {
+        orderStatusService.onOrderStatus(messageId).then(order => {
             res.json(order);
         }).catch((err) => {
             next(err);
@@ -72,12 +72,12 @@ class OrderStatusController {
     */
     onOrderStatusV2(req, res, next) {
         const { query } = req;
-        const { orderIds } = query;
+        const { messageIds } = query;
         
-        if(orderIds && orderIds.length && orderIds.trim().length) { 
-            const orderIdsArray = orderIds.split(",");
+        if(messageIds && messageIds.length && messageIds.trim().length) { 
+            const messageIdsArray = messageIds.split(",");
             
-            orderStatusService.onOrderStatusV2(orderIdsArray).then(orders => {
+            orderStatusService.onOrderStatusV2(messageIdsArray).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);
