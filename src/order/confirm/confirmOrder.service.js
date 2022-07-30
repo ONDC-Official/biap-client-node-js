@@ -2,6 +2,7 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -112,13 +113,13 @@ class ConfirmOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: context?.bpp_id
             });
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order,
                 dbResponse
             );
@@ -246,13 +247,13 @@ class ConfirmOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: order?.items[0]?.bpp_id
             });
 
             return await bppConfirmService.confirmV1(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order
             );
         }

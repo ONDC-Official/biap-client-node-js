@@ -4,6 +4,7 @@ import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../utils/constants.js";
 
 import BppSupportService from "./bppSupport.service.js";
 import ContextFactory from "../factories/ContextFactory.js";
+import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppSupportService = new BppSupportService();
 
@@ -24,12 +25,12 @@ class SupportService {
             });
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: requestContext.bpp_id,
             });
 
             return await bppSupportService.support(
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 context,
                 message?.ref_id
             );

@@ -16,7 +16,7 @@ class BppSupportService {
             const supportRequest = {
                 context: context,
                 message: {
-                    refId: refId
+                    ref_id: refId
                 }
             }
             bppUri = getBaseUri(bppUri);

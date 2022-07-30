@@ -55,7 +55,7 @@ class BppConfirmService {
                                 return { id: location }
                             })
                         },
-                        fulfillment: {
+                        fulfillment: [{
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -63,14 +63,14 @@ class BppConfirmService {
                                 },
                                 location: order.delivery_info.location,
                             },
-                            type: order.delivery_info.type,
+                            type: "Delivery",
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
                                 }
                             },
                             provider_id: provider.id
-                        },
+                        }],
                         addOns: [],
                         offers: [],
                         payment: {
@@ -82,6 +82,9 @@ class BppConfirmService {
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
+                        },
+                        quote: {
+                            ...order?.quote
                         }
                     }
                 }
@@ -138,7 +141,7 @@ class BppConfirmService {
                                 };
                             }) || [],
                         provider: storedOrder?.provider,
-                        fulfillment: {
+                        fulfillment: [{
                             end: {
                                 contact: {
                                     email: storedOrder?.fulfillment?.end?.contact?.email,
@@ -159,14 +162,14 @@ class BppConfirmService {
                                     }
                                 }
                             },
-                            type: storedOrder?.fulfillment?.type,
+                            type: "Delivery",
                             customer: {
                                 person: {
                                     name: storedOrder?.fulfillment?.customer?.person?.name
                                 }
                             },
                             provider_id: storedOrder?.provider?.id
-                        },
+                        }],
                         addOns: [],
                         offers: [],
                         payment: {
@@ -178,6 +181,9 @@ class BppConfirmService {
                                 PROTOCOL_PAYMENT.PAID :
                                 PROTOCOL_PAYMENT["NOT-PAID"],
                             type: order?.payment?.type
+                        },
+                        quote: {
+                            ...storedOrder?.quote
                         }
                     }
                 }
