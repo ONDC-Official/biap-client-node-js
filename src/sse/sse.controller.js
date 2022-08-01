@@ -22,7 +22,6 @@ class SseController {
             const { messageId } = query;
 
             if (messageId && messageId.length) {
-                console.log("added listener for messageId---", messageId);
 
                 const configureSse = new ConfigureSse(req, res, messageId);
                 const initSSE = configureSse.initialize();
@@ -97,7 +96,6 @@ class SseController {
     */
     onSearch(req, res, next) {
         const { body: response } = req;
-        console.log("in controller", response);
         sseProtocolService.onSearch(response).then(result => {
             res.json(result);
         }).catch((err) => {
