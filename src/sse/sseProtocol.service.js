@@ -90,13 +90,16 @@ class SseProtocol {
     async onSearch(response) {
         try {
             const { messageId } = response;
-            console.log(response);
+            console.log("in service response---", response, messageId);
                 
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
                 PROTOCOL_CONTEXT.ON_SEARCH,
                 messageId
             );
+
+            console.log("in service response after sse events---", response);
+
 
             return {
                 message: {
