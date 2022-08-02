@@ -1,14 +1,14 @@
 import { lookupBppById } from "../../utils/registryApis/index.js";
-import { onOrderQuote } from "../../utils/protocolApis/index.js";
+import { onOrderSelect } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
-import BppQuoteService from "./bppQuote.service.js";
+import BppSelectService from "./bppSelect.service.js";
 import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
-const bppQuoteService = new BppQuoteService();
+const bppSelectService = new BppSelectService();
 
-class QuoteOrderService {
+class SelectOrderService {
 
     /**
      * 
@@ -45,10 +45,10 @@ class QuoteOrderService {
     }
 
     /**
-    * quote order
+    * select order
     * @param {Object} orderRequest
     */
-    async quoteOrder(orderRequest) {
+    async selectOrder(orderRequest) {
         try {
             const { context: requestContext, message = {} } = orderRequest || {};
             const { cart = {} } = message;
@@ -83,7 +83,7 @@ class QuoteOrderService {
                 subscriber_id: context?.bpp_id
             });
 
-            return await bppQuoteService.quote(
+            return await bppSelectService.select(
                 context,
                 getSubscriberUrl(subscriberDetails),
                 cart
@@ -95,15 +95,15 @@ class QuoteOrderService {
     }
 
     /**
-     * quote multiple orders
+     * select multiple orders
      * @param {Array} requests 
      */
-    async quoteMultipleOrder(requests) {
+    async selectMultipleOrder(requests) {
 
-        const quoteOrderResponse = await Promise.all(
+        const selectOrderResponse = await Promise.all(
             requests.map(async request => {
                 try {
-                    const response = await this.quoteOrder(request);
+                    const response = await this.selectOrder(request);
                     return response;
                 }
                 catch (err) {
@@ -112,19 +112,19 @@ class QuoteOrderService {
             })
         );
 
-        return quoteOrderResponse;
+        return selectOrderResponse;
     }
 
     /**
-    * on quote order
+    * on select order
     * @param {Object} messageId
     */
-    async onQuoteOrder(messageId) {
+    async onSelectOrder(messageId) {
         try {
-            const protocolQuoteResponse = await onOrderQuote(messageId);
+            const protocolSelectResponse = await onOrderSelect(messageId);
 
-            if (!(protocolQuoteResponse && protocolQuoteResponse.length)  ||
-                protocolQuoteResponse?.[0]?.error) {
+            if (!(protocolSelectResponse && protocolSelectResponse.length)  ||
+                protocolSelectResponse?.[0]?.error) {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
                     messageId: messageId,
@@ -138,7 +138,7 @@ class QuoteOrderService {
                     }
                 };
             } else {
-                return this.transform(protocolQuoteResponse?.[0]);
+                return this.transform(protocolSelectResponse?.[0]);
             }
         }
         catch (err) {
@@ -147,16 +147,16 @@ class QuoteOrderService {
     }
 
     /**
-    * on quote multiple order
+    * on select multiple order
     * @param {Object} messageId
     */
-    async onQuoteMultipleOrder(messageIds) {
+    async onSelectMultipleOrder(messageIds) {
         try {
-            const onQuoteOrderResponse = await Promise.all(
+            const onSelectOrderResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onQuoteResponse = await this.onQuoteOrder(messageId);
-                        return { ...onQuoteResponse };
+                        const onSelectResponse = await this.onSelectOrder(messageId);
+                        return { ...onSelectResponse };
                     }
                     catch (err) {
                         throw err;
@@ -164,7 +164,7 @@ class QuoteOrderService {
                 })
             );
 
-            return onQuoteOrderResponse;
+            return onSelectOrderResponse;
         }
         catch (err) {
             throw err;
@@ -172,4 +172,4 @@ class QuoteOrderService {
     }
 }
 
-export default QuoteOrderService;
+export default SelectOrderService;

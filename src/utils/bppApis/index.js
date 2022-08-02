@@ -163,11 +163,11 @@ const bppOrderStatus = async (bppUri, order) => {
 };
 
 /**
- * quote order
+ * select order
  * @param {String} bppUri 
  * @param {Object} request 
  */
-const bppQuote = async (bppUri, request) => {
+const bppSelect = async (bppUri, request) => {
     const authHeader = await createAuthorizationHeader(request);
     
     const apiCall = new HttpRequest(
@@ -193,5 +193,5 @@ export {
     bppOrderStatus, 
     bppSupport, 
     bppTrack, 
-    bppQuote 
+    bppSelect 
 };
