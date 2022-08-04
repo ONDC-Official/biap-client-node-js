@@ -2,6 +2,7 @@ import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -45,7 +46,7 @@ class ConfirmOrderService {
         const paymentDetails = (confirmPayment && await juspayService.getOrderStatus(orderId)) || {};
 
         return payment == null ||
-            payment.paid_amount <= 0 || 
+            payment.paid_amount <= 0 ||
             total <= 0 ||
             (
                 confirmPayment &&
@@ -118,13 +119,13 @@ class ConfirmOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: context?.bpp_id
             });
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order,
                 dbResponse
             );
@@ -179,19 +180,29 @@ class ConfirmOrderService {
                         areaCode: orderSchema.billing.address.area_code
                     }
                 };
-                orderSchema.fulfillment = {
-                    ...orderSchema.fulfillment,
-                    end: {
-                        ...orderSchema?.fulfillment?.end,
-                        location: {
-                            ...orderSchema?.fulfillment?.end?.location,
-                            address: {
-                                ...orderSchema?.fulfillment?.end?.location?.address,
-                                areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
-                            }
+
+                if(orderSchema.fulfillment) {
+                    orderSchema.fulfillments = [orderSchema.fulfillment];
+                    delete orderSchema.fulfillment;
+                }   
+
+                if(orderSchema.fulfillment) {
+                    orderSchema.fulfillments = [...orderSchema.fulfillments].map((fulfillment) => {
+                        return {
+                            ...fulfillment,
+                            end: {
+                                ...fulfillment?.end,
+                                location: {
+                                    ...fulfillment?.end?.location,
+                                    address: {
+                                        ...fulfillment?.end?.location?.address,
+                                        areaCode: fulfillment?.end?.location?.address?.area_code
+                                    }
+                                }
+                            },
                         }
-                    },
-                };
+                    });
+                }
 
                 await addOrUpdateOrderWithTransactionId(
                     getBAPOrderId(response?.context?.transaction_id, response?.message?.order?.provider?.id),
@@ -255,13 +266,13 @@ class ConfirmOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: order?.items[0]?.bpp_id
             });
 
             return await bppConfirmService.confirmV1(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order
             );
         }
