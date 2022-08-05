@@ -5,5 +5,14 @@
  * @returns 
  */
 export const getBAPOrderId = (transactionId, providerId) => {
-    return transactionId + "_" + providerId;
+    try {
+        console.log(transactionId, providerId);
+        if(transactionId && providerId)
+            return transactionId + "_" + providerId;
+        else
+            throw new Error("Please provide transaction id and provider id"); 
+    }
+    catch(err) {
+        throw err;
+    }
 }

@@ -86,12 +86,12 @@ class ConfirmOrderService {
             message: order = {}
         } = orderRequest || {};
 
+        const provider = order?.provider || {};
+
         const dbResponse = await getOrderByTransactionId(getBAPOrderId(
             orderRequest?.context?.transaction_id,
-            "1"
+            provider?.id
         ));
-
-        console.log("dbResponse", dbResponse);
 
         if (dbResponse?.paymentStatus === null) {
 
