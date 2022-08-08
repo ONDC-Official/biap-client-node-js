@@ -191,7 +191,7 @@ class BppConfirmService {
                                 PAYMENT_COLLECTED_BY.BPP,
                         },
                         quote: {
-                            ...storedOrder?.quote
+                            ...(order?.quote || storedOrder?.quote)
                         }
                     }
                 }
