@@ -6,7 +6,7 @@ import ConfirmOrderController from './confirm/confirmOrder.controller.js';
 import InitOrderController from './init/initOrder.controller.js';
 import OrderHistoryController from './history/orderHistory.controller.js';
 import OrderStatusController from './status/orderStatus.controller.js';
-import QuoteOrderController from './quote/quoteOrder.controller.js';
+import SelectOrderController from './select/selectOrder.controller.js';
 
 const rootRouter = new Router();
 
@@ -15,7 +15,7 @@ const confirmOrderController = new ConfirmOrderController();
 const initOrderController = new InitOrderController();
 const orderHistoryController = new OrderHistoryController();
 const orderStatusController = new OrderStatusController();
-const quoteOrderController = new QuoteOrderController();
+const selectOrderController = new SelectOrderController();
 
 //#region confirm order
 
@@ -102,27 +102,27 @@ rootRouter.get('/v2/on_order_status', authentication(), orderStatusController.on
 
 //#endregion
 
-//#region quote order
+//#region select order
 
-// quote order v1
+// select order v1
 rootRouter.post(
-    '/v1/get_quote', 
+    '/v1/select', 
     authentication(),
-    quoteOrderController.quoteOrder,
+    selectOrderController.selectOrder,
 );
 
-// quote order v2
+// select order v2
 rootRouter.post(
-    '/v2/get_quote', 
+    '/v2/select', 
     authentication(),
-    quoteOrderController.quoteMultipleOrder,
+    selectOrderController.selectMultipleOrder,
 );
 
-// on quote order v1
-rootRouter.get('/v1/on_get_quote', authentication(), quoteOrderController.onQuoteOrder);
+// on select order v1
+rootRouter.get('/v1/on_select', authentication(), selectOrderController.onSelectOrder);
 
-// on quote order v2
-rootRouter.get('/v2/on_get_quote', authentication(), quoteOrderController.onQuoteMultipleOrder);
+// on select order v2
+rootRouter.get('/v2/on_select', authentication(), selectOrderController.onSelectMultipleOrder);
 
 //#endregion
 

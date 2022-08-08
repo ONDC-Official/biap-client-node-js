@@ -1,4 +1,5 @@
 import { bppInit } from "../../utils/bppApis/index.js";
+import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../utils/constants.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppInitService {
@@ -47,7 +48,6 @@ class BppInitService {
                                 },
                                 location: {
                                     ...order.delivery_info.location,
-                                    gps: "12.974002, 77.613458",
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
@@ -55,7 +55,7 @@ class BppInitService {
                                     }
                                 },
                             },
-                            type: "Delivery",
+                            type: order.delivery_info.type,
                             customer: {
                                 person: {
                                     name: order.delivery_info.name
@@ -64,10 +64,10 @@ class BppInitService {
                             provider_id: provider.id
                         }],
                         payment: {
-                            type: "ON-ORDER",
-                            collected_by: "BAP",
-                            "@ondc/org/buyer_app_finder_fee_type": "Percent",
-                            "@ondc/org/buyer_app_finder_fee_amount": 0.0,
+                            type: order?.payment?.type,
+                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
+                            "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
+                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
                             "@ondc/org/ondc-withholding_amount": 0.0,
                             "@ondc/org/ondc-return_window": 0.0,
                             "@ondc/org/ondc-settlement_basis": "Collection",
