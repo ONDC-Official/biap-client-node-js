@@ -4,14 +4,14 @@ import { PROTOCOL_CONTEXT, PROTOCOL_VERSION } from '../utils/constants.js';
 class ContextFactory {
 
     constructor(arg = {}) {
-        const { 
-            domain = process.env.DOMAIN, 
-            city = process.env.CITY, 
-            country = process.env.COUNTRY, 
-            bapId = process.env.BAP_ID, 
-            bapUrl = process.env.BAP_URL 
+        const {
+            domain = process.env.DOMAIN,
+            city = process.env.CITY,
+            country = process.env.COUNTRY,
+            bapId = process.env.BAP_ID,
+            bapUrl = process.env.BAP_URL
         } = arg || {};
-        
+
         this.domain = domain;
         this.city = city;
         this.country = country;
@@ -22,24 +22,24 @@ class ContextFactory {
 
     create(contextObject = {}) {
         const {
-            transactionId = uuidv4(), 
-            messageId = uuidv4(), 
+            transactionId = uuidv4(),
+            messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
-            bppId 
+            bppId
         } = contextObject || {};
-                
+
         return {
-            domain : this.domain,
+            domain: this.domain,
             country: this.country,
-            city : this.city,
-            action : action,
-            core_version : PROTOCOL_VERSION.v_0_9_3,
-            bap_id : this.bapId,
-            bap_uri : this.bapUrl,
-            bpp_id : bppId,
-            transaction_id : transactionId,
-            message_id : messageId,
-            timestamp: this.timestamp
+            city: this.city,
+            action: action,
+            core_version: PROTOCOL_VERSION.v_0_9_3,
+            bap_id: this.bapId,
+            bap_uri: this.bapUrl,
+            transaction_id: transactionId,
+            message_id: messageId,
+            timestamp: this.timestamp,
+            ...(bppId && { bpp_id: bppId })
         };
 
     }

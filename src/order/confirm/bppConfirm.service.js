@@ -55,7 +55,7 @@ class BppConfirmService {
                                 return { id: location }
                             })
                         },
-                        fulfillment: [{
+                        fulfillments: [{
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -85,7 +85,6 @@ class BppConfirmService {
                             collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
                                 PAYMENT_COLLECTED_BY.BAP : 
                                 PAYMENT_COLLECTED_BY.BPP,
-                            type: order?.payment?.type
                         },
                         quote: {
                             ...order?.quote
@@ -145,35 +144,37 @@ class BppConfirmService {
                                 };
                             }) || [],
                         provider: storedOrder?.provider,
-                        fulfillment: [{
-                            end: {
-                                contact: {
-                                    email: storedOrder?.fulfillment?.end?.contact?.email,
-                                    phone: storedOrder?.fulfillment?.end?.contact?.phone,
-                                },
-                                location: {
-                                    address: {
-                                        door: storedOrder?.fulfillment?.end?.location?.address?.door,
-                                        name: storedOrder?.fulfillment?.end?.location?.address?.name,
-                                        building: storedOrder?.fulfillment?.end?.location?.address?.building,
-                                        street: storedOrder?.fulfillment?.end?.location?.address?.street,
-                                        locality: storedOrder?.fulfillment?.end?.location?.address?.locality,
-                                        ward: storedOrder?.fulfillment?.end?.location?.address?.ward,
-                                        city: storedOrder?.fulfillment?.end?.location?.address?.city,
-                                        state: storedOrder?.fulfillment?.end?.location?.address?.state,
-                                        country: storedOrder?.fulfillment?.end?.location?.address?.country,
-                                        area_code: storedOrder?.fulfillment?.end?.location?.address?.areaCode
+                        fulfillments: [...storedOrder.fulfillments].map((fulfillment) => {
+                            return {
+                                end: {
+                                    contact: {
+                                        email: fulfillment?.end?.contact?.email,
+                                        phone: fulfillment?.end?.contact?.phone,
+                                    },
+                                    location: {
+                                        address: {
+                                            door: fulfillment?.end?.location?.address?.door,
+                                            name: fulfillment?.end?.location?.address?.name,
+                                            building: fulfillment?.end?.location?.address?.building,
+                                            street: fulfillment?.end?.location?.address?.street,
+                                            locality: fulfillment?.end?.location?.address?.locality,
+                                            ward: fulfillment?.end?.location?.address?.ward,
+                                            city: fulfillment?.end?.location?.address?.city,
+                                            state: fulfillment?.end?.location?.address?.state,
+                                            country: fulfillment?.end?.location?.address?.country,
+                                            area_code: fulfillment?.end?.location?.address?.areaCode
+                                        }
                                     }
-                                }
-                            },
-                            type: storedOrder?.fulfillment?.type,
-                            customer: {
-                                person: {
-                                    name: storedOrder?.fulfillment?.customer?.person?.name
-                                }
-                            },
-                            provider_id: storedOrder?.provider?.id
-                        }],
+                                },
+                                type: "Delivery",
+                                customer: {
+                                    person: {
+                                        name: fulfillment?.customer?.person?.name
+                                    }
+                                },
+                                provider_id: storedOrder?.provider?.id
+                            }
+                        }),
                         addOns: [],
                         offers: [],
                         payment: {
@@ -188,7 +189,6 @@ class BppConfirmService {
                             collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
                                 PAYMENT_COLLECTED_BY.BAP : 
                                 PAYMENT_COLLECTED_BY.BPP,
-                            type: order?.payment?.type
                         },
                         quote: {
                             ...storedOrder?.quote
