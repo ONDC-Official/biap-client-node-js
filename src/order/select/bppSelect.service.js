@@ -11,8 +11,10 @@ class BppSelectService {
     * @returns 
     */
 
-    async select(context, bppUri, cart = {}) {
+    async select(context, bppUri, order = {}) {
         try {
+            const { cart = {}, fulfillments = [] } = order || {};
+
             const provider = cart?.items?.[0]?.provider || {};
 
             const selectRequest = {
@@ -31,20 +33,13 @@ class BppSelectService {
                                 return { id: location };
                             })
                         },
-                        fulfillment: [{
-                            end: {
-                                location: {
-                                    gps: cart?.location?.gps,
-                                    address: {
-                                        area_code: cart?.location?.area_code
-                                    }
-                                }
-                            }
-                        }]
+                        fulfillments: fulfillments && fulfillments.length ? 
+                            [...fulfillments] : 
+                            []
                     }
                 }
             };
-
+            
             bppUri = getBaseUri(bppUri);
 
             const response = await bppSelect(bppUri, selectRequest);

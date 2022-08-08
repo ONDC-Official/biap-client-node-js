@@ -51,7 +51,7 @@ class SelectOrderService {
     async selectOrder(orderRequest) {
         try {
             const { context: requestContext, message = {} } = orderRequest || {};
-            const { cart = {} } = message;
+            const { cart = {}, fulfillments = [] } = message;
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -86,7 +86,7 @@ class SelectOrderService {
             return await bppSelectService.select(
                 context,
                 getSubscriberUrl(subscriberDetails),
-                cart
+                { cart, fulfillments }
             );
         }
         catch (err) {
