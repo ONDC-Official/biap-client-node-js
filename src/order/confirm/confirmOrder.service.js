@@ -45,7 +45,7 @@ class ConfirmOrderService {
         const paymentDetails = (confirmPayment && await juspayService.getOrderStatus(orderId)) || {};
 
         return payment == null ||
-            payment.paid_amount <= 0 || 
+            payment.paid_amount <= 0 ||
             total <= 0 ||
             (
                 confirmPayment &&
@@ -171,19 +171,29 @@ class ConfirmOrderService {
                         areaCode: orderSchema.billing.address.area_code
                     }
                 };
-                orderSchema.fulfillment = {
-                    ...orderSchema.fulfillment,
-                    end: {
-                        ...orderSchema?.fulfillment?.end,
-                        location: {
-                            ...orderSchema?.fulfillment?.end?.location,
-                            address: {
-                                ...orderSchema?.fulfillment?.end?.location?.address,
-                                areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
-                            }
+
+                if(orderSchema.fulfillment) {
+                    orderSchema.fulfillments = [orderSchema.fulfillment];
+                    delete orderSchema.fulfillment;
+                }   
+
+                if(orderSchema.fulfillment) {
+                    orderSchema.fulfillments = [...orderSchema.fulfillments].map((fulfillment) => {
+                        return {
+                            ...fulfillment,
+                            end: {
+                                ...fulfillment?.end,
+                                location: {
+                                    ...fulfillment?.end?.location,
+                                    address: {
+                                        ...fulfillment?.end?.location?.address,
+                                        areaCode: fulfillment?.end?.location?.address?.area_code
+                                    }
+                                }
+                            },
                         }
-                    },
-                };
+                    });
+                }
 
                 await addOrUpdateOrderWithTransactionId(
                     response.context.transaction_id,

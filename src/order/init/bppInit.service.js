@@ -39,7 +39,7 @@ class BppInitService {
                                 area_code: order?.billing_info?.address?.areaCode
                             }
                         },
-                        fulfillment: [{
+                        fulfillments: [{
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -77,8 +77,9 @@ class BppInitService {
                 }
             };
 
+            
             bppUri = getBaseUri(bppUri);
-
+            
             const response = await bppInit(bppUri, initRequest);
 
             return {

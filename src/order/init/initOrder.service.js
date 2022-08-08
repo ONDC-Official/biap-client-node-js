@@ -77,7 +77,7 @@ class InitOrderService {
                     transactionId: response?.context?.transaction_id,
                     parentOrderId: response?.context?.parent_order_id,
                     bppId: response?.context?.bpp_id,
-                    fulfillment: fulfillment,
+                    fulfillments: [ fulfillment ],
                     provider: { ...providerDetails },
                     items: orderRequest?.items.map(item => {
                         return {
@@ -126,20 +126,26 @@ class InitOrderService {
                 }
             };
 
-            if (orderSchema.fulfillment) {
-                orderSchema.fulfillment = {
-                    ...orderSchema.fulfillment,
+            if(orderSchema.fulfillment) {
+                orderSchema.fulfillments = [orderSchema.fulfillment];
+                delete orderSchema.fulfillment;
+            }
+
+            if (orderSchema.fulfillments && orderSchema.fulfillments.length) {
+                orderSchema.fulfillments = [...orderSchema?.fulfillments].map((fulfillment)=> {
+                    return {
+                    ...fulfillment,
                     end: {
-                        ...orderSchema?.fulfillment?.end,
+                        ...fulfillment?.end,
                         location: {
-                            ...orderSchema?.fulfillment?.end?.location,
+                            ...fulfillment?.end?.location,
                             address: {
-                                ...orderSchema?.fulfillment?.end?.location?.address,
-                                areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+                                ...fulfillment?.end?.location?.address,
+                                areaCode: fulfillment?.end?.location?.address?.area_code
                             }
                         }
                     },
-                };
+                }});
             }
 
             await addOrUpdateOrderWithTransactionId(

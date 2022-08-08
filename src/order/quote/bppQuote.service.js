@@ -22,7 +22,8 @@ class BppQuoteService {
                         items: cart.items.map(cartItem => {
                             return {
                                 id: cartItem?.id?.toString(),
-                                quantity: cartItem?.quantity
+                                quantity: cartItem?.quantity,
+                                price: cartItem?.product?.price
                             }
                         }) || [],
                         provider: {
@@ -31,7 +32,7 @@ class BppQuoteService {
                                 return { id: location };
                             })
                         },
-                        fulfillment: [{
+                        fulfillments: [{
                             type: "Delivery",
                             end: {
                                 location: {
