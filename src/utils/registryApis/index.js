@@ -15,15 +15,18 @@ const lookupBppById = async ({
     country = process.env.COUNTRY
 }) => {
     let request = {subscriber_id, type, domain, country};
+    let registryBaseUrl = REGISTRY_SERVICE_API_URLS.LOOKUP;
 
-    if(process.env.ENV_TYPE !== "STAGING")
+    if(process.env.ENV_TYPE !== "STAGING") {
         request = await formatRegistryRequest({ 
             subscriber_id, type, domain, country
         });
+        registryBaseUrl = REGISTRY_SERVICE_API_URLS.VLOOKUP;
+    }
 
     const apiCall = new HttpRequest(
         process.env.REGISTRY_BASE_URL,
-        REGISTRY_SERVICE_API_URLS.LOOKUP,
+        REGISTRY_SERVICE_API_URLS.VLOOKUP,
         "POST",
         { ...request }
     );
@@ -38,7 +41,7 @@ const lookupBppById = async ({
  *  
  */
 const lookupGateways = async () => {
-    
+    let registryBaseUrl = REGISTRY_SERVICE_API_URLS.LOOKUP;
     let request = {
         type: getSubscriberType(SUBSCRIBER_TYPE.BG),
         domain: process.env.DOMAIN, 
@@ -51,11 +54,13 @@ const lookupGateways = async () => {
             country: process.env.COUNTRY,
             domain: process.env.DOMAIN,
         });
+        registryBaseUrl = REGISTRY_SERVICE_API_URLS.VLOOKUP;
     }
+
 
     const apiCall = new HttpRequest(
         process.env.REGISTRY_BASE_URL,
-        REGISTRY_SERVICE_API_URLS.LOOKUP,
+        registryBaseUrl,
         "POST",
         {
             ...request
