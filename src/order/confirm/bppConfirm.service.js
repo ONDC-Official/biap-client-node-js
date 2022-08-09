@@ -152,6 +152,7 @@ class BppConfirmService {
                                         phone: fulfillment?.end?.contact?.phone,
                                     },
                                     location: {
+                                        gps: fulfillment?.end?.location?.gps,
                                         address: {
                                             door: fulfillment?.end?.location?.address?.door,
                                             name: fulfillment?.end?.location?.address?.name,
