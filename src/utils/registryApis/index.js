@@ -26,7 +26,7 @@ const lookupBppById = async ({
 
     const apiCall = new HttpRequest(
         process.env.REGISTRY_BASE_URL,
-        REGISTRY_SERVICE_API_URLS.VLOOKUP,
+        registryBaseUrl,
         "POST",
         { ...request }
     );

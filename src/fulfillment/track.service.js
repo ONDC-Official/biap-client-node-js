@@ -20,13 +20,15 @@ class TrackService {
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
-                action: PROTOCOL_CONTEXT.TRACK
+                action: PROTOCOL_CONTEXT.TRACK,
+                transactionId: requestContext?.transaction_id
             });
 
             const subscriberDetails = await lookupBppById({
                 type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: requestContext.bpp_id,
             });
+
 
             return await bppTrackService.track(
                 getSubscriberUrl(subscriberDetails),
