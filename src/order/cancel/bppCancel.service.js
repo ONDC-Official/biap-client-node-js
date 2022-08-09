@@ -18,7 +18,7 @@ class BppCancelService {
                 context: context,
                 message: {
                     order_id: orderId,
-                    cancellation_reason_id: cancellationReasonId
+                    cancellation_reason_id: "1"
                 }
             }
             bppUri = getBaseUri(bppUri);

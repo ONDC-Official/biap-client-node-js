@@ -4,6 +4,7 @@ import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppQuoteService from "./bppQuote.service.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppQuoteService = new BppQuoteService();
 
@@ -56,6 +57,7 @@ class QuoteOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
+                bppId: cart?.items[0]?.bpp_id
             });
 
             if (!(cart?.items || cart?.items?.length)) {
@@ -77,13 +79,13 @@ class QuoteOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
-                subscriber_id: cart?.items[0]?.bpp_id
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
+                subscriber_id: context?.bpp_id
             });
 
             return await bppQuoteService.quote(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 cart
             );
         }

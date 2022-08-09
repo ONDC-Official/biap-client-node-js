@@ -19,6 +19,7 @@ class BppOrderStatusService {
             }
             
             bppUri = getBaseUri(bppUri);
+
             const response = await protocolOrderStatus(bppUri, orderStatusRequest);
 
             return { context: context, message: response.message };

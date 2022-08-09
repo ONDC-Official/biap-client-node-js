@@ -50,9 +50,11 @@ class Gateway {
                     }
                 }
             }
-            
-            let baseUrl = getBaseUri(gateway.subscriber_url);
-            
+
+            let baseUrl = getBaseUri(process.env.ENV_TYPE !== "STAGING" ?
+                gateway?.network_participant?.[0]?.subscriber_url : 
+                gateway?.subscriber_url);
+
             const response = await protocolSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };

@@ -5,6 +5,7 @@ import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../d
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
+import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppInitService = new BppInitService();
 
@@ -76,7 +77,7 @@ class InitOrderService {
                     transactionId: response?.context?.transaction_id,
                     parentOrderId: response?.context?.parent_order_id,
                     bppId: response?.context?.bpp_id,
-                    fulfillment: fulfillment,
+                    fulfillments: [ fulfillment ],
                     provider: { ...providerDetails },
                     items: orderRequest?.items.map(item => {
                         return {
@@ -125,20 +126,26 @@ class InitOrderService {
                 }
             };
 
-            if (orderSchema.fulfillment) {
-                orderSchema.fulfillment = {
-                    ...orderSchema.fulfillment,
+            if(orderSchema.fulfillment) {
+                orderSchema.fulfillments = [orderSchema.fulfillment];
+                delete orderSchema.fulfillment;
+            }
+
+            if (orderSchema.fulfillments && orderSchema.fulfillments.length) {
+                orderSchema.fulfillments = [...orderSchema?.fulfillments].map((fulfillment)=> {
+                    return {
+                    ...fulfillment,
                     end: {
-                        ...orderSchema?.fulfillment?.end,
+                        ...fulfillment?.end,
                         location: {
-                            ...orderSchema?.fulfillment?.end?.location,
+                            ...fulfillment?.end?.location,
                             address: {
-                                ...orderSchema?.fulfillment?.end?.location?.address,
-                                areaCode: orderSchema?.fulfillment?.end?.location?.address?.area_code
+                                ...fulfillment?.end?.location?.address,
+                                areaCode: fulfillment?.end?.location?.address?.area_code
                             }
                         }
                     },
-                };
+                }});
             }
 
             await addOrUpdateOrderWithTransactionId(
@@ -185,13 +192,13 @@ class InitOrderService {
             }
 
             const subscriberDetails = await lookupBppById({
-                type: SUBSCRIBER_TYPE.BPP,
+                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
                 subscriber_id: context.bpp_id
             });
 
             const bppResponse = await bppInitService.init(
                 context,
-                subscriberDetails?.[0]?.subscriber_url,
+                getSubscriberUrl(subscriberDetails),
                 order,
                 parentOrderId
             );

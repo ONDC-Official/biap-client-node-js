@@ -13,7 +13,6 @@ class BppQuoteService {
 
     async quote(context, bppUri, cart = {}) {
         try {
-
             const provider = cart?.items?.[0]?.provider || {};
 
             const selectRequest = {
@@ -23,7 +22,8 @@ class BppQuoteService {
                         items: cart.items.map(cartItem => {
                             return {
                                 id: cartItem?.id?.toString(),
-                                quantity: cartItem?.quantity
+                                quantity: cartItem?.quantity,
+                                price: cartItem?.product?.price
                             }
                         }) || [],
                         provider: {
@@ -31,12 +31,24 @@ class BppQuoteService {
                             locations: provider.locations.map(location => {
                                 return { id: location };
                             })
-                        }
+                        },
+                        fulfillments: [{
+                            type: "Delivery",
+                            end: {
+                                location: {
+                                    gps: "12.974002, 77.613458",
+                                    address: {
+                                        area_code: "560001"
+                                    }
+                                }
+                            }
+                        }]
                     }
                 }
-            }
+            };
 
             bppUri = getBaseUri(bppUri);
+
             const response = await protocolQuote(bppUri, selectRequest);
 
             return { context: context, message: response.message };
