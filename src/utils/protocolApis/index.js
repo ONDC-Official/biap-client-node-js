@@ -1,34 +1,25 @@
 import fetch from 'node-fetch';
 
-import { createAuthorizationHeader } from '../cryptic.js';
 import HttpRequest from "../HttpRequest.js";
-
 import PROTOCOL_API_URLS from "./routes.js";
 
 /**
  * order confirm
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolConfirm = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolConfirm = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.CONFIRM,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -43,34 +34,27 @@ const onOrderConfirm = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 /**
  * order cancel
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolCancel = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolCancel = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.CANCEL,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -85,34 +69,27 @@ const onOrderCancel = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 /**
  * init order
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolInit = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolInit = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.INIT,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -127,34 +104,28 @@ const onOrderInit = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 /**
  * search
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolSearch = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolSearch = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.SEARCH,
         "POST",
         {
-            url: url,
-            data: data
+            ...data
         },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
-        }
+        
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -181,28 +152,21 @@ const onSearch = async (query) => {
 
 /**
  * track order
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolTrack = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolTrack = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.TRACK,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -217,34 +181,27 @@ const onOrderTrack = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 /**
  * order support
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolSupport = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolSupport = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.SUPPORT,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -259,34 +216,27 @@ const onOrderSupport = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 /**
  * order status
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolOrderStatus = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolOrderStatus = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.STATUS,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -301,35 +251,28 @@ const onOrderStatus = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
 
 /**
  * quote order
- * @param {String} url 
  * @param {Object} data 
  * @returns 
  */
-const protocolQuote = async (url, data) => {
-    const authHeader = await createAuthorizationHeader(data);
+const protocolQuote = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.SELECT,
         "POST",
         {
-            url: url,
-            data: data
-        },
-        {
-            "Authorization": authHeader,
-            "Accept": "application/json"
+            ...data
         }
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 }
 
@@ -344,7 +287,7 @@ const onOrderQuote = async (messageId) => {
         "get",
     );
 
-    let result = await apiCall.send();
+    const result = await apiCall.send();
     return result.data;
 };
 
