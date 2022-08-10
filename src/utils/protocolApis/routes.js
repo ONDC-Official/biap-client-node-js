@@ -12,7 +12,7 @@ const CANCEL = "protocol/cancel";
 const INIT = "protocol/init";
 const SEARCH = "protocol/search";
 const SELECT = "protocol/select";
-const STATUS = "protocol/order_status";
+const STATUS = "protocol/status";
 const SUPPORT = "protocol/support";
 const TRACK = "protocol/track";
 

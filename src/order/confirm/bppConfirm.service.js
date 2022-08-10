@@ -185,7 +185,7 @@ class BppConfirmService {
                     }
                 }
             };
-            
+                        
             return await this.confirm(confirmRequest);
         }
         catch (err) {

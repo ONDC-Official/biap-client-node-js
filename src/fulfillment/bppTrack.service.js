@@ -17,7 +17,7 @@ class BppTrackService {
                     ...request.message
                 }
             }
-            
+                        
             const response = await protocolTrack(trackRequest);
             
             return { context: context, message: response.message };

@@ -22,6 +22,7 @@ class OrderStatusService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: requestContext?.transaction_id,
+                bppId: requestContext?.bpp_id
             });
 
             return await bppOrderStatusService.getOrderStatus(
@@ -70,7 +71,6 @@ class OrderStatusService {
                 const context = contextFactory.create({
                     action: PROTOCOL_CONTEXT.ON_STATUS
                 });
-
                 return {
                     context,
                     error: {
@@ -125,6 +125,9 @@ class OrderStatusService {
                                     }
                                 };
                             }
+                        }
+                        else {
+                            return { ...onOrderStatusResponse };
                         }
                         
                     }

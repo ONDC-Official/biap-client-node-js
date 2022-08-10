@@ -19,9 +19,9 @@ class TrackService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.TRACK,
-                transactionId: requestContext?.transaction_id
+                transactionId: requestContext?.transaction_id,
+                bppId: requestContext?.bpp_id
             });
-
 
             return await bppTrackService.track(
                 context,

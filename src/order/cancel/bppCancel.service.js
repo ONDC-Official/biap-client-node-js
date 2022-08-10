@@ -1,7 +1,7 @@
 import { protocolCancel } from "../../utils/protocolApis/index.js";
 
 class BppCancelService {
-    
+
     /**
      * 
      * @param {Object} context 
@@ -9,7 +9,7 @@ class BppCancelService {
      * @param {String} cancellationReasonId 
      * @returns 
      */
-    async cancelOrder(context, orderId, cancellationReasonId="1") {
+    async cancelOrder(context, orderId, cancellationReasonId = "1") {
         try {
 
             const cancelRequest = {
@@ -19,9 +19,9 @@ class BppCancelService {
                     cancellation_reason_id: "1"
                 }
             }
-            
+
             const response = await protocolCancel(cancelRequest);
-            
+
             return { context: context, message: response.message };
         }
         catch (err) {
