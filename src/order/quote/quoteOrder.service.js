@@ -1,10 +1,8 @@
-import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderQuote } from "../../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppQuoteService from "./bppQuote.service.js";
-import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppQuoteService = new BppQuoteService();
 
@@ -78,14 +76,8 @@ class QuoteOrderService {
                 };
             }
 
-            const subscriberDetails = await lookupBppById({
-                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                subscriber_id: context?.bpp_id
-            });
-
             return await bppQuoteService.quote(
                 context,
-                getSubscriberUrl(subscriberDetails),
                 cart
             );
         }

@@ -1,8 +1,6 @@
-import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderStatus } from "../../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
-import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
+import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
+import { addOrUpdateOrderWithTransactionId } from "../db/dbService.js";
 import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -26,14 +24,8 @@ class OrderStatusService {
                 transactionId: requestContext?.transaction_id,
             });
 
-            const subscriberDetails = await lookupBppById({
-                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                subscriber_id: requestContext?.bpp_id
-            });
-
             return await bppOrderStatusService.getOrderStatus(
                 context,
-                getSubscriberUrl(subscriberDetails),
                 message
             );
         }

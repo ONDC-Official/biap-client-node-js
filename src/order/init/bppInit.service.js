@@ -1,15 +1,13 @@
 import { protocolInit } from "../../utils/protocolApis/index.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppInitService {
     /**
     * bpp init order
     * @param {Object} context
-    * @param {String} bppUri
     * @param {Object} order
     * @param {String} parentOrderId
     */
-    async init(context, bppUri, order = {}, parentOrderId) {
+    async init(context, order = {}, parentOrderId) {
         try {
             const provider = order?.items?.[0]?.provider || {};
 
@@ -77,10 +75,7 @@ class BppInitService {
                 }
             };
 
-            
-            bppUri = getBaseUri(bppUri);
-
-            const response = await protocolInit(bppUri, initRequest);
+            const response = await protocolInit(initRequest);
 
             return {
                 context: {

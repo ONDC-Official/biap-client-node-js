@@ -1,16 +1,14 @@
 import { protocolOrderStatus } from "../../utils/protocolApis/index.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppOrderStatusService {
     
     /**
      * bpp order status
      * @param {Object} context 
-     * @param {String} bppUri 
      * @param {Object} message 
      * @returns 
      */
-    async getOrderStatus(context, bppUri, message = {}) {
+    async getOrderStatus(context, message = {}) {
         try {
 
             const orderStatusRequest = {
@@ -18,9 +16,7 @@ class BppOrderStatusService {
                 message: message
             }
             
-            bppUri = getBaseUri(bppUri);
-
-            const response = await protocolOrderStatus(bppUri, orderStatusRequest);
+            const response = await protocolOrderStatus(orderStatusRequest);
 
             return { context: context, message: response.message };
         }

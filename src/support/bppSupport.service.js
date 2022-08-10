@@ -1,16 +1,14 @@
 import { protocolSupport } from "../utils/protocolApis/index.js";
-import { getBaseUri } from "../utils/urlHelper.js";
 
 class BppSupportService {
     
     /**
      * support
-     * @param {String} bppUri 
      * @param {Object} context 
      * @param {String} refId 
      * @returns 
      */
-    async support(bppUri, context = {}, refId) {
+    async support(context = {}, refId) {
         try {
 
             const supportRequest = {
@@ -19,9 +17,9 @@ class BppSupportService {
                     ref_id: refId
                 }
             }
-            bppUri = getBaseUri(bppUri);
             
-            const response = await protocolSupport(bppUri, supportRequest);
+            const response = await protocolSupport(supportRequest);
+            
             return { context: context, message: response.message };
         }
         catch (err) {

@@ -1,17 +1,15 @@
 import { protocolQuote } from "../../utils/protocolApis/index.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
 
 class BppQuoteService {
 
     /**
     * bpp quote order
     * @param {Object} context 
-    * @param {String} bppUri 
     * @param {Object} cart 
     * @returns 
     */
 
-    async quote(context, bppUri, cart = {}) {
+    async quote(context, cart = {}) {
         try {
             const provider = cart?.items?.[0]?.provider || {};
 
@@ -47,9 +45,7 @@ class BppQuoteService {
                 }
             };
 
-            bppUri = getBaseUri(bppUri);
-
-            const response = await protocolQuote(bppUri, selectRequest);
+            const response = await protocolQuote(selectRequest);
 
             return { context: context, message: response.message };
         }

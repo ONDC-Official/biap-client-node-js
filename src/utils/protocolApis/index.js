@@ -255,7 +255,6 @@ const onOrderStatus = async (messageId) => {
     return result.data;
 };
 
-
 /**
  * quote order
  * @param {Object} data 
