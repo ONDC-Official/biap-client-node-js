@@ -3,16 +3,17 @@ import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class Gateway {
-    
+
     /**
      * 
      * @param {String} bppUri 
      * @param {Object} context 
-     * @param {Object} criteria 
+     * @param {Object} req 
      * @returns 
      */
-    async search(gateway, context = {}, criteria = {}) {
+    async search(gateway, context = {}, req = {}) {
         try {
+            const { criteria = {}, payment = {} } = req || {};
 
             const searchRequest = {
                 context: context,
@@ -41,18 +42,22 @@ class Gateway {
                                     gps: criteria.delivery_location
                                 }
                             }
-                        }: null,
+                        } : null,
                         category: {
                             id: criteria.category_id,
                             descriptor: {
                                 name: criteria.category_name
                             }
+                        },
+                        payment: {
+                            "@ondc/org/buyer_app_finder_fee_type": payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
+                            "@ondc/org/buyer_app_finder_fee_amount": payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
                         }
                     }
                 }
             }
             let baseUrl = getBaseUri(process.env.ENV_TYPE !== "STAGING" ?
-                gateway?.network_participant?.[0]?.subscriber_url : 
+                gateway?.network_participant?.[0]?.subscriber_url :
                 gateway?.subscriber_url);
 
             const response = await bppSearch(baseUrl, searchRequest);

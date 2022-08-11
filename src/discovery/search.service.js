@@ -29,7 +29,7 @@ class SearchService {
     async search(searchRequest = {}) {
         try {
             const { context: requestContext = {}, message = {} } = searchRequest;
-            const { criteria = {} } = message;
+            const { criteria = {}, payment } = message;
 
             const contextFactory = new ContextFactory();
             const protocolContext = contextFactory.create({
@@ -46,14 +46,14 @@ class SearchService {
                 return await bppSearchService.search(
                     getSubscriberUrl(subscriberDetails),
                     protocolContext,
-                    criteria
+                    { criteria, payment }
                 );
             }
             
             const subscriberDetails = await lookupGateways();
 
             if(subscriberDetails && subscriberDetails.length)
-                return gateway.search(subscriberDetails?.[0], protocolContext, criteria);
+                return gateway.search(subscriberDetails?.[0], protocolContext, { criteria, payment });
             
             return null; 
         }

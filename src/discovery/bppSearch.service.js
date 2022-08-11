@@ -2,16 +2,17 @@ import { bppSearch } from "../utils/bppApis/index.js";
 import { getBaseUri } from "../utils/urlHelper.js";
 
 class BppSearchService {
-    
+
     /**
      * 
      * @param {String} bppUri 
      * @param {Object} context 
-     * @param {Object} criteria 
+     * @param {Object} req 
      * @returns 
      */
-    async search(bppUri, context = {}, criteria = {}) {
+    async search(bppUri, context = {}, req = {}) {
         try {
+            const { criteria = {}, payment = {} } = req || {};
 
             const searchRequest = {
                 context: context,
@@ -40,17 +41,21 @@ class BppSearchService {
                                     gps: criteria.delivery_location
                                 }
                             }
-                        }: null,
+                        } : null,
                         category: {
                             id: criteria.category_id,
                             descriptor: {
                                 name: criteria.category_name
                             }
+                        },
+                        payment: {
+                            "@ondc/org/buyer_app_finder_fee_type": payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
+                            "@ondc/org/buyer_app_finder_fee_amount": payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
                         }
                     }
                 }
             }
-            
+
             bppUri = getBaseUri(bppUri);
             const response = await bppSearch(bppUri, searchRequest);
 
