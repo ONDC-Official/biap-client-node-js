@@ -24,6 +24,7 @@ class OrderStatusService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: requestContext?.transaction_id,
+                bppId: requestContext?.bpp_id
             });
 
             const subscriberDetails = await lookupBppById({
