@@ -9,11 +9,9 @@ import { PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } fr
 import { getJuspayOrderStatus } from "../utils/juspayApis.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../order/db/dbService.js";
 import { NoRecordFoundError } from "../lib/errors/index.js";
-import { lookupBppById } from "../utils/registryApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppConfirmService from "../order/confirm/bppConfirm.service.js";
-import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppConfirmService = new BppConfirmService();
 
@@ -108,14 +106,8 @@ class JuspayService {
                     bppId: dbResponse.bppId
                 });
 
-                const subscriberDetails = await lookupBppById({
-                    type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                    subscriber_id: context.bpp_id
-                });
-
                 const bppConfirmResponse = await bppConfirmService.confirmV2(
                     context,
-                    getSubscriberUrl(subscriberDetails),
                     orderRequest,
                     dbResponse
                 );

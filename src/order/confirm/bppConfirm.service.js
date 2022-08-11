@@ -1,22 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { bppConfirm } from "../../utils/bppApis/index.js";
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
+import { protocolConfirm } from '../../utils/protocolApis/index.js';
 
 class BppConfirmService {
 
     /**
      * bpp confirm order
-     * @param {String} bppUri 
      * @param {Object} confirmRequest 
      * @returns 
      */
-    async confirm(bppUri, confirmRequest = {}) {
+    async confirm(confirmRequest = {}) {
         try {
 
-            bppUri = getBaseUri(bppUri);
-            const response = await bppConfirm(bppUri, confirmRequest);
+            const response = await protocolConfirm(confirmRequest);
 
             return { context: confirmRequest.context, message: response.message };
         }
@@ -28,11 +25,10 @@ class BppConfirmService {
     /**
      * bpp confirm order
      * @param {Object} context 
-     * @param {String} bppUri 
      * @param {Object} order 
      * @returns 
      */
-    async confirmV1(context, bppUri, order = {}) {
+    async confirmV1(context, order = {}) {
         try {
 
             const provider = order?.items?.[0]?.provider || {};
@@ -93,7 +89,7 @@ class BppConfirmService {
                 }
             }
 
-            return await this.confirm(bppUri, confirmRequest);
+            return await this.confirm(confirmRequest);
         }
         catch (err) {
             throw err;
@@ -103,12 +99,11 @@ class BppConfirmService {
     /**
      * bpp confirm order v2
      * @param {Object} context 
-     * @param {String} bppUri 
      * @param {Object} order 
      * @param {Object} storedOrder 
      * @returns 
      */
-    async confirmV2(context, bppUri, order = {}, storedOrder = {}) {
+    async confirmV2(context, order = {}, storedOrder = {}) {
         try {
             storedOrder = storedOrder?.toJSON();
 
@@ -197,8 +192,8 @@ class BppConfirmService {
                     }
                 }
             };
-
-            return await this.confirm(bppUri, confirmRequest);
+                        
+            return await this.confirm(confirmRequest);
         }
         catch (err) {
             throw err;

@@ -1,10 +1,8 @@
-import { lookupBppById } from "../utils/registryApis/index.js";
 import { onOrderSupport } from "../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../utils/constants.js";
+import { PROTOCOL_CONTEXT } from "../utils/constants.js";
 
 import BppSupportService from "./bppSupport.service.js";
 import ContextFactory from "../factories/ContextFactory.js";
-import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppSupportService = new BppSupportService();
 
@@ -21,16 +19,11 @@ class SupportService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.SUPPORT,
-                transactionId: requestContext.transaction_id
-            });
-
-            const subscriberDetails = await lookupBppById({
-                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                subscriber_id: requestContext.bpp_id,
+                transactionId: requestContext?.transaction_id,
+                bppId: requestContext?.bpp_id
             });
 
             return await bppSupportService.support(
-                getSubscriberUrl(subscriberDetails),
                 context,
                 message?.ref_id
             );

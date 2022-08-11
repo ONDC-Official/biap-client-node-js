@@ -1,10 +1,8 @@
-import { lookupBppById } from "../utils/registryApis/index.js";
 import { onOrderTrack } from "../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../utils/constants.js";
+import { PROTOCOL_CONTEXT } from "../utils/constants.js";
 
 import BppTrackService from "./bppTrack.service.js";
 import ContextFactory from "../factories/ContextFactory.js";
-import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppTrackService = new BppTrackService();
 
@@ -25,14 +23,7 @@ class TrackService {
                 bppId: requestContext?.bpp_id
             });
 
-            const subscriberDetails = await lookupBppById({
-                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                subscriber_id: requestContext.bpp_id,
-            });
-
-
             return await bppTrackService.track(
-                getSubscriberUrl(subscriberDetails),
                 context,
                 trackRequest
             );

@@ -1,13 +1,10 @@
 import _ from "lodash";
 
-import { lookupBppById, lookupGateways } from "../utils/registryApis/index.js";
-import { SUBSCRIBER_TYPE } from "../utils/constants.js";
 import { onSearch } from "../utils/protocolApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
 import Gateway from "./gateway.service.js";
-import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppSearchService = new BppSearchService();
 const gateway = new Gateway();
@@ -38,24 +35,15 @@ class SearchService {
             });
             
             if(this.isBppFilterSpecified(protocolContext)) {
-                const subscriberDetails = await lookupBppById({
-                    type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                    subscriber_id: protocolContext.bpp_id
-                });
 
                 return await bppSearchService.search(
-                    getSubscriberUrl(subscriberDetails),
                     protocolContext,
                     criteria
                 );
             }
-            
-            const subscriberDetails = await lookupGateways();
+            else
+                return gateway.search(protocolContext, criteria);
 
-            if(subscriberDetails && subscriberDetails.length)
-                return gateway.search(subscriberDetails?.[0], protocolContext, criteria);
-            
-            return null; 
         }
         catch (err) {
             throw err;

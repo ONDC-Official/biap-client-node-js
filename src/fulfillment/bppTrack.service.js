@@ -1,16 +1,14 @@
-import { bppTrack } from "../utils/bppApis/index.js";
-import { getBaseUri } from "../utils/urlHelper.js";
+import { protocolTrack } from "../utils/protocolApis/index.js";
 
 class BppTrackService {
     
     /**
      * track order
-     * @param {String} bppUri 
      * @param {Object} context 
      * @param {Object} trackRequest 
      * @returns 
      */
-    async track(bppUri, context = {}, request = {}) {
+    async track(context = {}, request = {}) {
         try {
 
             const trackRequest = {
@@ -19,9 +17,8 @@ class BppTrackService {
                     ...request.message
                 }
             }
-            bppUri = getBaseUri(bppUri);
-            
-            const response = await bppTrack(bppUri, trackRequest);
+                        
+            const response = await protocolTrack(trackRequest);
             
             return { context: context, message: response.message };
         }

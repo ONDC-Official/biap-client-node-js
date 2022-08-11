@@ -1,17 +1,14 @@
-import { bppSearch } from "../utils/bppApis/index.js";
-import { getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
-import { getBaseUri } from "../utils/urlHelper.js";
+import { protocolSearch } from "../utils/protocolApis/index.js";
 
 class Gateway {
     
     /**
      * 
-     * @param {String} bppUri 
      * @param {Object} context 
      * @param {Object} criteria 
      * @returns 
      */
-    async search(gateway, context = {}, criteria = {}) {
+    async search(context = {}, criteria = {}) {
         try {
 
             const searchRequest = {
@@ -51,11 +48,8 @@ class Gateway {
                     }
                 }
             }
-            let baseUrl = getBaseUri(process.env.ENV_TYPE !== "STAGING" ?
-                gateway?.network_participant?.[0]?.subscriber_url : 
-                gateway?.subscriber_url);
 
-            const response = await bppSearch(baseUrl, searchRequest);
+            const response = await protocolSearch(searchRequest);
 
             return { context: context, message: response.message };
         }
