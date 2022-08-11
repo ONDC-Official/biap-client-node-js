@@ -11,7 +11,7 @@ class Gateway {
      * @param {Object} req 
      * @returns 
      */
-    async search(gateway, context = {}, req = {}) {
+    async search(bppUri, context = {}, req = {}) {
         try {
             const { criteria = {}, payment = {} } = req || {};
 
@@ -56,10 +56,8 @@ class Gateway {
                     }
                 }
             }
-            let baseUrl = getBaseUri(process.env.ENV_TYPE !== "STAGING" ?
-                gateway?.network_participant?.[0]?.subscriber_url :
-                gateway?.subscriber_url);
-
+            let baseUrl = getBaseUri(bppUri);
+            
             const response = await bppSearch(baseUrl, searchRequest);
 
             return { context: context, message: response.message };
