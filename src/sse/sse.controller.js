@@ -112,7 +112,7 @@ class SseController {
     */
     onQuote(req, res, next) {
         const { body: response } = req;
-
+        console.log("select call ----", new Date(), response);
         sseProtocolService.onQuote(response).then(result => {
             res.json(result);
         }).catch((err) => {

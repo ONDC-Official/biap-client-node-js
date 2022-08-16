@@ -117,6 +117,7 @@ class SseProtocol {
     async onQuote(response) {
         try {
             const { messageId } = response;
+            console.log("select call service send data ----", new Date(), response);
 
             SSE_CONNECTIONS?.[messageId]?.send(
                 response,
