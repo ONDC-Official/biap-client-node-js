@@ -48,7 +48,7 @@ class BppSearchService {
                         },
                         payment: {
                             "@ondc/org/buyer_app_finder_fee_type": payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
-                            "@ondc/org/buyer_app_finder_fee_amount": payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
+                            "@ondc/org/buyer_app_finder_fee_amount": payment?.buyer_app_finder_fee_amount || parseFloat(process.env.BAP_FINDER_FEE_AMOUNT),
                         }
                     }
                 }

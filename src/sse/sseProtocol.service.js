@@ -1,5 +1,5 @@
 import { PROTOCOL_CONTEXT } from '../utils/constants.js';
-import { SSE_CONNECTIONS } from '../utils/sse.js';
+import { sendSSEResponse } from '../utils/sse.js';
 class SseProtocol {
 
     /**
@@ -10,10 +10,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_CANCEL,
-                messageId
+                response,
             );
 
             return {
@@ -37,10 +37,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_CONFIRM,
-                messageId
+                response,
             );
 
             return {
@@ -64,10 +64,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_INIT,
-                messageId
+                response,
             );
 
             return {
@@ -90,11 +90,11 @@ class SseProtocol {
     async onSearch(response) {
         try {
             const { messageId } = response;
-                
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_SEARCH,
-                messageId
+                response,
             );
 
             return {
@@ -118,10 +118,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_SELECT,
-                messageId
+                response,
             );
 
             return {
@@ -145,10 +145,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_STATUS,
-                messageId
+                response,
             );
 
             return {
@@ -172,10 +172,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_SUPPORT,
-                messageId
+                response,
             );
 
             return {
@@ -199,10 +199,10 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
-            SSE_CONNECTIONS?.[messageId]?.send(
-                response,
+            sendSSEResponse(
+                messageId,
                 PROTOCOL_CONTEXT.ON_TRACK,
-                messageId
+                response,
             );
 
             return {
