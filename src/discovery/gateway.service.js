@@ -19,36 +19,63 @@ class Gateway {
                 context: context,
                 message: {
                     intent: {
-                        item: {
-                            descriptor: {
-                                name: criteria.search_string
-                            }
-                        },
-                        provider: {
-                            id: criteria.provider_id,
-                            category_id: criteria.category_id,
-                            descriptor: {
-                                name: criteria.provider_name
-                            }
-                        },
-                        fulfillment: criteria.delivery_location ? {
-                            start: {
-                                location: {
-                                    gps: criteria.pickup_location
-                                }
-                            },
-                            end: {
-                                location: {
-                                    gps: criteria.delivery_location
+                        ...(
+                            criteria?.search_string && {
+                                item: {
+                                    descriptor: {
+                                        name: criteria.search_string
+                                    }
                                 }
                             }
-                        } : null,
-                        category: {
-                            id: criteria.category_id,
-                            descriptor: {
-                                name: criteria.category_name
+                        ),
+                        ...((criteria?.provider_id || criteria?.category_id || criteria?.provider_name) && {
+                            provider: {
+                                ...(criteria?.provider_id && {
+                                    id: criteria?.provider_id
+                                }),
+                                ...(criteria?.category_id && {
+                                    category_id: criteria.category_id
+                                }),
+                                ...(criteria?.provider_name && {
+                                    descriptor: {
+                                        name: criteria?.provider_name
+                                    }
+                                })
                             }
-                        },
+                        }),
+                        ...((criteria?.pickup_location || criteria?.delivery_location) && {
+                            fulfillment: {
+                                ...(criteria?.pickup_location && {
+                                    start: {
+                                        location: {
+                                            gps: criteria?.pickup_location
+                                        }
+                                    }
+                                }),
+                                ...(criteria?.delivery_location && {
+                                    end: {
+                                        location: {
+                                            gps: criteria?.delivery_location
+                                        }
+                                    }
+                                })
+                            }
+                        }),
+                        ...(
+                            (criteria?.category_id || criteria?.category_name) && {
+                                category: {
+                                    ...(criteria?.category_id && {
+                                        id: criteria?.category_id
+                                    }),
+                                    ...(criteria?.category_name && {
+                                        descriptor: {
+                                            name: criteria?.category_name
+                                        }
+                                    }
+                                    )
+                                }
+                            }
+                        ),
                         payment: {
                             "@ondc/org/buyer_app_finder_fee_type": payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
                             "@ondc/org/buyer_app_finder_fee_amount": payment?.buyer_app_finder_fee_amount || parseFloat(process.env.BAP_FINDER_FEE_AMOUNT),
@@ -56,8 +83,8 @@ class Gateway {
                     }
                 }
             }
+
             let baseUrl = getBaseUri(bppUri);
-            
             
             const response = await bppSearch(baseUrl, searchRequest);
 
