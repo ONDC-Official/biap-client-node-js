@@ -98,3 +98,8 @@ export const ORDER_STATUS = {
     COMPLETED: "completed",
     "IN-PROGRESS": "in-progress"
 }
+
+export const PAYMENT_COLLECTED_BY = {
+    BAP: "BAP",
+    BPP: "BPP"
+}

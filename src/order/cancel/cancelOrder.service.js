@@ -95,8 +95,8 @@ class CancelOrderService {
                             { ...orderSchema }
                         );
                     }
-
                 }
+                
                 return protocolCancelResponse;
             }
 

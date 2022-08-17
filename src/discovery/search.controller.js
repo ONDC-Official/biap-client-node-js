@@ -1,6 +1,7 @@
 import SearchService from './search.service.js';
 import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
 import NoRecordFoundError from "../lib/errors/no-record-found.error.js";
+import { SSE_CONNECTIONS } from '../utils/sse.js';
 
 const searchService = new SearchService();
 

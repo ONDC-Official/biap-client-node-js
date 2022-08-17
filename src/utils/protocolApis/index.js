@@ -116,10 +116,10 @@ const onOrderStatus = async (messageId) => {
 };
 
 /**
- * on quote order
+ * on select order
  * @param {String} messageId 
  */
-const onOrderQuote = async (messageId) => {
+const onOrderSelect = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.ON_SELECT + "?messageId="+ messageId,
@@ -138,5 +138,5 @@ export {
     onOrderStatus, 
     onOrderSupport, 
     onOrderTrack, 
-    onOrderQuote 
+    onOrderSelect 
 };

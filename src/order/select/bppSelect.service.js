@@ -1,18 +1,20 @@
-import { bppQuote } from "../../utils/bppApis/index.js";
+import { bppSelect } from "../../utils/bppApis/index.js";
 import { getBaseUri } from "../../utils/urlHelper.js";
 
-class BppQuoteService {
+class BppSelectService {
 
     /**
-    * bpp quote order
+    * bpp select order
     * @param {Object} context 
     * @param {String} bppUri 
     * @param {Object} cart 
     * @returns 
     */
 
-    async quote(context, bppUri, cart = {}) {
+    async select(context, bppUri, order = {}) {
         try {
+            const { cart = {}, fulfillments = [] } = order || {};
+
             const provider = cart?.items?.[0]?.provider || {};
 
             const selectRequest = {
@@ -31,24 +33,16 @@ class BppQuoteService {
                                 return { id: location };
                             })
                         },
-                        fulfillment: [{
-                            type: "Delivery",
-                            end: {
-                                location: {
-                                    gps: "12.974002, 77.613458",
-                                    address: {
-                                        area_code: "560001"
-                                    }
-                                }
-                            }
-                        }]
+                        fulfillments: fulfillments && fulfillments.length ? 
+                            [...fulfillments] : 
+                            []
                     }
                 }
             };
-
+            
             bppUri = getBaseUri(bppUri);
 
-            const response = await bppQuote(bppUri, selectRequest);
+            const response = await bppSelect(bppUri, selectRequest);
 
             return { context: context, message: response.message };
         }
@@ -58,4 +52,4 @@ class BppQuoteService {
     }
 }
 
-export default BppQuoteService;
+export default BppSelectService;

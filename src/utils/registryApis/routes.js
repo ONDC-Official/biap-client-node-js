@@ -15,9 +15,11 @@ const REGISTRY_SERVICE = {
 }
 
 const LOOKUP = "/lookup";
+const VLOOKUP = "/vlookup";
 
 const REGISTRY_SERVICE_API_URLS = {
-    LOOKUP
+    LOOKUP,
+    VLOOKUP
 };
 
 export {  
