@@ -114,7 +114,7 @@ const onOrderInit = async (messageId) => {
  * @returns 
  */
 const protocolSearch = async (data) => {
-
+    
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.SEARCH,
@@ -126,6 +126,7 @@ const protocolSearch = async (data) => {
     );
 
     const result = await apiCall.send();
+
     return result.data;
 }
 

@@ -16,7 +16,7 @@ class BppCancelService {
                 context: context,
                 message: {
                     order_id: orderId,
-                    cancellation_reason_id: "1"
+                    cancellation_reason_id: "001"
                 }
             }
 
