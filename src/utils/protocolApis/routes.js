@@ -6,6 +6,7 @@ const ON_SELECT = "protocol/response/v1/on_select";
 const ON_STATUS = "protocol/response/v1/on_status";
 const ON_SUPPORT = "protocol/response/v1/on_support";
 const ON_TRACK = "protocol/response/v1/on_track";
+const ON_UPDATE = "protocol/response/v1/on_update";
 
 const CONFIRM = "protocol/confirm";
 const CANCEL = "protocol/cancel";
@@ -15,6 +16,8 @@ const SELECT = "protocol/select";
 const STATUS = "protocol/status";
 const SUPPORT = "protocol/support";
 const TRACK = "protocol/track";
+const UPDATE = "protocol/update";
+// const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
     CONFIRM,
@@ -32,7 +35,9 @@ const PROTOCOL_API_URLS = {
     SELECT,
     STATUS,
     SUPPORT,
-    TRACK
+    TRACK,
+    UPDATE,
+    ON_UPDATE
 };
 
 export default PROTOCOL_API_URLS;

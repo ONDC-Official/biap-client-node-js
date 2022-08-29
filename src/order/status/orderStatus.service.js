@@ -64,6 +64,10 @@ class OrderStatusService {
         try {
             let protocolOrderStatusResponse = await onOrderStatus(messageId);
 
+            // console.log("protocolOrderStatusResponse------------>",protocolOrderStatusResponse);
+            // console.log("protocolOrderStatusResponse------------>",protocolOrderStatusResponse.fulfillments);
+            console.log("protocolOrderStatusResponse------------>",JSON.stringify(protocolOrderStatusResponse));
+
             if(protocolOrderStatusResponse && protocolOrderStatusResponse.length)
                 return protocolOrderStatusResponse?.[0];
             else {
@@ -94,6 +98,8 @@ class OrderStatusService {
                 messageIds.map(async messageId => {
                     try {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
+
+                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
 
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({

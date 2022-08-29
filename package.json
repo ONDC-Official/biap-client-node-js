@@ -17,17 +17,16 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^6.2.9",
+    "morgan": "^1.10.0",
     "node-fetch": "^3.2.3",
     "node-rsa": "^1.1.1",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
-    "uuid": "^8.3.2"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.7"
+    "uuid": "^8.3.2",
+    "winston": "^3.8.1"
   },
   "scripts": {
-    "debug": "nodemon src/app.js",
+    "debug": "nodemon --exec babel-node src/app.js --trace-deprecation",
     "start": "node src/app.js"
   },
   "repository": {
@@ -39,5 +38,25 @@
   "bugs": {
     "url": "https://github.com/MoonshotsProductStudio/ONDCReferenceAppPaymentService/issues"
   },
-  "homepage": "https://github.com/MoonshotsProductStudio/ONDCReferenceAppPaymentService#readme"
+  "homepage": "https://github.com/MoonshotsProductStudio/ONDCReferenceAppPaymentService#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.7",
+    "@babel/node": "^7.16.8",
+    "@babel/plugin-transform-modules-commonjs": "^7.17.7",
+    "@babel/preset-env": "^7.16.11",
+    "cross-conf-env": "^1.2.1",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "js-beautify": "^1.8.9",
+    "nodemon": "^1.18.9",
+    "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
+  }
 }

@@ -16,5 +16,6 @@ rootRouter.post('/response/on_select', sseController.onQuote);
 rootRouter.post('/response/on_status', sseController.onStatus);
 rootRouter.post('/response/on_support', sseController.onSupport);
 rootRouter.post('/response/on_track', sseController.onTrack);
+rootRouter.post('/response/on_update', sseController.onUpdate);
 
 export default rootRouter;

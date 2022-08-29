@@ -257,6 +257,39 @@ const onOrderStatus = async (messageId) => {
 };
 
 /**
+ * on order status
+ * @param {String} messageId
+ */
+const protocolUpdate = async (data) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.UPDATE,
+        "POST",
+        {
+            ...data
+        }
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+/**
+ * on order update status
+ * @param {String} messageId
+ */
+const onUpdateStatus = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.ON_UPDATE+ "?messageId="+ messageId,
+        "get",
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+/**
 <<<<<<< HEAD
  * on select order
 =======
@@ -266,6 +299,7 @@ const onOrderStatus = async (messageId) => {
  */
 const protocolSelect = async (data) => {
 
+    console.log("protocolSelect-------------------------",data);
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.SELECT,
@@ -312,4 +346,6 @@ export {
     protocolSupport,
     protocolTrack,
     protocolSelect,
+    protocolUpdate,
+    onUpdateStatus
 };
