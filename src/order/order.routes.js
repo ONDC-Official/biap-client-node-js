@@ -7,6 +7,7 @@ import InitOrderController from './init/initOrder.controller.js';
 import OrderHistoryController from './history/orderHistory.controller.js';
 import OrderStatusController from './status/orderStatus.controller.js';
 import SelectOrderController from './select/selectOrder.controller.js';
+import UpdateOrderController from './update/updateOrder.controller.js';
 
 const rootRouter = new Router();
 
@@ -16,6 +17,7 @@ const initOrderController = new InitOrderController();
 const orderHistoryController = new OrderHistoryController();
 const orderStatusController = new OrderStatusController();
 const selectOrderController = new SelectOrderController();
+const updateOrderController = new UpdateOrderController();
 
 //#region confirm order
 
@@ -123,6 +125,10 @@ rootRouter.get('/v1/on_select', authentication(), selectOrderController.onSelect
 
 // on select order v2
 rootRouter.get('/v2/on_select', authentication(), selectOrderController.onSelectMultipleOrder);
+
+rootRouter.post('/v1/update', authentication(), updateOrderController.update);
+
+rootRouter.get('/v2/on_update', authentication(), updateOrderController.onUpdate);
 
 //#endregion
 

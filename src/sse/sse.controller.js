@@ -26,12 +26,17 @@ class SseController {
                 const configureSse = new ConfigureSse(req, res, messageId);
                 const initSSE = configureSse.initialize();
 
+
+                console.log("initSSE-----------x-->",initSSE)
+
                 addSSEConnection(messageId, initSSE);
 
             }
 
+            // res.json({});
         }
         catch (err) {
+            console.log("error----------->",err);
             throw err;
         }
     }
@@ -165,6 +170,16 @@ class SseController {
         const { body: response } = req;
 
         sseProtocolService.onTrack(response).then(result => {
+            res.json(result);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    onUpdate(req, res, next) {
+        const { body: response } = req;
+
+        sseProtocolService.onUpdate(response).then(result => {
             res.json(result);
         }).catch((err) => {
             next(err);

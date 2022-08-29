@@ -217,6 +217,33 @@ class SseProtocol {
             throw err;
         }
     }
+
+    /**
+    * on update
+    * @param {Object} response
+    */
+    async onUpdate(response) {
+        try {
+            const { messageId } = response;
+
+            sendSSEResponse(
+                messageId,
+                PROTOCOL_CONTEXT.ON_UPDATE,
+                response,
+            );
+
+            return {
+                message: {
+                    ack: {
+                        status: "ACK"
+                    }
+                }
+            };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
 };
 
 export default SseProtocol;
