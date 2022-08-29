@@ -26,7 +26,7 @@
     "winston": "^3.8.1"
   },
   "scripts": {
-    "debug": "nodemon --exec babel-node src/app.js --trace-deprecation",
+    "debug": "NODE_ENV=development nodemon --exec babel-node src/app.js --trace-deprecation",
     "start": "node src/app.js"
   },
   "repository": {
