@@ -1,17 +1,14 @@
-import { bppSelect } from "../../utils/bppApis/index.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
+import { protocolSelect } from "../../utils/protocolApis/index.js";
 
 class BppSelectService {
 
     /**
     * bpp select order
     * @param {Object} context 
-    * @param {String} bppUri 
-    * @param {Object} cart 
+    * @param {Object} order 
     * @returns 
     */
-
-    async select(context, bppUri, order = {}) {
+    async select(context, order = {}) {
         try {
             const { cart = {}, fulfillments = [] } = order || {};
 
@@ -39,10 +36,8 @@ class BppSelectService {
                     }
                 }
             };
-            
-            bppUri = getBaseUri(bppUri);
 
-            const response = await bppSelect(bppUri, selectRequest);
+            const response = await protocolSelect(selectRequest);
 
             return { context: context, message: response.message };
         }

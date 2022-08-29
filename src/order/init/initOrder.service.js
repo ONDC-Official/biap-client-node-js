@@ -1,11 +1,9 @@
-import { lookupBppById } from "../../utils/registryApis/index.js";
 import { onOrderInit } from "../../utils/protocolApis/index.js";
-import { PROTOCOL_CONTEXT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
+import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
 import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
-import { getSubscriberType, getSubscriberUrl } from "../../utils/registryApis/registryUtil.js";
 
 const bppInitService = new BppInitService();
 
@@ -191,14 +189,8 @@ class InitOrderService {
                 };
             }
 
-            const subscriberDetails = await lookupBppById({
-                type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                subscriber_id: context.bpp_id
-            });
-
             const bppResponse = await bppInitService.init(
                 context,
-                getSubscriberUrl(subscriberDetails),
                 order,
                 parentOrderId
             );

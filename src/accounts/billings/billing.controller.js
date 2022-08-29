@@ -1,5 +1,4 @@
 import BillingService from './billing.service.js';
-import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 
 const billingService = new BillingService();
 

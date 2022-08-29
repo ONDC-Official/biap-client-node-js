@@ -1,16 +1,14 @@
-import { bppInit } from "../../utils/bppApis/index.js";
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../utils/constants.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
+import { protocolInit } from "../../utils/protocolApis/index.js";
 
 class BppInitService {
     /**
     * bpp init order
     * @param {Object} context
-    * @param {String} bppUri
     * @param {Object} order
     * @param {String} parentOrderId
     */
-    async init(context, bppUri, order = {}, parentOrderId) {
+    async init(context, order = {}, parentOrderId) {
         try {
             const provider = order?.items?.[0]?.provider || {};
 
@@ -67,7 +65,7 @@ class BppInitService {
                             type: order?.payment?.type,
                             collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
                             "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
-                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
+                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || parseFloat(process.env.BAP_FINDER_FEE_AMOUNT),
                             "@ondc/org/ondc-withholding_amount": 0.0,
                             "@ondc/org/ondc-return_window": 0.0,
                             "@ondc/org/ondc-settlement_basis": "Collection",
@@ -77,10 +75,7 @@ class BppInitService {
                 }
             };
 
-            
-            bppUri = getBaseUri(bppUri);
-            
-            const response = await bppInit(bppUri, initRequest);
+            const response = await protocolInit(initRequest);
 
             return {
                 context: {

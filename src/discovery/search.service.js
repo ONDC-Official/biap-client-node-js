@@ -1,16 +1,11 @@
 import _ from "lodash";
 
-import { lookupBppById, lookupGateways } from "../utils/registryApis/index.js";
-import { SUBSCRIBER_TYPE } from "../utils/constants.js";
 import { onSearch } from "../utils/protocolApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
-import Gateway from "./gateway.service.js";
-import { getSubscriberType, getSubscriberUrl } from "../utils/registryApis/registryUtil.js";
 
 const bppSearchService = new BppSearchService();
-const gateway = new Gateway();
 
 class SearchService {
 
@@ -36,26 +31,12 @@ class SearchService {
                 transactionId: requestContext?.transaction_id,
                 bppId: requestContext?.bpp_id
             });
-            
-            if(this.isBppFilterSpecified(protocolContext)) {
-                const subscriberDetails = await lookupBppById({
-                    type: getSubscriberType(SUBSCRIBER_TYPE.BPP),
-                    subscriber_id: protocolContext.bpp_id
-                });
 
-                return await bppSearchService.search(
-                    getSubscriberUrl(subscriberDetails),
-                    protocolContext,
-                    { criteria, payment }
-                );
-            }
+            return await bppSearchService.search(
+                protocolContext,
+                { criteria, payment }
+            );
             
-            const subscriberDetails = await lookupGateways();
-
-            if(subscriberDetails && subscriberDetails.length)
-                return gateway.search(getSubscriberUrl(subscriberDetails), protocolContext, { criteria, payment });
-            
-            return null; 
         }
         catch (err) {
             throw err;
@@ -68,7 +49,7 @@ class SearchService {
      */
     transform(searchResults = []) {
         let data = [];
-        
+
         searchResults && searchResults.length && searchResults.forEach(result => {
             let searchObj = { ...result };
             delete searchObj?.["context"];
@@ -89,34 +70,34 @@ class SearchService {
         let providerList = new Map();
         let categoryList = new Map();
         let fulfillmentList = new Map();
-        let minPrice = Infinity; 
-        let maxPrice = -Infinity; 
+        let minPrice = Infinity;
+        let maxPrice = -Infinity;
 
         searchResults && searchResults.length && searchResults.forEach(result => {
 
-            if(!_.isEmpty(result?.["provider_details"]))
+            if (!_.isEmpty(result?.["provider_details"]))
                 providerList.set(
-                    result?.["provider_details"]?.id, 
+                    result?.["provider_details"]?.id,
                     result?.["provider_details"]?.descriptor?.name
                 );
 
-            if(!_.isEmpty(result?.["category_details"]))
+            if (!_.isEmpty(result?.["category_details"]))
                 categoryList.set(
-                    result?.["category_details"]?.id, 
+                    result?.["category_details"]?.id,
                     result?.["category_details"]?.descriptor?.name
                 );
 
-            if(!_.isEmpty(result?.["fulfillment_details"]))
+            if (!_.isEmpty(result?.["fulfillment_details"]))
                 fulfillmentList.set(
-                    result?.["fulfillment_details"]?.id, 
+                    result?.["fulfillment_details"]?.id,
                     result?.["fulfillment_details"]
                 );
 
             const value = parseFloat(result?.price?.value);
-            if(maxPrice < value) 
+            if (maxPrice < value)
                 maxPrice = value;
 
-            if(minPrice > value) 
+            if (minPrice > value)
                 minPrice = value;
         });
 
@@ -128,7 +109,7 @@ class SearchService {
     * @param {Object} queryParams
     */
     async onSearch(queryParams) {
-        try {            
+        try {
             const { messageId } = queryParams;
 
             const protocolSearchResponse = await onSearch(queryParams);
@@ -142,7 +123,7 @@ class SearchService {
             return {
                 context,
                 message: {
-                    catalogs: [ ...searchResult ],
+                    catalogs: [...searchResult],
                     count: protocolSearchResponse?.count
                 },
             };
@@ -157,14 +138,14 @@ class SearchService {
     * @param {String} query
     */
     async getFilterParams(query) {
-        try {            
+        try {
             const protocolSearchResponse = await onSearch(query);
 
-            const { 
-                categoryList = {}, 
-                fulfillmentList = {}, 
-                minPrice, 
-                maxPrice, 
+            const {
+                categoryList = {},
+                fulfillmentList = {},
+                minPrice,
+                maxPrice,
                 providerList = {}
             } = this.getFilter(protocolSearchResponse?.data);
 

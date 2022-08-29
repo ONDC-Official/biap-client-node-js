@@ -1,30 +1,27 @@
-import { bppCancel } from "../../utils/bppApis/index.js";
-import { getBaseUri } from "../../utils/urlHelper.js";
+import { protocolCancel } from "../../utils/protocolApis/index.js";
 
 class BppCancelService {
-    
+
     /**
      * 
-     * @param {String} bppUri 
      * @param {Object} context 
      * @param {String} orderId 
      * @param {String} cancellationReasonId 
      * @returns 
      */
-    async cancelOrder(bppUri, context, orderId, cancellationReasonId) {
+    async cancelOrder(context, orderId, cancellationReasonId = "001") {
         try {
 
             const cancelRequest = {
                 context: context,
                 message: {
                     order_id: orderId,
-                    cancellation_reason_id: "1"
+                    cancellation_reason_id: "001"
                 }
             }
-            bppUri = getBaseUri(bppUri);
-            
-            const response = await bppCancel(bppUri, cancelRequest);
-            
+
+            const response = await protocolCancel(cancelRequest);
+
             return { context: context, message: response.message };
         }
         catch (err) {

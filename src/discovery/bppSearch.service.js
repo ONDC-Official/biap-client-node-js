@@ -1,16 +1,14 @@
-import { bppSearch } from "../utils/bppApis/index.js";
-import { getBaseUri } from "../utils/urlHelper.js";
+import { protocolSearch } from "../utils/protocolApis/index.js";
 
 class BppSearchService {
 
     /**
      * 
-     * @param {String} bppUri 
      * @param {Object} context 
      * @param {Object} req 
      * @returns 
      */
-    async search(bppUri, context = {}, req = {}) {
+    async search(context = {}, req = {}) {
         try {
             const { criteria = {}, payment = {} } = req || {};
 
@@ -83,8 +81,7 @@ class BppSearchService {
                 }
             }
 
-            bppUri = getBaseUri(bppUri);
-            const response = await bppSearch(bppUri, searchRequest);
+            const response = await protocolSearch(searchRequest);
 
             return { context: context, message: response.message };
         }
