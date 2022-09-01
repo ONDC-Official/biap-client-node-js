@@ -256,7 +256,8 @@ const ItemQuantityAllocatedSchema = new mongoose.Schema(
 const ItemsSchema = new mongoose.Schema(
     {
         id: { type: String, required: true },
-        quantity: { type: ItemQuantityAllocatedSchema, required: true }
+        quantity: { type: ItemQuantityAllocatedSchema, required: true },
+        product:{type:Object, required: false}
     },
     { _id: false }
 );

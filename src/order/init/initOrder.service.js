@@ -80,6 +80,7 @@ class InitOrderService {
                     items: orderRequest?.items.map(item => {
                         return {
                             id: item?.id?.toString(),
+                            product: item?.product,
                             quantity: item.quantity
                         };
                     }) || [],
