@@ -153,8 +153,10 @@ class ConfirmOrderService {
                     response?.context?.transaction_id
                 );
 
-                let orderSchema = { ...response?.message?.order };
+                console.log("dbResponse--------------->",dbResponse.items);
 
+                let orderSchema = { ...response?.message?.order };
+                console.log("orderSchema--------------->",orderSchema.items);
                 orderSchema.messageId = response?.context?.message_id;
                 orderSchema.billing = {
                     ...orderSchema.billing,
@@ -167,7 +169,10 @@ class ConfirmOrderService {
                 if(orderSchema.fulfillment) {
                     orderSchema.fulfillments = [orderSchema.fulfillment];
                     delete orderSchema.fulfillment;
-                }   
+                }
+                if(orderSchema.items) {
+                    orderSchema.items = dbResponse.items
+                }
 
                 if(orderSchema.fulfillment) {
                     orderSchema.fulfillments = [...orderSchema.fulfillments].map((fulfillment) => {

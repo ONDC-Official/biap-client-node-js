@@ -44,6 +44,8 @@ class InitOrderService {
                 })
             };
 
+
+            console.log("orderRequest---------------->",orderRequest?.items)
             const fulfillment = {
                 end: {
                     contact: {
@@ -67,6 +69,19 @@ class InitOrderService {
                 provider_id: provider?.id
             };
 
+            let itemProducts = []
+            for(const item of orderRequest?.items){
+                let itemObj =
+                {
+                    id: item?.id?.toString(),
+                    product: item?.product,
+                    quantity: item.quantity
+                }
+                itemProducts.push(itemObj);
+            }
+
+            console.log('itemProducts--------------->',itemProducts);
+
             await addOrUpdateOrderWithTransactionId(
                 response.context.transaction_id,
                 {
@@ -77,13 +92,7 @@ class InitOrderService {
                     bppId: response?.context?.bpp_id,
                     fulfillments: [ fulfillment ],
                     provider: { ...providerDetails },
-                    items: orderRequest?.items.map(item => {
-                        return {
-                            id: item?.id?.toString(),
-                            product: item?.product,
-                            quantity: item.quantity
-                        };
-                    }) || [],
+                    items:itemProducts ,
                 }
             );
         }
@@ -96,6 +105,7 @@ class InitOrderService {
      */
     async updateOrder(response, dbResponse) {
 
+        console.log("update order-------------------->",dbResponse);
         if (response?.message?.order && dbResponse) {
             dbResponse = dbResponse?.toJSON();
 
@@ -104,7 +114,8 @@ class InitOrderService {
             orderSchema.items = dbResponse?.items.map(item => {
                 return {
                     id: item?.id?.toString(),
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    product: item.product
                 };
             }) || [];
 
