@@ -83,14 +83,10 @@ class UpdateOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
 
-                        // orderSchema.items
                         let op =orderSchema.items.map((e,i)=>{
 
-                            console.log("e---------------------------->",e)
-                            console.log("e--------------protocolUpdateResponse-------------->",protocolUpdateResponse?.message?.order.items)
+                            e.order_status ='Return Approved' //TODO: change from actual response
                             let temp = protocolUpdateResponse?.message?.order.items.find(element=> element.id === e.id)
-
-                            console.log("temp---------------->",temp)
                             if(temp) {
                                 e.order_status = temp.tags.status;
                             }
@@ -98,11 +94,7 @@ class UpdateOrderService {
                         })
 
                         //get item from db and update state for item
-                        // console.log("dbResponse-------------->",protocolUpdateResponse?.message?.order.items)
-                        console.log("dbResponse-------------->",orderSchema.items)
-
-                        // dbResponse.filter(data-.{})
-
+                        orderSchema.items = op;
                         await addOrUpdateOrderWithTransactionId(
                             protocolUpdateResponse.context.transaction_id,
                             { ...orderSchema }
