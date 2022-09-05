@@ -19,6 +19,7 @@ class UpdateOrderService {
     async update(orderRequest) {
         try {
 
+            console.log("orderRequest-------------->",orderRequest);
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.UPDATE,
@@ -76,12 +77,31 @@ class UpdateOrderService {
                         transactionId: protocolUpdateResponse.context.transaction_id
                     });
 
-
                     if (!(dbResponse || dbResponse.length))
                         throw new NoRecordFoundError();
                     else {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
+
+                        // orderSchema.items
+                        let op =orderSchema.items.map((e,i)=>{
+
+                            console.log("e---------------------------->",e)
+                            console.log("e--------------protocolUpdateResponse-------------->",protocolUpdateResponse?.message?.order.items)
+                            let temp = protocolUpdateResponse?.message?.order.items.find(element=> element.id === e.id)
+
+                            console.log("temp---------------->",temp)
+                            if(temp) {
+                                e.order_status = temp.tags.status;
+                            }
+                            return e;
+                        })
+
+                        //get item from db and update state for item
+                        // console.log("dbResponse-------------->",protocolUpdateResponse?.message?.order.items)
+                        console.log("dbResponse-------------->",orderSchema.items)
+
+                        // dbResponse.filter(data-.{})
 
                         await addOrUpdateOrderWithTransactionId(
                             protocolUpdateResponse.context.transaction_id,

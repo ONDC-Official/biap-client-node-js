@@ -22,6 +22,7 @@ class BppUpdateService {
 
             const response = await protocolUpdate(cancelRequest);
 
+            console.log("response----------------------->",response)
             return { context: context, message: response.message };
         }
         catch (err) {

@@ -11,14 +11,27 @@ class UpdateOrderController {
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    update(req, res, next) {
-        const orderRequest = req.body;
+    async update(req, res, next) {
+        const {body: orders} = req;
 
-        cancelOrderService.update(orderRequest).then(response => {
-            res.json(response);
-        }).catch((err) => {
-            next(err);
-        });
+        // console.log("orderStatus-------------------->",orders)
+        const onUpdateOrderResponse = await Promise.all(
+            orders.map(async order => {
+                try {
+
+                    console.log("orders--------------->",order);
+                    return await cancelOrderService.update(order);
+                } catch (err) {
+                    throw err;
+                }
+            })
+        );
+
+        console.log("onUpdateOrderResponse------------->",onUpdateOrderResponse)
+
+        res.json(onUpdateOrderResponse);
+
+        // return onUpdateOrderResponse;
     }
 
 

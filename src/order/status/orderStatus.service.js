@@ -16,6 +16,8 @@ class OrderStatusService {
     */
     async orderStatus(order) {
         try {
+
+            console.log("order--------------service>",order)
             const { context: requestContext, message } = order || {};
 
             const contextFactory = new ContextFactory();
@@ -44,6 +46,8 @@ class OrderStatusService {
         const orderStatusResponse = await Promise.all(
             orders.map(async order => {
                 try {
+
+                    console.log("order------------------>",order);
                     const orderResponse = await this.orderStatus(order);
                     return orderResponse;
                 }
