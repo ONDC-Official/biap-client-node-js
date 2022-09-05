@@ -85,16 +85,18 @@ class UpdateOrderService {
 
                         let op =orderSchema.items.map((e,i)=>{
 
-                            e.order_status ='Return Approved' //TODO: change from actual response
+                            e.update_status ='Return Approved' //TODO: change from actual response
                             let temp = protocolUpdateResponse?.message?.order.items.find(element=> element.id === e.id)
                             if(temp) {
-                                e.order_status = temp.tags.status;
+                                e.update_status = temp.tags.status;
                             }
                             return e;
                         })
 
                         //get item from db and update state for item
                         orderSchema.items = op;
+
+                        console.log("orderSchema.items ===",orderSchema.items )
                         await addOrUpdateOrderWithTransactionId(
                             protocolUpdateResponse.context.transaction_id,
                             { ...orderSchema }
