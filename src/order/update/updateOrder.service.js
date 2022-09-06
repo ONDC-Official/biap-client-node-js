@@ -85,10 +85,12 @@ class UpdateOrderService {
 
                         let op =orderSchema.items.map((e,i)=>{
 
-                            e.update_status ='Return Approved' //TODO: change from actual response
+                            e.cancellation_status ='Cancelled' //TODO: change from actual response
+                            e.return_status ='Return Approved' //TODO: change from actual response
                             let temp = protocolUpdateResponse?.message?.order.items.find(element=> element.id === e.id)
                             if(temp) {
-                                e.update_status = temp.tags.status;
+                                e.return_status = temp.tags.status;
+                                e.cancellation_status = temp.tags.status;
                             }
                             return e;
                         })

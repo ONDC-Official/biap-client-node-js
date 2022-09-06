@@ -103,7 +103,9 @@ class OrderStatusService {
                     try {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
 
-                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
+                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
+                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
+                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({
