@@ -107,6 +107,16 @@ class OrderStatusService {
                         console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
                         console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
+
+                        let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments.map((fulfillment,i)=>{
+                            console.log("fulfillment----------------->",fulfillment)
+                            let temp = onOrderStatusResponse?.message?.order?.items.find(element=> element.fulfillment_id === fulfillment.id)
+                            temp.state = fulfillment.state?.descriptor?.code??""
+                            console.log("temp------------------>",temp);
+                            return temp;
+                        })
+
+
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({
                                 transactionId: onOrderStatusResponse?.context?.transaction_id
@@ -115,7 +125,19 @@ class OrderStatusService {
                             if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
-                                
+
+                                let op =orderSchema.items.map((e,i)=>{
+                                    let temp = fulfillmentItems.find(element=> element.id === e.id)
+                                    if(temp) {
+                                        e.fulfillment_status = temp.state;
+                                    }else{
+                                        e.fulfillment_status = ""
+                                    }
+                                    return e;
+                                })
+
+                                orderSchema.items = op;
+
                                 await addOrUpdateOrderWithTransactionId(
                                     onOrderStatusResponse?.context?.transaction_id,
                                     { ...orderSchema }
