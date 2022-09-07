@@ -111,11 +111,12 @@ class OrderStatusService {
                         let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments.map((fulfillment,i)=>{
                             console.log("fulfillment----------------->",fulfillment)
                             let temp = onOrderStatusResponse?.message?.order?.items.find(element=> element.fulfillment_id === fulfillment.id)
-                            temp.state = fulfillment.state?.descriptor?.code??""
-                            console.log("temp------------------>",temp);
-                            return temp;
+                            if(temp){
+                                temp.state = fulfillment.state?.descriptor?.code??""
+                                console.log("temp------------------>",temp);
+                                return temp;
+                            }
                         })
-
 
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({
@@ -127,7 +128,7 @@ class OrderStatusService {
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
 
                                 let op =orderSchema.items.map((e,i)=>{
-                                    let temp = fulfillmentItems.find(element=> element.id === e.id)
+                                    let temp = fulfillmentItems?.find(element=> element?.id === e?.id)
                                     if(temp) {
                                         e.fulfillment_status = temp.state;
                                     }else{
