@@ -27,7 +27,7 @@ class SseController {
                 const initSSE = configureSse.initialize();
 
 
-                console.log("initSSE-----------x-->",initSSE)
+                // console.log("initSSE-----------x-->",initSSE)
 
                 addSSEConnection(messageId, initSSE);
 
