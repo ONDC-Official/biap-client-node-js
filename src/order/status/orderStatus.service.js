@@ -104,16 +104,16 @@ class OrderStatusService {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
 
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
-                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
-                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
+                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
+                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
 
                         let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments.map((fulfillment,i)=>{
-                            console.log("fulfillment----------------->",fulfillment)
+                            // console.log("fulfillment----------------->",fulfillment)
                             let temp = onOrderStatusResponse?.message?.order?.items.find(element=> element.fulfillment_id === fulfillment.id)
                             if(temp){
                                 temp.state = fulfillment.state?.descriptor?.code??""
-                                console.log("temp------------------>",temp);
+                                // console.log("temp------------------>",temp);
                                 return temp;
                             }
                         })

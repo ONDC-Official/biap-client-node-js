@@ -83,10 +83,10 @@ class UpdateOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
 
-                        let op =orderSchema.items.map((e,i)=>{
+                        let op =orderSchema?.items.map((e,i)=>{
 
 
-                            let temp = protocolUpdateResponse?.message?.order.items.find(element=> element.id === e.id)
+                            let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
                             if(temp) {
                                 e.return_status = temp.tags.status;
                                 e.cancellation_status = temp.tags.status;
