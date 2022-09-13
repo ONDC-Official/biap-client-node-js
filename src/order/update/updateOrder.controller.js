@@ -22,12 +22,10 @@ class UpdateOrderController {
                     console.log("orders--------------->",order);
                     return await cancelOrderService.update(order);
                 } catch (err) {
-                    throw err;
+                    // throw err;
                 }
             })
         );
-
-        console.log("onUpdateOrderResponse------------->",onUpdateOrderResponse)
 
         res.json(onUpdateOrderResponse);
 
