@@ -127,7 +127,7 @@ class OrderStatusService {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
 
-                                let op =orderSchema.items.map((e,i)=>{
+                                let op =orderSchema?.items.map((e,i)=>{
                                     let temp = fulfillmentItems?.find(element=> element?.id === e?.id)
                                     if(temp) {
                                         e.fulfillment_status = temp.state;
