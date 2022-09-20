@@ -24,7 +24,9 @@ class OrderStatusService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: requestContext?.transaction_id,
-                bppId: requestContext?.bpp_id
+                bppId: requestContext?.bpp_id,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             return await bppOrderStatusService.getOrderStatus(
@@ -77,7 +79,7 @@ class OrderStatusService {
             else {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
-                    action: PROTOCOL_CONTEXT.ON_STATUS
+                    action: PROTOCOL_CONTEXT.ON_STATUS,
                 });
                 return {
                     context,

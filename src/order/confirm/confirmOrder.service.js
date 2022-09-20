@@ -91,7 +91,9 @@ class ConfirmOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
-                bppId: dbResponse.bppId
+                bppId: dbResponse.bppId,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             if (await this.arePaymentsPending(
@@ -127,7 +129,9 @@ class ConfirmOrderService {
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse?.bppId,
-                messageId: dbResponse?.messageId
+                messageId: dbResponse?.messageId,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             return {
@@ -153,6 +157,8 @@ class ConfirmOrderService {
                     response?.context?.transaction_id
                 );
 
+                console.log("dbResponse----------response?.context?.transaction_id----->",response?.context?.transaction_id);
+                console.log("dbResponse--------------->",dbResponse);
                 console.log("dbResponse--------------->",dbResponse.items);
 
                 let orderSchema = { ...response?.message?.order };
@@ -219,6 +225,8 @@ class ConfirmOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             if (!(order?.items?.length)) {

@@ -1,37 +1,64 @@
 import { v4 as uuidv4 } from 'uuid';
 import { PROTOCOL_CONTEXT, PROTOCOL_VERSION } from '../utils/constants.js';
+import {CITY_CODE} from "../utils/cityCode.js";
+
 
 class ContextFactory {
 
     constructor(arg = {}) {
-        const {
+        let {
             domain = process.env.DOMAIN,
-            city = process.env.CITY,
+           //TODO: map city to city code. eg. Haydrabad
             country = process.env.COUNTRY,
             bapId = process.env.BAP_ID,
-            bapUrl = process.env.BAP_URL
+            bapUrl = process.env.BAP_URL,
+            city,
+            state
         } = arg || {};
 
         this.domain = domain;
-        this.city = city;
         this.country = country;
         this.bapId = bapId;
         this.bapUrl = bapUrl;
         this.timestamp = new Date()
     };
 
+
+    getCity(city,state){
+
+        //map state and city to city code
+
+        let cityCode = process.env.CITY
+        let cityMapping = CITY_CODE.find(x => {
+            if( x.City === city && x.State === state){
+                return x
+            }
+        })
+
+        if(cityMapping){
+            if(cityMapping.Code){
+                cityCode = cityMapping.Code
+            }
+        }
+
+        return cityCode
+
+    }
+
     create(contextObject = {}) {
         const {
-            transactionId = uuidv4(),
+            transactionId = uuidv4(), //FIXME: if ! found in args then create new
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
-            bppId
+            bppId,
+            city,state
+
         } = contextObject || {};
 
         return {
             domain: this.domain,
             country: this.country,
-            city: this.city,
+            city: this.getCity(city,state) ,
             action: action,
             core_version: PROTOCOL_VERSION.v_1_0_0,
             bap_id: this.bapId,
