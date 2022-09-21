@@ -64,6 +64,8 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
+
+            console.log(`[DEBUG] onInit---${messageId}--${response}`)
             sendSSEResponse(
                 messageId,
                 PROTOCOL_CONTEXT.ON_INIT,
@@ -202,6 +204,33 @@ class SseProtocol {
             sendSSEResponse(
                 messageId,
                 PROTOCOL_CONTEXT.ON_TRACK,
+                response,
+            );
+
+            return {
+                message: {
+                    ack: {
+                        status: "ACK"
+                    }
+                }
+            };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+    * on update
+    * @param {Object} response
+    */
+    async onUpdate(response) {
+        try {
+            const { messageId } = response;
+
+            sendSSEResponse(
+                messageId,
+                PROTOCOL_CONTEXT.ON_UPDATE,
                 response,
             );
 

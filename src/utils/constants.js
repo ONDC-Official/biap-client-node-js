@@ -53,6 +53,8 @@ export const PROTOCOL_CONTEXT = {
     ON_STATUS: "on_status",
     SELECT: "select",
     ON_SELECT: "on_select",
+    UPDATE: "update",
+    ON_UPDATE: "on_update",
 };
 
 export const PROTOCOL_PAYMENT = {

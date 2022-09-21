@@ -4,7 +4,7 @@ import { onSearch } from "../utils/protocolApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
-
+// import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
 class SearchService {
@@ -23,6 +23,9 @@ class SearchService {
     */
     async search(searchRequest = {}) {
         try {
+
+            // logger.info(`[SearchService][search] Search product`, {params: searchRequest});
+
             const { context: requestContext = {}, message = {} } = searchRequest;
             const { criteria = {}, payment } = message;
 
