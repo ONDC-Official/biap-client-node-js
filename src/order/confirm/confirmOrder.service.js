@@ -157,13 +157,9 @@ class ConfirmOrderService {
                     response?.context?.transaction_id
                 );
 
-                console.log("dbResponse----------response?.context?.transaction_id----->",response?.context?.transaction_id);
-                console.log("dbResponse--------------->",dbResponse);
-                console.log("dbResponse--------------->",dbResponse.items);
-
                 let orderSchema = { ...response?.message?.order };
-                console.log("orderSchema--------------->",orderSchema.items);
                 orderSchema.messageId = response?.context?.message_id;
+                orderSchema.city = response?.context?.city;
                 orderSchema.billing = {
                     ...orderSchema.billing,
                     address: {

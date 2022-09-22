@@ -1,6 +1,6 @@
 import { onOrderCancel } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId } from "../db/dbService.js";
+import {addOrUpdateOrderWithTransactionId, getOrderById} from "../db/dbService.js";
 
 import BppCancelService from "./bppCancel.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -19,11 +19,17 @@ class CancelOrderService {
     async cancelOrder(orderRequest) {
         try {
 
+
+            console.log("cancel order-------------->",orderRequest);
+
+            const orderDetails = await getOrderById(orderRequest.message.order_id);
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CANCEL,
                 transactionId: orderRequest?.context?.transaction_id,
-                bppId: orderRequest?.context?.bpp_id
+                bppId: orderRequest?.context?.bpp_id,
+                cityCode:orderDetails.city
             });
 
             const { message = {} } = orderRequest || {};

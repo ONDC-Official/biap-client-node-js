@@ -24,24 +24,28 @@ class ContextFactory {
     };
 
 
-    getCity(city,state){
+    getCity(city,state,cityCode){
 
         //map state and city to city code
 
-        let cityCode = process.env.CITY
-        let cityMapping = CITY_CODE.find(x => {
-            if( x.City === city && x.State === state){
-                return x
-            }
-        })
+        if(cityCode){
+            return cityCode
+        }else{
+            cityCode = process.env.CITY
+            let cityMapping = CITY_CODE.find(x => {
+                if( x.City === city && x.State === state){
+                    return x
+                }
+            })
 
-        if(cityMapping){
-            if(cityMapping.Code){
-                cityCode = cityMapping.Code
+            if(cityMapping){
+                if(cityMapping.Code){
+                    cityCode = cityMapping.Code
+                }
             }
+            return cityCode
         }
 
-        return cityCode
 
     }
 
@@ -51,14 +55,14 @@ class ContextFactory {
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
-            city,state
+            city,state,cityCode
 
         } = contextObject || {};
 
         return {
             domain: this.domain,
             country: this.country,
-            city: this.getCity(city,state) ,
+            city: this.getCity(city,state,cityCode) ,
             action: action,
             core_version: PROTOCOL_VERSION.v_1_0_0,
             bap_id: this.bapId,

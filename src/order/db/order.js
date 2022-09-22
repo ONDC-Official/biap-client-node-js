@@ -328,6 +328,7 @@ const OrderSchema = new mongoose.Schema(
         quote: { type: QuotationSchema },
         payment: { type: PaymentSchema },
         id: { type: String },
+        city: { type: String },
         state: { type: String }, //["PENDING-CONFIRMATION", "Ordered", "CANCELLED", "Pending", "Active", "Processing"]
         userId: String,
         transactionId: { type: String },

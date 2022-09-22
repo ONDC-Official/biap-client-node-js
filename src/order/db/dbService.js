@@ -38,4 +38,15 @@ const getOrderByTransactionId = async (transactionId) => {
         return order?.[0];
 };
 
-export { addOrUpdateOrderWithTransactionId, getOrderByTransactionId };
+const getOrderById = async (orderId) => {
+    const order = await OrderMongooseModel.find({
+        id: orderId
+    });
+
+    if (!(order || order.length))
+        throw new NoRecordFoundError();
+    else
+        return order?.[0];
+};
+
+export { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderById };

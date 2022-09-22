@@ -123,6 +123,7 @@ class SearchService {
             const protocolSearchResponse = await onSearch(queryParams);
             const searchResult = this.transform(protocolSearchResponse?.data);
 
+            console.log("protocolSearchResponse--------------------->",protocolSearchResponse.data[0].context)
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 messageId: messageId

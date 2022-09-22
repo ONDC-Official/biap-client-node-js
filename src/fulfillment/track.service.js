@@ -3,6 +3,7 @@ import { PROTOCOL_CONTEXT } from "../utils/constants.js";
 
 import BppTrackService from "./bppTrack.service.js";
 import ContextFactory from "../factories/ContextFactory.js";
+import {getOrderById} from "../order/db/dbService.js";
 
 const bppTrackService = new BppTrackService();
 
@@ -16,13 +17,15 @@ class TrackService {
         try {
             const { context: requestContext } = trackRequest || {};
 
+
+            const orderDetails = await getOrderById(trackRequest.message.order_id);
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.TRACK,
                 transactionId: requestContext?.transaction_id,
                 bppId: requestContext?.bpp_id,
-                city:requestContext.city,
-                state:requestContext.state
+                cityCode:orderDetails.city
             });
 
             return await bppTrackService.track(
