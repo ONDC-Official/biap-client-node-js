@@ -27,7 +27,7 @@ class CancelOrderService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CANCEL,
-                transactionId: orderRequest?.context?.transaction_id,
+                transactionId: orderDetails.transactionId,
                 bppId: orderRequest?.context?.bpp_id,
                 cityCode:orderDetails.city
             });

@@ -49,9 +49,17 @@ class ContextFactory {
 
     }
 
+    getTransactionId(transactionId){
+        if(transactionId){
+            return transactionId
+        }else{
+            return uuidv4()
+        }
+    }
+
     create(contextObject = {}) {
         const {
-            transactionId = uuidv4(), //FIXME: if ! found in args then create new
+            transactionId, //FIXME: if ! found in args then create new
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
@@ -67,7 +75,7 @@ class ContextFactory {
             core_version: PROTOCOL_VERSION.v_1_0_0,
             bap_id: this.bapId,
             bap_uri: this.bapUrl,
-            transaction_id: transactionId,
+            transaction_id: this.getTransactionId(transactionId),
             message_id: messageId,
             timestamp: this.timestamp,
             ...(bppId && { bpp_id: bppId })

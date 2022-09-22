@@ -26,7 +26,7 @@ class UpdateOrderService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.UPDATE,
-                transactionId: orderRequest?.context?.transaction_id,
+                transactionId: orderDetails?.transactionId,
                 bppId: orderRequest?.context?.bpp_id,
                 cityCode:orderDetails.city
             });

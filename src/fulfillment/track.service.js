@@ -23,7 +23,7 @@ class TrackService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.TRACK,
-                transactionId: requestContext?.transaction_id,
+                transactionId: orderDetails?.transactionId,
                 bppId: requestContext?.bpp_id,
                 cityCode:orderDetails.city
             });
