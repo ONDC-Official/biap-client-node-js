@@ -33,6 +33,7 @@ class BppConfirmService {
 
             const provider = order?.items?.[0]?.provider || {};
 
+            console.log("context--------------------->",context);
             const confirmRequest = {
                 context: context,
                 message: {
@@ -89,6 +90,8 @@ class BppConfirmService {
                     }
                 }
             }
+
+            console.log("confirmRequest--------------------->",confirmRequest.message.order.payment.params);
 
             return await this.confirm(confirmRequest);
         }
