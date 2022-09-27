@@ -33,7 +33,7 @@ class BppConfirmService {
 
             const provider = order?.items?.[0]?.provider || {};
 
-            console.log("context--------------------->",context);
+            console.log("context----------v1----------->",context);
             const confirmRequest = {
                 context: context,
                 message: {
@@ -91,7 +91,7 @@ class BppConfirmService {
                 }
             }
 
-            console.log("confirmRequest--------------------->",confirmRequest.message.order.payment.params);
+            console.log("confirmRequest----------v2----------->",confirmRequest.message.order.payment.params);
 
             return await this.confirm(confirmRequest);
         }
@@ -110,6 +110,9 @@ class BppConfirmService {
     async confirmV2(context, order = {}, storedOrder = {}) {
         try {
             storedOrder = storedOrder?.toJSON();
+
+
+            console.log("context----------v2----------->",context);
 
             const confirmRequest = {
                 context: context,
@@ -181,6 +184,7 @@ class BppConfirmService {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
+                                transaction_id:context.transactionId//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
@@ -196,7 +200,7 @@ class BppConfirmService {
                     }
                 }
             };
-                        
+            console.log("confirmRequest----------v2----------->",confirmRequest.message.order.payment.params);
             return await this.confirm(confirmRequest);
         }
         catch (err) {
