@@ -74,7 +74,7 @@ class BppConfirmService {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
-                                transaction_id:context.transactionId//payment transaction id
+                                transaction_id:context.transaction_id//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
@@ -184,7 +184,7 @@ class BppConfirmService {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
-                                transaction_id:context.transactionId//payment transaction id
+                                transaction_id:context.transaction_id//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
