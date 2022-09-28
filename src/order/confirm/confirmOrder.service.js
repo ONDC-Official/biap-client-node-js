@@ -112,9 +112,12 @@ class ConfirmOrderService {
                 };
             }
 
+
+            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                order,
+                {...order,jusPayTransactionId:paymentStatus.txn_id},
                 dbResponse
             );
 
@@ -257,9 +260,11 @@ class ConfirmOrderService {
                 };
             }
 
+            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
             return await bppConfirmService.confirmV1(
                 context,
-                order
+                {...order,jusPayTransactionId:paymentStatus.txn_id}
             );
         }
         catch (err) {
