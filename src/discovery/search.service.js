@@ -4,6 +4,7 @@ import { onSearch } from "../utils/protocolApis/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
+import {CITY_CODE} from "../utils/cityCode.js"
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
@@ -29,10 +30,14 @@ class SearchService {
             const { context: requestContext = {}, message = {} } = searchRequest;
             const { criteria = {}, payment } = message;
 
+
+            // console.log("City---------------->",city);
             const contextFactory = new ContextFactory();
             const protocolContext = contextFactory.create({
                 transactionId: requestContext?.transaction_id,
-                bppId: requestContext?.bpp_id
+                bppId: requestContext?.bpp_id,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             return await bppSearchService.search(
@@ -118,6 +123,7 @@ class SearchService {
             const protocolSearchResponse = await onSearch(queryParams);
             const searchResult = this.transform(protocolSearchResponse?.data);
 
+            console.log("protocolSearchResponse--------------------->",protocolSearchResponse.data[0].context)
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 messageId: messageId

@@ -19,9 +19,11 @@ class UpdateOrderController {
             orders.map(async order => {
                 try {
 
-                    console.log("orders--------------->",order);
+                    console.log("update orders--------------->",order);
                     return await cancelOrderService.update(order);
                 } catch (err) {
+
+                    console.log("update orders---------err------>",err);
                     // throw err;
                 }
             })

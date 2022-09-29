@@ -91,7 +91,9 @@ class ConfirmOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
-                bppId: dbResponse.bppId
+                bppId: dbResponse.bppId,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             if (await this.arePaymentsPending(
@@ -110,9 +112,12 @@ class ConfirmOrderService {
                 };
             }
 
+
+            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                order,
+                {...order,jusPayTransactionId:paymentStatus.txn_id},
                 dbResponse
             );
 
@@ -127,7 +132,9 @@ class ConfirmOrderService {
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse?.bppId,
-                messageId: dbResponse?.messageId
+                messageId: dbResponse?.messageId,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             return {
@@ -153,11 +160,9 @@ class ConfirmOrderService {
                     response?.context?.transaction_id
                 );
 
-                console.log("dbResponse--------------->",dbResponse.items);
-
                 let orderSchema = { ...response?.message?.order };
-                console.log("orderSchema--------------->",orderSchema.items);
                 orderSchema.messageId = response?.context?.message_id;
+                orderSchema.city = response?.context?.city;
                 orderSchema.billing = {
                     ...orderSchema.billing,
                     address: {
@@ -219,6 +224,8 @@ class ConfirmOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
+                city:requestContext.city,
+                state:requestContext.state
             });
 
             if (!(order?.items?.length)) {
@@ -253,9 +260,11 @@ class ConfirmOrderService {
                 };
             }
 
+            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
             return await bppConfirmService.confirmV1(
                 context,
-                order
+                {...order,jusPayTransactionId:paymentStatus.txn_id}
             );
         }
         catch (err) {

@@ -55,7 +55,9 @@ class SelectOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
-                bppId: cart?.items[0]?.bpp_id
+                bppId: cart?.items[0]?.bpp_id,
+                city:requestContext?.city,
+                state:requestContext?.state
             });
 
             if (!(cart?.items || cart?.items?.length)) {

@@ -42,6 +42,7 @@ class BppSearchService {
                         }),
                         ...((criteria?.pickup_location || criteria?.delivery_location) && {
                             fulfillment: {
+                                type:"Delivery",
                                 ...(criteria?.pickup_location && {
                                     start: {
                                         location: {

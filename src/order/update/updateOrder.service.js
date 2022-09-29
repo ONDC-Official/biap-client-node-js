@@ -1,6 +1,6 @@
 import { onOrderCancel ,onUpdateStatus} from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId } from "../db/dbService.js";
+import { addOrUpdateOrderWithTransactionId,getOrderById } from "../db/dbService.js";
 
 import BppUpdateService from "./bppUpdate.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -20,12 +20,18 @@ class UpdateOrderService {
         try {
 
             console.log("orderRequest-------------->",orderRequest);
+
+            const orderDetails = await getOrderById(orderRequest.message.order_id);
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.UPDATE,
                 transactionId: orderRequest?.context?.transaction_id,
-                bppId: orderRequest?.context?.bpp_id
+                bppId: orderRequest?.context?.bpp_id,
+                cityCode:orderDetails.city
             });
+
+            console.log("context-------------->",context);
 
             const { message = {} } = orderRequest || {};
             const { update_target,order } = message || {};
@@ -88,8 +94,8 @@ class UpdateOrderService {
 
                             let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
                             if(temp) {
-                                e.return_status = temp.tags.status;
-                                e.cancellation_status = temp.tags.status;
+                                e.return_status = temp?.tags?.status;
+                                e.cancellation_status = temp?.tags?.status;
                             }
                             if(!e.cancellation_status || !e.return_status ){
                                 e.cancellation_status ='Cancelled' //TODO: change from actual response

@@ -179,6 +179,8 @@ class InitOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.INIT,
                 bppId: order?.items[0]?.bpp_id,
+                city:requestContext.city,
+                state:requestContext.state,
                 ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 

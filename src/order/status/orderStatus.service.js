@@ -1,6 +1,6 @@
 import { onOrderStatus } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId } from "../db/dbService.js";
+import {addOrUpdateOrderWithTransactionId, getOrderById} from "../db/dbService.js";
 import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -17,14 +17,16 @@ class OrderStatusService {
     async orderStatus(order) {
         try {
 
-            console.log("order--------------service>",order)
             const { context: requestContext, message } = order || {};
+
+            const orderDetails = await getOrderById(order.message.order_id);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: requestContext?.transaction_id,
-                bppId: requestContext?.bpp_id
+                bppId: requestContext?.bpp_id,
+                cityCode: orderDetails.city
             });
 
             return await bppOrderStatusService.getOrderStatus(
@@ -48,6 +50,9 @@ class OrderStatusService {
                 try {
 
                     console.log("order------------------>",order);
+
+
+
                     const orderResponse = await this.orderStatus(order);
                     return orderResponse;
                 }
@@ -77,7 +82,7 @@ class OrderStatusService {
             else {
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
-                    action: PROTOCOL_CONTEXT.ON_STATUS
+                    action: PROTOCOL_CONTEXT.ON_STATUS,
                 });
                 return {
                     context,
@@ -108,9 +113,9 @@ class OrderStatusService {
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
 
-                        let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments.map((fulfillment,i)=>{
+                        let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments?.map((fulfillment,i)=>{
                             // console.log("fulfillment----------------->",fulfillment)
-                            let temp = onOrderStatusResponse?.message?.order?.items.find(element=> element.fulfillment_id === fulfillment.id)
+                            let temp = onOrderStatusResponse?.message?.order?.items?.find(element=> element.fulfillment_id === fulfillment.id)
                             if(temp){
                                 temp.state = fulfillment.state?.descriptor?.code??""
                                 // console.log("temp------------------>",temp);
