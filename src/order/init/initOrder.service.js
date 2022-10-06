@@ -1,6 +1,6 @@
 import { onOrderInit } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderByTransactionIdAndBppId,addOrUpdateOrderWithTransactionIdAndBppId } from "../db/dbService.js";
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -45,7 +45,7 @@ class InitOrderService {
             };
 
 
-            console.log("orderRequest---------------->",orderRequest?.items)
+            console.log("orderRequest---------------->",response?.response)
             const fulfillment = {
                 end: {
                     contact: {
@@ -81,9 +81,10 @@ class InitOrderService {
             }
 
             console.log('itemProducts--------------->',itemProducts);
+            console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
 
-            await addOrUpdateOrderWithTransactionId(
-                response.context.transaction_id,
+            await addOrUpdateOrderWithTransactionIdAndBppId(
+                response.context.transaction_id,response?.context?.bpp_id,
                 {
                     userId: userId,
                     messageId: response?.context?.message_id,
@@ -106,6 +107,7 @@ class InitOrderService {
     async updateOrder(response, dbResponse) {
 
         console.log("update order-------------------->",dbResponse);
+        console.log("update order-----------response--------->",response);
         if (response?.message?.order && dbResponse) {
             dbResponse = dbResponse?.toJSON();
 
@@ -158,8 +160,8 @@ class InitOrderService {
                 }});
             }
 
-            await addOrUpdateOrderWithTransactionId(
-                response?.context?.transaction_id,
+            await addOrUpdateOrderWithTransactionIdAndBppId(
+                response?.context?.transaction_id,response?.context?.bpp_id,
                 { ...orderSchema }
             );
         }
@@ -173,7 +175,7 @@ class InitOrderService {
     async initOrder(orderRequest, isMultiSellerRequest = false) {
         try {
             const { context: requestContext = {}, message: order = {} } = orderRequest || {};
-            const parentOrderId = requestContext?.transaction_id;
+            const parentOrderId = requestContext?.transaction_id; //FIXME: verify usage
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -181,7 +183,8 @@ class InitOrderService {
                 bppId: order?.items[0]?.bpp_id,
                 city:requestContext.city,
                 state:requestContext.state,
-                ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
+                transactionId: requestContext?.transaction_id
+                // ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 
             if (!(order?.items?.length)) {
@@ -286,7 +289,9 @@ class InitOrderService {
                 messageIds.map(async messageId => {
                     try {
                         let protocolInitResponse = await this.onInitOrder(messageId);
-                        let dbResponse = await getOrderByTransactionId(protocolInitResponse?.context?.transaction_id);
+                        let dbResponse = await getOrderByTransactionIdAndBppId(protocolInitResponse?.context?.transaction_id,protocolInitResponse?.context?.bpp_id);
+
+                        console.log("on init --protocolInitResponse",protocolInitResponse);
 
                         await this.updateOrder(protocolInitResponse, dbResponse);
 

@@ -12,6 +12,7 @@ class BppInitService {
         try {
             const provider = order?.items?.[0]?.provider || {};
 
+            console.log("context---------------->",context);
             const initRequest = {
                 context: context,
                 message: {
