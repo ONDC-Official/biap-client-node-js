@@ -1,6 +1,10 @@
 import { onOrderStatus } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import {addOrUpdateOrderWithTransactionId, getOrderById} from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderById
+} from "../db/dbService.js";
 import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -108,7 +112,7 @@ class OrderStatusService {
                     try {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
 
-                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
+                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
@@ -125,7 +129,8 @@ class OrderStatusService {
 
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({
-                                transactionId: onOrderStatusResponse?.context?.transaction_id
+                                transactionId: onOrderStatusResponse?.context?.transaction_id,
+                                "provider.id": onOrderStatusResponse.message.order.provider.id
                             });
 
                             if ((dbResponse && dbResponse.length)) {
@@ -144,8 +149,8 @@ class OrderStatusService {
 
                                 orderSchema.items = op;
 
-                                await addOrUpdateOrderWithTransactionId(
-                                    onOrderStatusResponse?.context?.transaction_id,
+                                await addOrUpdateOrderWithTransactionIdAndProvider(
+                                    onOrderStatusResponse?.context?.transaction_id,onOrderStatusResponse.message.order.provider.id,
                                     { ...orderSchema }
                                 );
                                 

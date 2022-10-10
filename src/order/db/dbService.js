@@ -22,14 +22,14 @@ const addOrUpdateOrderWithTransactionId = async (transactionId, orderSchema = {}
 
 };
 
-const addOrUpdateOrderWithTransactionIdAndBppId = async (transactionId,bppId, orderSchema = {}) => {
+const addOrUpdateOrderWithTransactionIdAndProvider = async (transactionId, providerId, orderSchema = {}) => {
 
 
     // console.log("items------------------->",transactionId,orderSchema.items)
     return await OrderMongooseModel.findOneAndUpdate(
         {
             transactionId: transactionId,
-            bppId:bppId
+            "provider.id":providerId
         },
         {
             ...orderSchema
@@ -54,10 +54,10 @@ const getOrderByTransactionId = async (transactionId) => {
     else
         return order?.[0];
 };
-const getOrderByTransactionIdAndBppId = async (transactionId,bppId) => {
+const getOrderByTransactionIdAndProvider = async (transactionId, providerId) => {
     const order = await OrderMongooseModel.find({
         transactionId: transactionId,
-        bppId:bppId
+        "provider.id":providerId
     });
 
     if (!(order || order.length))
@@ -77,4 +77,4 @@ const getOrderById = async (orderId) => {
         return order?.[0];
 };
 
-export { addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndBppId, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndBppId };
+export { addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };

@@ -1,6 +1,10 @@
 import { onOrderCancel ,onUpdateStatus} from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId,getOrderById } from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderById
+} from "../db/dbService.js";
 
 import BppUpdateService from "./bppUpdate.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -80,7 +84,8 @@ class UpdateOrderService {
                     protocolUpdateResponse = protocolUpdateResponse?.[0];
 
                     const dbResponse = await OrderMongooseModel.find({
-                        transactionId: protocolUpdateResponse.context.transaction_id
+                        transactionId: protocolUpdateResponse.context.transaction_id,
+                        "provider.id": protocolUpdateResponse.message.order.provider.id
                     });
 
                     if (!(dbResponse || dbResponse.length))
@@ -108,8 +113,8 @@ class UpdateOrderService {
                         orderSchema.items = op;
 
                         console.log("orderSchema.items ===",orderSchema.items )
-                        await addOrUpdateOrderWithTransactionId(
-                            protocolUpdateResponse.context.transaction_id,
+                        await addOrUpdateOrderWithTransactionIdAndProvider(
+                            protocolUpdateResponse.context.transaction_id,protocolUpdateResponse.message.order.provider.id,
                             { ...orderSchema }
                         );
                     }

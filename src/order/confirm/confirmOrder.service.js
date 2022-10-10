@@ -1,6 +1,10 @@
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderByTransactionId,
+    getOrderByTransactionIdAndProvider
+} from "../db/dbService.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -65,8 +69,8 @@ class ConfirmOrderService {
         if (paymentType === PAYMENT_TYPES["ON-ORDER"])
             orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
 
-        await addOrUpdateOrderWithTransactionId(
-            confirmResponse?.context?.transaction_id,
+        await addOrUpdateOrderWithTransactionIdAndProvider(
+            confirmResponse?.context?.transaction_id,dbResponse.provider.id,
             { ...orderSchema }
         );
     }
@@ -83,7 +87,11 @@ class ConfirmOrderService {
             message: order = {}
         } = orderRequest || {};
 
-        const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
+        // console.log("message---------------->",orderRequest.message)
+
+        const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id,orderRequest.message.providers.id);
+
+        console.log("dbResponse---------------->",dbResponse)
 
         if (dbResponse?.paymentStatus === null) {
 
@@ -117,6 +125,8 @@ class ConfirmOrderService {
                 order,
                 dbResponse
             );
+
+            console.log("bppConfirmResponse-------------------->",bppConfirmResponse);
 
             if (bppConfirmResponse?.message?.ack)
                 await this.updateOrder(dbResponse, bppConfirmResponse, order?.payment?.type);
@@ -152,9 +162,11 @@ class ConfirmOrderService {
      */
     async processOnConfirmResponse(response = {}) {
         try {
+
+            console.log("processOnConfirmResponse------------------------------>",response)
             if (response?.message?.order) {
-                const dbResponse = await getOrderByTransactionId(
-                    response?.context?.transaction_id
+                const dbResponse = await getOrderByTransactionIdAndProvider(
+                    response?.context?.transaction_id,response?.message?.order.provider.id
                 );
 
                 let orderSchema = { ...response?.message?.order };
@@ -194,8 +206,8 @@ class ConfirmOrderService {
                     });
                 }
 
-                await addOrUpdateOrderWithTransactionId(
-                    response.context.transaction_id,
+                await addOrUpdateOrderWithTransactionIdAndProvider(
+                    response.context.transaction_id,dbResponse.provider.id,
                     { ...orderSchema }
                 );
 

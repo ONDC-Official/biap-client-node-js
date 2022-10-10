@@ -1,6 +1,6 @@
 import { onOrderInit } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderByTransactionIdAndBppId,addOrUpdateOrderWithTransactionIdAndBppId } from "../db/dbService.js";
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderByTransactionIdAndProvider,addOrUpdateOrderWithTransactionIdAndProvider } from "../db/dbService.js";
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -83,8 +83,8 @@ class InitOrderService {
             console.log('itemProducts--------------->',itemProducts);
             console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
 
-            await addOrUpdateOrderWithTransactionIdAndBppId(
-                response.context.transaction_id,response?.context?.bpp_id,
+            await addOrUpdateOrderWithTransactionIdAndProvider(
+                response.context.transaction_id,provider.id,
                 {
                     userId: userId,
                     messageId: response?.context?.message_id,
@@ -160,8 +160,8 @@ class InitOrderService {
                 }});
             }
 
-            await addOrUpdateOrderWithTransactionIdAndBppId(
-                response?.context?.transaction_id,response?.context?.bpp_id,
+            await addOrUpdateOrderWithTransactionIdAndProvider(
+                response?.context?.transaction_id,dbResponse.provider.id,
                 { ...orderSchema }
             );
         }
@@ -289,9 +289,13 @@ class InitOrderService {
                 messageIds.map(async messageId => {
                     try {
                         let protocolInitResponse = await this.onInitOrder(messageId);
-                        let dbResponse = await getOrderByTransactionIdAndBppId(protocolInitResponse?.context?.transaction_id,protocolInitResponse?.context?.bpp_id);
 
-                        console.log("on init --protocolInitResponse",protocolInitResponse);
+                        console.log("protocolInitResponse------------->",protocolInitResponse);
+                        console.log("protocolInitResponse-------provider------>",protocolInitResponse.message.order.provider);
+
+                        let dbResponse = await getOrderByTransactionIdAndProvider(protocolInitResponse?.context?.transaction_id,protocolInitResponse?.message.order.provider.id);
+
+                        console.log("on init --protocolInitResponse--dbResponse",dbResponse);
 
                         await this.updateOrder(protocolInitResponse, dbResponse);
 

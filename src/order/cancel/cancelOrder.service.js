@@ -1,6 +1,10 @@
 import { onOrderCancel } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import {addOrUpdateOrderWithTransactionId, getOrderById} from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderById
+} from "../db/dbService.js";
 
 import BppCancelService from "./bppCancel.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -78,7 +82,7 @@ class CancelOrderService {
                     protocolCancelResponse = protocolCancelResponse?.[0];
 
                     const dbResponse = await OrderMongooseModel.find({
-                        transactionId: protocolCancelResponse.context.transaction_id
+                        transactionId: protocolCancelResponse.context.transaction_id,"provider.id": protocolCancelResponse.message.order.provider.id
                     });
 
 
@@ -88,8 +92,8 @@ class CancelOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
 
-                        await addOrUpdateOrderWithTransactionId(
-                            protocolCancelResponse.context.transaction_id,
+                        await addOrUpdateOrderWithTransactionIdAndProvider(
+                            protocolCancelResponse.context.transaction_id,protocolCancelResponse.message.order.provider.id,
                             { ...orderSchema }
                         );
                     }
