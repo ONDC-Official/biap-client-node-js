@@ -55,11 +55,6 @@ class BppInitService {
                                 },
                             },
                             type: order.delivery_info.type,
-                            customer: {
-                                person: {
-                                    name: order.delivery_info.name
-                                }
-                            },
                             provider_id: provider.id
                         }],
                         payment: {

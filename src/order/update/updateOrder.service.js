@@ -99,8 +99,8 @@ class UpdateOrderService {
 
                             let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
                             if(temp) {
-                                e.return_status = temp.tags.status;
-                                e.cancellation_status = temp.tags.status;
+                                e.return_status = temp?.tags?.status;
+                                e.cancellation_status = temp?.tags?.status;
                             }
                             if(!e.cancellation_status || !e.return_status ){
                                 e.cancellation_status ='Cancelled' //TODO: change from actual response

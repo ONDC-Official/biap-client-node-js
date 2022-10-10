@@ -1,5 +1,20 @@
 export const CITY_CODE = [
     {
+        "State": "Andhra Pradesh",
+        "City": "Chittoor",
+        "Code": "std:08572"
+    },
+    {
+        "State": "Andhra Pradesh",
+        "City": "Vuyyuru",
+        "Code": "std:08676"
+    },
+    {
+        "State": "Andhra Pradesh",
+        "City": "Vizayanagaram",
+        "Code": "std:08922"
+    },
+    {
         "State": "Bihar",
         "City": "Patna",
         "Code": "std:0612"
@@ -76,6 +91,21 @@ export const CITY_CODE = [
         "State": "Bihar",
         "City": "Begusarai",
         "Code": "std:06243"
+    },
+    {
+        "State": "Delhi",
+        "City": "Delhi",
+        "Code": "std:011"
+    },
+    {
+        "State": "Goa",
+        "City": "Panaji",
+        "Code": "std:0832"
+    },
+    {
+        "State": "Goa",
+        "City": "Porvorim",
+        "Code": "std:0832217"
     },
     {
         "State": "Gujarat",
@@ -175,6 +205,189 @@ export const CITY_CODE = [
         "Code": "std:0261"
     },
     {
+        "State": "Gujarat",
+        "City": "Nadiad",
+        "Code": "std:0268"
+    },
+    {
+        "State": "Haryana",
+        "City": "Gurgaon",
+        "Code": "std:0124"
+    },
+    {
+        "State": "Haryana",
+        "City": "Faridabad",
+        "Code": "std:0129"
+    },
+    {
+        "State": "Jammu & Kashmir",
+        "City": "Jammu",
+        "Code": "std:0191"
+    },
+    {
+        "State": "Jammu & Kashmir",
+        "City": "Srinagar",
+        "Code": "std:0194",
+        "Column4": "Direct code for Ooty not available, 3 sub-divisions have been mentioned with codes"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Bengaluru",
+        "Code": "std:080"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Udupi",
+        "Code": "std:0820"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Mysuru",
+        "Code": "std:0821"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Mandya",
+        "Code": "std:08232",
+        "Column4": "Mentioned as 'Theni' in STD codes"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Mangaluru",
+        "Code": "std:0824"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Achladi",
+        "Code": "std:08252"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Karkala",
+        "Code": "std:08258"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Chikmagalur",
+        "Code": "std:08262"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Bailhongal",
+        "Code": "std:08288"
+    },
+    {
+        "State": "Karnataka",
+        "City": "Ranebennur",
+        "Code": "std:08373"
+    },
+    {
+        "State": "Kerala",
+        "City": "Thiruvananthapuram",
+        "Code": "std:0471"
+    },
+    {
+        "State": "Kerala",
+        "City": "Quilon",
+        "Code": "std:0474"
+    },
+    {
+        "State": "Kerala",
+        "City": "Alleppy",
+        "Code": "std:0477"
+    },
+    {
+        "State": "Kerala",
+        "City": "Mavelikkara",
+        "Code": "std:0479"
+    },
+    {
+        "State": "Kerala",
+        "City": "Ernakulam",
+        "Code": "std:0484"
+    },
+    {
+        "State": "Kerala",
+        "City": "Trichur",
+        "Code": "std:0487"
+    },
+    {
+        "State": "Kerala",
+        "City": "Kannur",
+        "Code": "std:0497"
+    },
+    {
+        "State": "Madhya Pradesh",
+        "City": "Chhindwara",
+        "Code": "std:07162"
+    },
+    {
+        "State": "Madhya Pradesh",
+        "City": "Indore",
+        "Code": "std:0731"
+    },
+    {
+        "State": "Madhya Pradesh",
+        "City": "Bareli",
+        "Code": "std:07486"
+    },
+    {
+        "State": "Madhya Pradesh",
+        "City": "Bhopal",
+        "Code": "std:0755"
+    },
+    {
+        "State": "Maharashtra",
+        "City": "Pune",
+        "Code": "std:020"
+    },
+    {
+        "State": "Maharashtra",
+        "City": "Mumbai",
+        "Code": "std:022"
+    },
+    {
+        "State": "Meghalaya",
+        "City": "Shillong",
+        "Code": "std:0364"
+    },
+    {
+        "State": "Orissa",
+        "City": "Cuttack",
+        "Code": "std:0671"
+    },
+    {
+        "State": "Punjab",
+        "City": "Chandigarh",
+        "Code": "std:0172"
+    },
+    {
+        "State": "Rajasthan",
+        "City": "Jaipur",
+        "Code": "std:0141"
+    },
+    {
+        "State": "Rajasthan",
+        "City": "Kotputli",
+        "Code": "std:01421",
+        "Column4": "Direct code for Ghaziabad not available; sub-divisions mentioned with codes"
+    },
+    {
+        "State": "Rajasthan",
+        "City": "Bansur",
+        "Code": "std:01461"
+    },
+    {
+        "State": "Rajasthan",
+        "City": "Sriganganagar",
+        "Code": "std:0154"
+    },
+    {
+        "State": "Sikkim",
+        "City": "Gangtok",
+        "Code": "std:03592"
+    },
+    {
         "State": "Tamil Nadu",
         "City": "Thanjavur",
         "Code": "std:04362"
@@ -226,8 +439,7 @@ export const CITY_CODE = [
     },
     {
         "State": "Tamil Nadu",
-        "City": "Ooty",
-        "Column4": "Direct code for Ooty not available, 3 sub-divisions have been mentioned with codes"
+        "City": "Ooty"
     },
     {
         "State": "Tamil Nadu",
@@ -247,18 +459,19 @@ export const CITY_CODE = [
     {
         "State": "Tamil Nadu",
         "City": "Theni Allinagaram",
-        "Code": "std:04546",
-        "Column4": "Mentioned as 'Theni' in STD codes"
+        "Code": "std:04546"
     },
     {
         "State": "Tamil Nadu",
         "City": "Cuddalore",
-        "Code": "std:04142"
+        "Code": "std:04142",
+        "Column4": "Direct code for Lakhimpur not available; sub-divisions mentioned with codes"
     },
     {
         "State": "Tamil Nadu",
         "City": "Karur",
-        "Code": "std:04324"
+        "Code": "std:04324",
+        "Column4": "Direct code for Bahraich not available; sub-divisions mentioned with codes"
     },
     {
         "State": "Tamil Nadu",
@@ -347,6 +560,46 @@ export const CITY_CODE = [
         "City": "Thoothukudi"
     },
     {
+        "State": "Tamil Nadu",
+        "City": "Iyyengarkulam",
+        "Code": "std:04112"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Manavalanagar",
+        "Code": "std:04116"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Tindivanam",
+        "Code": "std:04147"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Mettupalayam",
+        "Code": "std:04254"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Mayiladuthura",
+        "Code": "std:04364"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Ramanathpuram",
+        "Code": "std:04567"
+    },
+    {
+        "State": "Tamil Nadu",
+        "City": "Tirunelvelli",
+        "Code": "std:0462"
+    },
+    {
+        "State": "Telangana",
+        "City": "Hyderabad",
+        "Code": "std:040"
+    },
+    {
         "State": "Uttar Pradesh",
         "City": "Varanasi",
         "Code": "std:0542"
@@ -359,7 +612,7 @@ export const CITY_CODE = [
     {
         "State": "Uttar Pradesh",
         "City": "Ghaziabad",
-        "Column4": "Direct code for Ghaziabad not available; sub-divisions mentioned with codes"
+        "Code": "std:0120"
     },
     {
         "State": "Uttar Pradesh",
@@ -452,13 +705,11 @@ export const CITY_CODE = [
     },
     {
         "State": "Uttar Pradesh",
-        "City": "Lakhimpur",
-        "Column4": "Direct code for Lakhimpur not available; sub-divisions mentioned with codes"
+        "City": "Lakhimpur"
     },
     {
         "State": "Uttar Pradesh",
-        "City": "Bahraich",
-        "Column4": "Direct code for Bahraich not available; sub-divisions mentioned with codes"
+        "City": "Bahraich"
     },
     {
         "State": "Uttar Pradesh",
@@ -478,5 +729,50 @@ export const CITY_CODE = [
         "State": "Uttar Pradesh",
         "City": "Muzaffarnagar",
         "Code": "std:0131"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Bijnore",
+        "Code": "std:01342"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Kotdwara",
+        "Code": "std:01382"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Hamirpur",
+        "Code": "std:05282"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Moradabad",
+        "Code": "std:0591"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Bilari",
+        "Code": "std:05921"
+    },
+    {
+        "State": "Uttar Pradesh",
+        "City": "Chhapra",
+        "Code": "std:06152"
+    },
+    {
+        "State": "Uttarakhand",
+        "City": "Haridwar",
+        "Code": "std:01334"
+    },
+    {
+        "State": "Uttarakhand",
+        "City": "Dehradun",
+        "Code": "std:0135"
+    },
+    {
+        "State": "West Bengal",
+        "City": "Kolkata",
+        "Code": "std:033"
     }
 ]
