@@ -112,7 +112,7 @@ class BppConfirmService {
             storedOrder = storedOrder?.toJSON();
 
 
-            console.log("context----------v23----------->",context);
+            console.log("confirmRequest----------v233-------order---->",order);
 
             const confirmRequest = {
                 context: context,
@@ -200,7 +200,7 @@ class BppConfirmService {
                     }
                 }
             };
-            console.log("confirmRequest----------v233----------->",confirmRequest.message.order.payment.params);
+
             return await this.confirm(confirmRequest);
         }
         catch (err) {

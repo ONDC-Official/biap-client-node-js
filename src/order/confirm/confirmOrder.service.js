@@ -200,8 +200,7 @@ class ConfirmOrderService {
                                 location: {
                                     ...fulfillment?.end?.location,
                                     address: {
-                                        ...fulfillment?.end?.location?.address,
-                                        areaCode: fulfillment?.end?.location?.address?.area_code
+                                        ...fulfillment?.end?.location?.address
                                     }
                                 }
                             },
