@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../utils/constants.js";
 import { protocolConfirm } from '../../utils/protocolApis/index.js';
+import OrderMongooseModel from "../db/order.js";
 
 class BppConfirmService {
 
@@ -22,6 +23,13 @@ class BppConfirmService {
         }
     }
 
+    pad(str, count=2, char='0') {
+        str = str.toString();
+        if (str.length < count)
+            str = Array(count - str.length).fill(char).join('') + str;
+        return str;
+    };
+
     /**
      * bpp confirm order
      * @param {Object} context 
@@ -33,7 +41,6 @@ class BppConfirmService {
 
             const provider = order?.items?.[0]?.provider || {};
 
-            console.log("context----------v1----------->",context);
             const confirmRequest = {
                 context: context,
                 message: {
@@ -111,14 +118,20 @@ class BppConfirmService {
         try {
             storedOrder = storedOrder?.toJSON();
 
+            const n = new Date();
+            const count = await OrderMongooseModel.count({
+            });
 
-            console.log("confirmRequest----------v233-------order---->",order);
+            console.log("count-------------------------------->",count)
 
+            let orderId = `${n.getFullYear()}-${this.pad(n.getMonth())}-${this.pad(n.getDate())}-${count + 1}`;
+
+            console.log("orderId-------------------------------->",orderId)
             const confirmRequest = {
                 context: context,
                 message: {
                     order: {
-                        id: uuidv4(),
+                        id: orderId,
                         billing: {
                             address: {
                                 door: storedOrder?.billing?.address?.door,
