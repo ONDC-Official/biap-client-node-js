@@ -126,7 +126,14 @@ class BppConfirmService {
 
             let orderId = `${n.getFullYear()}-${this.pad(n.getMonth())}-${this.pad(n.getDate())}-${count + 1}`;
 
+            let qoute = {...(order?.quote || storedOrder?.quote)}
+
+            let value = ""+qoute?.price?.value
+            qoute.price.value = value
+
             console.log("orderId-------------------------------->",orderId)
+            console.log("confirm----------------------qoute---------->",qoute)
+
             const confirmRequest = {
                 context: context,
                 message: {
@@ -208,7 +215,7 @@ class BppConfirmService {
                                 PAYMENT_COLLECTED_BY.BPP,
                         },
                         quote: {
-                            ...(order?.quote || storedOrder?.quote)
+                            ...(qoute)
                         }
                     }
                 }
