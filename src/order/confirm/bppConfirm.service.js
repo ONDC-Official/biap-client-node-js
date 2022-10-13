@@ -124,7 +124,7 @@ class BppConfirmService {
 
             console.log("count-------------------------------->",count)
 
-            let orderId = `${n.getFullYear()}-${this.pad(n.getMonth())}-${this.pad(n.getDate())}-${count + 1}`;
+            let orderId = `${n.getFullYear()}-${this.pad(n.getMonth())}-${this.pad(n.getDate())}-${Math.floor(100000 + Math.random() * 900000)}`;
 
             let qoute = {...(order?.quote || storedOrder?.quote)}
 
@@ -133,6 +133,7 @@ class BppConfirmService {
 
             console.log("orderId-------------------------------->",orderId)
             console.log("confirm----------------------qoute---------->",qoute)
+            console.log("confirm----------------------order?.jusPayTransactionId/---------->",order?.jusPayTransactionId)
 
             const confirmRequest = {
                 context: context,
