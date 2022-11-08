@@ -167,6 +167,7 @@ class ConfirmOrderService {
         try {
 
             console.log("processOnConfirmResponse------------------------------>",response)
+            console.log("processOnConfirmResponse------------------------------>",response?.message?.order.provider)
             if (response?.message?.order) {
                 const dbResponse = await getOrderByTransactionIdAndProvider(
                     response?.context?.transaction_id,response?.message?.order.provider.id
@@ -187,7 +188,11 @@ class ConfirmOrderService {
                     orderSchema.fulfillments = [orderSchema.fulfillment];
                     delete orderSchema.fulfillment;
                 }
-                if(orderSchema.items) {
+
+                console.log("processOnConfirmResponse----------------dbResponse.items-------------->",dbResponse)
+                console.log("processOnConfirmResponse----------------dbResponse.orderSchema-------------->",orderSchema)
+
+                if(orderSchema.items && dbResponse.items) {
                     orderSchema.items = dbResponse.items
                 }
 
@@ -207,6 +212,8 @@ class ConfirmOrderService {
                         }
                     });
                 }
+
+                console.log("orderSchema.fulfillments",orderSchema.fulfillments)
 
                 await addOrUpdateOrderWithTransactionIdAndProvider(
                     response.context.transaction_id,dbResponse.provider.id,

@@ -174,6 +174,9 @@ class BppConfirmService {
                                         email: fulfillment?.end?.contact?.email,
                                         phone: fulfillment?.end?.contact?.phone,
                                     },
+                                    person: {
+                                        name: fulfillment?.customer?.person?.name
+                                    },
                                     location: {
                                         gps: fulfillment?.end?.location?.gps,
                                         address: {
