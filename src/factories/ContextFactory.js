@@ -78,7 +78,8 @@ class ContextFactory {
             transaction_id: this.getTransactionId(transactionId),
             message_id: messageId,
             timestamp: this.timestamp,
-            ...(bppId && { bpp_id: bppId })
+            ...(bppId && { bpp_id: bppId }),
+            ttl:"PT30S"
         };
 
     }
