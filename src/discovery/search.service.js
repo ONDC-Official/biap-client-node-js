@@ -60,7 +60,7 @@ class SearchService {
 
         searchResults && searchResults.length && searchResults.forEach(result => {
             let searchObj = { ...result };
-            delete searchObj?.["context"];
+            // delete searchObj?.["context"];
 
             data.push({
                 ...searchObj
