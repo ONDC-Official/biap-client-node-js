@@ -3,6 +3,7 @@ import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
 import {
     addOrUpdateOrderWithTransactionId,
     addOrUpdateOrderWithTransactionIdAndProvider,
+    addOrUpdateOrderWithTransactionIdAndOrderId,
     getOrderById
 } from "../db/dbService.js";
 
@@ -81,9 +82,14 @@ class CancelOrderService {
 
                     protocolCancelResponse = protocolCancelResponse?.[0];
 
+                    console.log("protocolCancelResponse----------------->",protocolCancelResponse);
+
+                    // message: { order: { id: '7488750', state: 'Cancelled', tags: [Object] } }
                     const dbResponse = await OrderMongooseModel.find({
-                        transactionId: protocolCancelResponse.context.transaction_id,"provider.id": protocolCancelResponse.message.order.provider.id
+                        transactionId: protocolCancelResponse.context.transaction_id,id: protocolCancelResponse.message.order.id
                     });
+
+                    console.log("dbResponse----------------->",dbResponse);
 
 
                     if (!(dbResponse || dbResponse.length))
@@ -92,8 +98,8 @@ class CancelOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
 
-                        await addOrUpdateOrderWithTransactionIdAndProvider(
-                            protocolCancelResponse.context.transaction_id,protocolCancelResponse.message.order.provider.id,
+                        await addOrUpdateOrderWithTransactionIdAndOrderId(
+                            protocolCancelResponse.context.transaction_id,protocolCancelResponse.message.order.id,
                             { ...orderSchema }
                         );
                     }

@@ -39,6 +39,23 @@ const addOrUpdateOrderWithTransactionIdAndProvider = async (transactionId, provi
 
 };
 
+const addOrUpdateOrderWithTransactionIdAndOrderId = async (transactionId, orderId, orderSchema = {}) => {
+
+
+    // console.log("items------------------->",transactionId,orderSchema.items)
+    return await OrderMongooseModel.findOneAndUpdate(
+        {
+            transactionId: transactionId,
+            "id":orderId
+        },
+        {
+            ...orderSchema
+        },
+        { upsert: true }
+    );
+
+};
+
 /**
  * get the order with passed transaction id from the database
  * @param {String} transactionId 
@@ -77,4 +94,4 @@ const getOrderById = async (orderId) => {
         return order?.[0];
 };
 
-export { addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };
+export { addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };
