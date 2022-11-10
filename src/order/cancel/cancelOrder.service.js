@@ -34,6 +34,7 @@ class CancelOrderService {
                 action: PROTOCOL_CONTEXT.CANCEL,
                 transactionId: orderDetails.transactionId,
                 bppId: orderRequest?.context?.bpp_id,
+                bpp_uri: orderDetails?.bpp_uri,
                 cityCode:orderDetails.city
             });
 

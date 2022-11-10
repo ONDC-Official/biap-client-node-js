@@ -100,6 +100,7 @@ class ConfirmOrderService {
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse.bppId,
+                bpp_uri: dbResponse.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state
             });

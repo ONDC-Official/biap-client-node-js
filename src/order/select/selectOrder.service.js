@@ -56,6 +56,7 @@ class SelectOrderService {
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
                 bppId: cart?.items[0]?.bpp_id,
+                bpp_uri: cart?.items[0]?.bpp_uri,
                 city:requestContext?.city,
                 state:requestContext?.state
             });

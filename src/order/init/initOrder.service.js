@@ -91,6 +91,7 @@ class InitOrderService {
                     transactionId: response?.context?.transaction_id,
                     parentOrderId: response?.context?.parent_order_id,
                     bppId: response?.context?.bpp_id,
+                    bpp_uri: response?.context?.bpp_uri,
                     fulfillments: [ fulfillment ],
                     provider: { ...providerDetails },
                     items:itemProducts ,
@@ -181,6 +182,7 @@ class InitOrderService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.INIT,
                 bppId: order?.items[0]?.bpp_id,
+                bpp_uri: order?.items[0]?.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state,
                 transactionId: requestContext?.transaction_id

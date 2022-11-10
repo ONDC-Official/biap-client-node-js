@@ -30,6 +30,7 @@ class OrderStatusService {
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: orderDetails?.transactionId,
                 bppId: requestContext?.bpp_id,
+                bpp_uri: orderDetails?.bpp_uri,
                 cityCode: orderDetails.city
             });
 
