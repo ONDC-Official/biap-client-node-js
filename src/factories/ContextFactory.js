@@ -63,7 +63,7 @@ class ContextFactory {
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
-            city,state,cityCode
+            city,state,cityCode,bpp_uri
 
         } = contextObject || {};
 
@@ -75,6 +75,7 @@ class ContextFactory {
             core_version: PROTOCOL_VERSION.v_1_0_0,
             bap_id: this.bapId,
             bap_uri: this.bapUrl,
+            bpp_uri: bpp_uri,
             transaction_id: this.getTransactionId(transactionId),
             message_id: messageId,
             timestamp: this.timestamp,
