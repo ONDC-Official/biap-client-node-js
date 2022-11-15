@@ -135,11 +135,19 @@ class BppConfirmService {
             console.log("confirm----------------------qoute---------->",qoute)
             console.log("confirm----------------------order?.jusPayTransactionId/---------->",order?.jusPayTransactionId)
 
+
+            // Created - when created by the buyer app;
+            // Accepted - when confirmed by the seller app;
+            // In-progress - when order is ready to ship;
+            // Completed - when all fulfillments completed
+            // Cancelled - when order cancelled
+
             const confirmRequest = {
                 context: context,
                 message: {
                     order: {
                         id: orderId,
+                        state:"Created",
                         billing: {
                             address: {
                                 door: storedOrder?.billing?.address?.door,
