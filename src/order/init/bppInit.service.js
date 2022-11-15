@@ -13,6 +13,12 @@ class BppInitService {
             const provider = order?.items?.[0]?.provider || {};
 
             console.log("context---------------->",context);
+            order.delivery_info.location.address.area_code = order.delivery_info.location.address.areaCode
+            delete order.delivery_info.location.address.areaCode
+
+            order.billing_info.address.area_code = order.billing_info.address.areaCode
+            delete order.billing_info.address.areaCode
+
             const initRequest = {
                 context: context,
                 message: {
@@ -36,7 +42,7 @@ class BppInitService {
                             address: {
                                 ...order.billing_info.address,
                                 name: order.billing_info.name,
-                                area_code: order?.billing_info?.address?.areaCode
+                                area_code: order?.billing_info?.address?.area_code
                             }
                         },
                         fulfillments: [{
@@ -50,7 +56,7 @@ class BppInitService {
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
-                                        area_code: order?.delivery_info?.location?.address?.areaCode
+                                        area_code: order?.delivery_info?.location?.address?.area_code
                                     }
                                 },
                             },
@@ -65,13 +71,15 @@ class BppInitService {
                             "@ondc/org/ondc-withholding_amount": 0.0,
                             "@ondc/org/ondc-return_window": 0.0,
                             "@ondc/org/ondc-settlement_basis": "Collection",
-                            "@ondc/org/ondc-settlement_window": "PT2D"
+                            "@ondc/org/ondc-settlement_window": "P2D"
                         }
                     }
                 }
             };
 
             const response = await protocolInit(initRequest);
+
+            // return initRequest
 
             return {
                 context: {
