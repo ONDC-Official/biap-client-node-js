@@ -45,7 +45,8 @@ class InitOrderService {
             };
 
 
-            console.log("orderRequest---------------->",response?.response)
+            console.log("orderRequest---------name------->",orderRequest?.delivery_info?.name)
+            console.log("orderRequest-----------delivery_info----->",orderRequest?.delivery_info)
             const fulfillment = {
                 end: {
                     contact: {
@@ -80,8 +81,9 @@ class InitOrderService {
                 itemProducts.push(itemObj);
             }
 
-            console.log('itemProducts--------------->',itemProducts);
-            console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
+            // console.log('itemProducts--------------->',itemProducts);
+            // console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
+            console.log('itemProducts--------response?.context?.bpp_id------->',fulfillment);
 
             await addOrUpdateOrderWithTransactionIdAndProvider(
                 response.context.transaction_id,provider.id,
@@ -109,10 +111,13 @@ class InitOrderService {
 
         console.log("update order-------------------->",dbResponse);
         console.log("update order-----------response--------->",response);
+        // console.log("update order-----------response--------->",orderSchema.fulfillment);
         if (response?.message?.order && dbResponse) {
             dbResponse = dbResponse?.toJSON();
 
             let orderSchema = { ...response.message.order };
+
+            console.log("update order-----------fulfillment--------->",orderSchema.fulfillment);
 
             orderSchema.items = dbResponse?.items.map(item => {
                 return {
@@ -144,6 +149,8 @@ class InitOrderService {
                 delete orderSchema.fulfillment;
             }
 
+            console.log("update order-----------fulfillment--------->",orderSchema.fulfillments);
+
             if (orderSchema.fulfillments && orderSchema.fulfillments.length) {
                 orderSchema.fulfillments = [...orderSchema?.fulfillments].map((fulfillment)=> {
                     return {
@@ -158,6 +165,7 @@ class InitOrderService {
                             }
                         }
                     },
+                        customer:dbResponse?.fulfillments[0]?.customer
                 }});
             }
 
