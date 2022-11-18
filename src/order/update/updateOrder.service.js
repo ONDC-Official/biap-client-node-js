@@ -1,7 +1,7 @@
 import { onOrderCancel ,onUpdateStatus} from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionIdAndOrderId,
     addOrUpdateOrderWithTransactionIdAndProvider,
     getOrderById
 } from "../db/dbService.js";
@@ -25,7 +25,7 @@ class UpdateOrderService {
 
             console.log("orderRequest-------------->",orderRequest);
 
-            const orderDetails = await getOrderById(orderRequest.message.order_id);
+            const orderDetails = await getOrderById(orderRequest.message.order.id);
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -86,7 +86,7 @@ class UpdateOrderService {
 
                     const dbResponse = await OrderMongooseModel.find({
                         transactionId: protocolUpdateResponse.context.transaction_id,
-                        "provider.id": protocolUpdateResponse.message.order.provider.id
+                        id: protocolUpdateResponse.message.order.id
                     });
 
                     if (!(dbResponse || dbResponse.length))
@@ -114,8 +114,8 @@ class UpdateOrderService {
                         orderSchema.items = op;
 
                         console.log("orderSchema.items ===",orderSchema.items )
-                        await addOrUpdateOrderWithTransactionIdAndProvider(
-                            protocolUpdateResponse.context.transaction_id,protocolUpdateResponse.message.order.provider.id,
+                        await addOrUpdateOrderWithTransactionIdAndOrderId(
+                            protocolUpdateResponse.context.transaction_id,protocolUpdateResponse.message.order.id,
                             { ...orderSchema }
                         );
                     }
