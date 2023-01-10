@@ -104,10 +104,10 @@ class UpdateOrderService {
                                 e.return_status = temp?.tags?.status;
                                 e.cancellation_status = temp?.tags?.status;
 
-                                if(!e.cancellation_status || !e.return_status ){
-                                    e.cancellation_status ='Cancelled' //TODO: change from actual response
-                                    e.return_status ='Return Approved' //TODO: change from actual response
-                                }
+                                // if(!e.cancellation_status || !e.return_status ){
+                                //     e.cancellation_status ='Cancelled' //TODO: change from actual response
+                                //     e.return_status ='Return Approved' //TODO: change from actual response
+                                // }
 
                             }
 
