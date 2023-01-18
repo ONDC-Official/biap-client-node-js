@@ -8,6 +8,7 @@ import OrderHistoryController from './history/orderHistory.controller.js';
 import OrderStatusController from './status/orderStatus.controller.js';
 import SelectOrderController from './select/selectOrder.controller.js';
 import UpdateOrderController from './update/updateOrder.controller.js';
+import ComplaintOrderController from './complaint/complaintOrder.controller.js';
 
 const rootRouter = new Router();
 
@@ -18,6 +19,7 @@ const orderHistoryController = new OrderHistoryController();
 const orderStatusController = new OrderStatusController();
 const selectOrderController = new SelectOrderController();
 const updateOrderController = new UpdateOrderController();
+const complaintOrderController  = new  ComplaintOrderController ();
 
 //#region confirm order
 
@@ -118,6 +120,12 @@ rootRouter.post(
     '/v2/select', 
     authentication(),
     selectOrderController.selectMultipleOrder,
+);
+
+// select order v2
+rootRouter.post(
+    '/v2/complaint',
+    complaintOrderController.raiseComplaint,
 );
 
 // on select order v1
