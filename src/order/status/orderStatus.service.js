@@ -113,10 +113,9 @@ class OrderStatusService {
                     try {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
 
-                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse)
+                        console.log("onOrderStatusResponse-------messageId------>",messageId)
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
                         // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
-
 
                         let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments?.map((fulfillment,i)=>{
                             // console.log("fulfillment----------------->",fulfillment)
