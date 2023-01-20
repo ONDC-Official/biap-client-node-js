@@ -11,7 +11,8 @@ const AddressSchema = new mongoose.Schema(
         city: { type: String, default: null },
         state: { type: String, default: null },
         country: { type: String, default: null },
-        areaCode: { type: String, default: null }
+        areaCode: { type: String, default: null },
+        tag:{ type: String, default: null }
     },
     { _id: false }
 );

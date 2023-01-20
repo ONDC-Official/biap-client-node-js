@@ -13,7 +13,7 @@ class ComplaintOrderService {
 
            console.log("orderRequest-------------->",orderRequest);
 
-           let complaintSchemaModel = new ComplaintSchemaModel(orderRequest);
+   let complaintSchemaModel = new ComplaintSchemaModel(orderRequest);
 
            complaintSchemaModel.save();
             //const orderDetails = await getOrderById(orderRequest.message.order.id);
