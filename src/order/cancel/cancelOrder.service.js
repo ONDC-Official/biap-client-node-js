@@ -82,6 +82,37 @@ class CancelOrderService {
                 if (!(protocolCancelResponse?.[0].error)) {
 
                     protocolCancelResponse = protocolCancelResponse?.[0];
+                }
+                return protocolCancelResponse;
+            }
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async onCancelOrderDbOperation(messageId) {
+        try {
+            let protocolCancelResponse = await onOrderCancel(messageId);
+
+            if (!(protocolCancelResponse && protocolCancelResponse.length)) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_CANCEL
+                });
+
+                return {
+                    context,
+                    error: {
+                        message: "No data found"
+                    }
+                };
+            }
+            else {
+                if (!(protocolCancelResponse?.[0].error)) {
+
+                    protocolCancelResponse = protocolCancelResponse?.[0];
 
                     console.log("protocolCancelResponse----------------->",protocolCancelResponse);
 
@@ -105,7 +136,7 @@ class CancelOrderService {
                         );
                     }
                 }
-                
+
                 return protocolCancelResponse;
             }
 

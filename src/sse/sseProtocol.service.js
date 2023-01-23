@@ -24,7 +24,7 @@ class SseProtocol {
                 response,
             );
 
-            await cancelOrderService.onCancelOrder(messageId);
+            await cancelOrderService.onCancelOrderDbOperation(messageId);
 
             return {
                 message: {
@@ -163,7 +163,7 @@ class SseProtocol {
                 response,
             );
 
-            await orderStatusService.onOrderStatusV2([messageId]);
+            await orderStatusService.onOrderStatusDbOperation([messageId]);
 
             return {
                 message: {
@@ -246,7 +246,7 @@ class SseProtocol {
                 response,
             );
 
-            await updateOrderService.onUpdate(messageId);
+            await updateOrderService.onUpdateDbOperation(messageId);
 
             return {
                 message: {

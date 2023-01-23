@@ -350,7 +350,7 @@ class ConfirmOrderService {
 
         }
         catch (err) {
-            throw err;
+            throw err
         }
     }
 

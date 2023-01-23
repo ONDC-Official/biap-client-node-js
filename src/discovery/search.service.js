@@ -64,18 +64,10 @@ class SearchService {
 
     validateSchedule(searchObj) {
         console.log("location_id------>", searchObj.location_id);
-        if (searchObj.location_id ===
-            "SIVA-ONDC-STORE-1-LOC-1") {
-            let start = new Date(),
-                duration = 'PT4H2M',
-                end = new Date(), // not included in result
-                period;
-
 
 
             console.log(searchObj.location_details);
             console.log(searchObj.location_details.time);
-            console.log(searchObj.location_details.time.schedule);
 
             let nowDate = new Date();
             let todayTimeStamp = nowDate.getTime();
@@ -169,7 +161,7 @@ class SearchService {
 
             }
 
-        }
+
 
         return {status: true, data: searchObj}
 

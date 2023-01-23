@@ -64,6 +64,47 @@ class UpdateOrderService {
         try {
             let protocolUpdateResponse = await onUpdateStatus(messageId);
 
+            if (!(protocolUpdateResponse && protocolUpdateResponse.length)) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_UPDATE
+                });
+
+                return {
+                    context,
+                    error: {
+                        message: "No data found"
+                    }
+                };
+            }
+            else {
+                if (!(protocolUpdateResponse?.[0].error)) {
+
+                    protocolUpdateResponse = protocolUpdateResponse?.[0];
+
+                    const dbResponse = await OrderMongooseModel.find({
+                        transactionId: protocolUpdateResponse.context.transaction_id,
+                        id: protocolUpdateResponse.message.order.id
+                    });
+
+                    if (!(dbResponse || dbResponse.length))
+                        throw new NoRecordFoundError();
+                    else {
+                    }
+                }
+                return protocolUpdateResponse;
+            }
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async onUpdateDbOperation(messageId) {
+        try {
+            let protocolUpdateResponse = await onUpdateStatus(messageId);
+
             console.log("protocolUpdateResponse-------------->",protocolUpdateResponse)
             if (!(protocolUpdateResponse && protocolUpdateResponse.length)) {
                 const contextFactory = new ContextFactory();
@@ -124,7 +165,7 @@ class UpdateOrderService {
                         );
                     }
                 }
-                
+
                 return protocolUpdateResponse;
             }
 

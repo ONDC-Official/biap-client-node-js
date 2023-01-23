@@ -188,6 +188,27 @@ class OrderStatusService {
             throw err;
         }
     }
+
+    async onOrderStatusDbOperation(messageIds) {
+        try {
+            const onOrderStatusResponse = await Promise.all(
+                messageIds.map(async messageId => {
+                    try {
+                        const onOrderStatusResponse = await this.onOrderStatus(messageId);
+                            return { ...onOrderStatusResponse };
+                    }
+                    catch (err) {
+                        throw err;
+                    }
+                })
+            );
+
+            return onOrderStatusResponse;
+        }
+        catch (err) {
+            throw err;
+        }
+    }
 }
 
 export default OrderStatusService;
