@@ -163,7 +163,7 @@ class SseProtocol {
                 response,
             );
 
-            await orderStatusService.onOrderStatusDbOperation([messageId]);
+            await orderStatusService.onOrderStatusV2([messageId]);
 
             return {
                 message: {

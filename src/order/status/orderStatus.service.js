@@ -114,15 +114,15 @@ class OrderStatusService {
                         const onOrderStatusResponse = await this.onOrderStatus(messageId);
 
                         console.log("onOrderStatusResponse-------messageId------>",messageId)
-                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.items)
-                        // console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
+                        console.log("onOrderStatusResponse----------->",onOrderStatusResponse.message.order.items)
+                        console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
 
                         let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments?.map((fulfillment,i)=>{
-                            // console.log("fulfillment----------------->",fulfillment)
+                            console.log("fulfillment----------------->",fulfillment)
                             let temp = onOrderStatusResponse?.message?.order?.items?.find(element=> element.fulfillment_id === fulfillment.id)
                             if(temp){
                                 temp.state = fulfillment.state?.descriptor?.code??""
-                                // console.log("temp------------------>",temp);
+                                console.log("temp------------------>",temp);
                                 return temp;
                             }
                         })
@@ -143,6 +143,27 @@ class OrderStatusService {
                                         e.fulfillment_status = temp.state;
                                     }else{
                                         e.fulfillment_status = ""
+                                    }
+                                    return e;
+                                })
+
+
+                                op =orderSchema?.items.map((e,i)=>{
+
+                                    let temp = onOrderStatusResponse?.message?.order?.items.find(element=> element.id === e.id)
+                                    if(temp) {
+
+                                        if(temp?.tags?.status){
+                                            e.return_status = temp?.tags?.status;
+                                            e.cancellation_status = temp?.tags?.status;
+
+                                        }
+
+                                        // if(!e.cancellation_status || !e.return_status ){
+                                        //     e.cancellation_status ='Cancelled' //TODO: change from actual response
+                                        //     e.return_status ='Return Approved' //TODO: change from actual response
+                                        // }
+
                                     }
                                     return e;
                                 })
