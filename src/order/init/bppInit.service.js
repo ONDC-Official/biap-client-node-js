@@ -91,6 +91,8 @@ class BppInitService {
             };
         }
         catch (err) {
+            err.response.data.initRequest =order
+
             throw err;
         }
     }
