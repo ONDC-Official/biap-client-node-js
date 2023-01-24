@@ -16,9 +16,15 @@ class BppConfirmService {
 
             const response = await protocolConfirm(confirmRequest);
 
-            return { context: confirmRequest.context, message: response.message };
+            if(response.error){
+                return { message: response.data };
+            }else{
+                return { context: confirmRequest.context, message: response.message };
+            }
+
         }
         catch (err) {
+
             throw err;
         }
     }
