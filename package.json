@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "@google-cloud/secret-manager": "^3.11.0",
+    "aws-sdk": "^2.1300.0",
     "axios": "^0.26.1",
     "body-parser": "^1.19.2",
     "cookie-parser": "^1.4.6",
