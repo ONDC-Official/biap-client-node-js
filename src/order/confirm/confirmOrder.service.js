@@ -308,7 +308,7 @@ class ConfirmOrderService {
                     return await this.confirmAndUpdateOrder(orderRequest, total, true);
                 }
                 catch (err) {
-                    throw err;
+                    return err.response.data;
                 }
             })
         );

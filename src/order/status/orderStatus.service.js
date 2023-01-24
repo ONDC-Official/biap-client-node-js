@@ -62,7 +62,7 @@ class OrderStatusService {
                     return orderResponse;
                 }
                 catch (err) {
-                    throw err;
+                    return err.response.data;
                 }
             })
         );

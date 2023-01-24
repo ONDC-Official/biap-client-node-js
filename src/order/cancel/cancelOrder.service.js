@@ -87,7 +87,7 @@ class CancelOrderService {
             }
         }
         catch (err) {
-            throw err;
+            return err.response.data;
         }
     }
 

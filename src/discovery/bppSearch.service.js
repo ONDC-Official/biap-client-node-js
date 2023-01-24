@@ -84,7 +84,7 @@ class BppSearchService {
 
             const response = await protocolSearch(searchRequest);
 
-            return { context: context, message: response.message };
+            return { context: context,searchRequest:searchRequest, message: response.message };
         }
         catch (err) {
             throw err;

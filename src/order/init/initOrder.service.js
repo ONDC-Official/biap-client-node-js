@@ -245,7 +245,7 @@ class InitOrderService {
                     return bppResponse;
                 }
                 catch (err) {
-                    throw err;
+                    return err.response.data;
                 }
 
             })
