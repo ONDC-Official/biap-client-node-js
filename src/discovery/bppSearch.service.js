@@ -40,7 +40,7 @@ class BppSearchService {
                                 })
                             }
                         }),
-                        ...((criteria?.pickup_location || criteria?.delivery_location) && {
+                        ...((criteria?.pickup_location || criteria?.delivery_location)? {
                             fulfillment: {
                                 type:"Delivery",
                                 ...(criteria?.pickup_location && {
@@ -58,7 +58,8 @@ class BppSearchService {
                                     }
                                 })
                             }
-                        }),
+                        }:{fulfillment: {
+                            type:"Delivery"}}),
                         ...(
                             (criteria?.category_id || criteria?.category_name) && {
                                 category: {
