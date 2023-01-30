@@ -338,7 +338,8 @@ const OrderSchema = new mongoose.Schema(
         paymentStatus: { type: String, enum: ['PAID', 'NOT-PAID'], default: null },
         bppId: { type: String },
         bpp_uri: { type: String },
-        bapOrderId: { type: String }
+        bapOrderId: { type: String },
+        settlementDetails:{type:Object}
     },
     { _id: true, timestamps: true }
 );

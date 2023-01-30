@@ -136,6 +136,7 @@ class InitOrderService {
                         [],
             };
 
+            orderSchema.settlementDetails = orderSchema.payment
             orderSchema.billing = {
                 ...orderSchema?.billing,
                 address: {

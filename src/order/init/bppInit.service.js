@@ -32,7 +32,8 @@ class BppInitService {
                         items: order?.items.map(item => {
                             return {
                                 id: item?.id?.toString(),
-                                quantity: item.quantity
+                                quantity: item.quantity,
+                                fulfillment_id:item?.fulfillment_id
                             };
                         }) || [],
                         billing: {
@@ -44,6 +45,10 @@ class BppInitService {
                             }
                         },
                         fulfillments: [{
+                            id: order.fulfillments[0].id,
+                            type: order.fulfillments[0].type,
+                            provider_id: order.fulfillments[0].provider_id,
+                            tracking: order.fulfillments[0].tracking,
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -57,21 +62,27 @@ class BppInitService {
                                         area_code: order?.delivery_info?.location?.address?.area_code
                                     }
                                 },
-                            },
-                            type: order.delivery_info.type,
-                            provider_id: provider.id
+                            }
                         }],
-                        payment: {
-                            type: order?.payment?.type,
-                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
-                            "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
-                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
-                            "@ondc/org/ondc-withholding_amount": 0.0,
-                            "@ondc/org/ondc-return_window": 0.0,
-                            "@ondc/org/ondc-settlement_basis": "Collection",
-                            "@ondc/org/ondc-settlement_window": "P2D"
-                        }
+                        tags:
+                            [
+                                {
+                                    code:"bap_terms_fee",
+                                    list:
+                                        [
+                                            {
+                                                code:"finder_fee_type",
+                                                value:order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE
+                                            },
+                                            {
+                                                code:"finder_fee_amount",
+                                                value: order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT
+                                            }
+                                        ]
+                                }
+                            ]
                     }
+
                 }
             };
 
