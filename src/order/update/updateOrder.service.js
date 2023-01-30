@@ -136,6 +136,10 @@ class UpdateOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
 
+                        if(protocolUpdateResponse?.message?.order?.quote){
+                            orderSchema.updatedQuote = protocolUpdateResponse?.message?.order?.quote
+                        }
+
                         let op =orderSchema?.items.map((e,i)=>{
 
 

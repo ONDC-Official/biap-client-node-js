@@ -326,6 +326,7 @@ const OrderSchema = new mongoose.Schema(
         billing: { type: BillingSchema },
         fulfillments: { type: [FulfillmentSchema] },
         quote: { type: QuotationSchema },
+        updatedQuote: { type: Object},
         payment: { type: PaymentSchema },
         id: { type: String },
         city: { type: String },

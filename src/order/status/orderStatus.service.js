@@ -116,13 +116,15 @@ class OrderStatusService {
                         console.log("onOrderStatusResponse-------messageId------>",messageId)
                         console.log("onOrderStatusResponse----------->",onOrderStatusResponse.message.order.items)
                         console.log("onOrderStatusResponse------------->",onOrderStatusResponse.message.order.fulfillments)
+                        console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
+
 
                         let fulfillmentItems =onOrderStatusResponse.message?.order?.fulfillments?.map((fulfillment,i)=>{
-                            console.log("fulfillment----------------->",fulfillment)
+                            //console.log("fulfillment----------------->",fulfillment)
                             let temp = onOrderStatusResponse?.message?.order?.items?.find(element=> element.fulfillment_id === fulfillment.id)
                             if(temp){
                                 temp.state = fulfillment.state?.descriptor?.code??""
-                                console.log("temp------------------>",temp);
+                               // console.log("temp------------------>",temp);
                                 return temp;
                             }
                         })
@@ -136,6 +138,11 @@ class OrderStatusService {
                             if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
+                                if(onOrderStatusResponse?.message?.order?.quote){
+
+                                    console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
+                                    orderSchema.updatedQuote = onOrderStatusResponse?.message?.order?.quote
+                                }
 
                                 let op =orderSchema?.items.map((e,i)=>{
                                     let temp = fulfillmentItems?.find(element=> element?.id === e?.id)
