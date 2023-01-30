@@ -35,8 +35,6 @@ class BppInitService {
                                 quantity: item.quantity
                             };
                         }) || [],
-                        add_ons: [],
-                        offers: [],
                         billing: {
                             ...order.billing_info,
                             address: {
