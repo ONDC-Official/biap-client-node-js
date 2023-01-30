@@ -8,7 +8,7 @@ import initializeFirebase from './lib/firebase/initializeFirebase.js';
 import logErrors from './utils/logErrors.js';
 import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
-
+import mongoSanitize from 'express-mongo-sanitize'
 const app = express();
 
 loadEnvVariables();
@@ -19,7 +19,15 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
+app.use(
+    mongoSanitize({
+        onSanitize: ({ req, key }) => {
+            console.warn(`This request[${key}] is sanitized`, req);
+        },
+    }),
+);
 app.use(logger('combined'))
+
 //
 // // Global exception handler for HTTP/HTTPS requests
 // app.use(function (err, req, res, next) {
