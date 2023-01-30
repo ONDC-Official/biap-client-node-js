@@ -17,7 +17,7 @@ class BppConfirmService {
             const response = await protocolConfirm(confirmRequest);
 
             if(response.error){
-                return { message: response.data };
+                return { message: response.data ,error:response.error};
             }else{
                 return { context: confirmRequest.context, message: response.message };
             }
@@ -83,8 +83,6 @@ class BppConfirmService {
                             },
                             provider_id: provider.id
                         }],
-                        addOns: [],
-                        offers: [],
                         payment: {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
@@ -101,7 +99,9 @@ class BppConfirmService {
                         },
                         quote: {
                             ...order?.quote
-                        }
+                        },
+                        created_at:new Date(),
+                        updated_at:new Date()
                     }
                 }
             }
@@ -233,15 +233,29 @@ class BppConfirmService {
                             collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
                                 PAYMENT_COLLECTED_BY.BAP : 
                                 PAYMENT_COLLECTED_BY.BPP,
+                            ...storedOrder.settlementDetails
                         },
                         quote: {
                             ...(qoute)
-                        }
+                        },
+                        created_at:new Date(),
+                        updated_at:new Date()
                     }
                 }
             };
 
-            return await this.confirm(confirmRequest);
+            let confirmResponse = await this.confirm(confirmRequest);
+
+            if(confirmResponse.error){
+                //retrial attempt
+                console.log("error--------->",confirmResponse.message);
+
+
+            }
+
+            return confirmResponse
+
+           // return await this.confirm(confirmRequest);
         }
         catch (err) {
             throw err;
