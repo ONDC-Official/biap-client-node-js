@@ -45,10 +45,10 @@ class BppInitService {
                             }
                         },
                         fulfillments: [{
-                            id: order.fulfillments[0].id,
-                            type: order.fulfillments[0].type,
-                            provider_id: order.fulfillments[0].provider_id,
-                            tracking: order.fulfillments[0].tracking,
+                            id: order?.fulfillments[0]?.id,
+                            type: order?.fulfillments[0]?.type,
+                            provider_id: order?.fulfillments[0]?.provider_id,
+                            tracking: order?.fulfillments[0]?.tracking,
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
