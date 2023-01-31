@@ -19,6 +19,12 @@ class BppInitService {
             order.billing_info.address.area_code = order.billing_info.address.areaCode
             delete order.billing_info.address.areaCode
 
+            const fulfillments = order?.fulfillments
+            let fulfillment = {}
+            if(fulfillments && fulfillments.length>0){
+                fulfillment = fulfillments[0]
+            }
+
             const initRequest = {
                 context: context,
                 message: {
@@ -45,10 +51,10 @@ class BppInitService {
                             }
                         },
                         fulfillments: [{
-                            id: order?.fulfillments[0]?.id,
-                            type: order?.fulfillments[0]?.type,
-                            provider_id: order?.fulfillments[0]?.provider_id,
-                            tracking: order?.fulfillments[0]?.tracking,
+                            id: fulfillment?.id,
+                            type: fulfillment?.type,
+                            provider_id: fulfillment?.provider_id,
+                            tracking: fulfillment?.tracking,
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -95,6 +101,8 @@ class BppInitService {
             };
         }
         catch (err) {
+
+            console.log("error------->",err)
             err.response.data.initRequest =order
 
             throw err;
