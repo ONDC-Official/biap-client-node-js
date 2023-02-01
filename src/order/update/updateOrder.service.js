@@ -24,7 +24,6 @@ class UpdateOrderService {
     async update(orderRequest) {
         try {
 
-            console.log("update step 1");
 
             const orderDetails = await getOrderById(orderRequest.message.order.id);
 
@@ -42,7 +41,6 @@ class UpdateOrderService {
                const data = {context:context,data:orderRequest}
            // }
 
-            console.log("update step 2");
             const transactionId= data.context.transaction_id
             const messageId= data.context.message_id
             const request = data.data
@@ -59,7 +57,6 @@ class UpdateOrderService {
             }
 
 
-            console.log("update step 3");
             return await bppUpdateService.update(
                 context,
                 update_target,
@@ -79,15 +76,10 @@ class UpdateOrderService {
     async updateForPaymentObject(orderRequest) {
         try {
 
-            console.log("on update payment-> step 1---->")
 
             const orderDetails = await getOrderById(orderRequest.message.order.id);
 
             const orderRequestDb = await getOrderRequest({transaction_id:orderRequest.context.transaction_id,message_id:orderRequest.context.message_id,requestType:'update'})
-
-           // console.log("o[][]]]]]]]]]]]]]--->orderRequest",{transaction_id:orderRequest.context.transaction_id,message_id:orderRequest.context.message_id,requestType:'update'})
-
-            //console.log("o[][]]]]]]]]]]]]]--->orderRequest",orderRequestDb?.request)
 
             if(!orderRequestDb?.request?.data?.payment){
                 const contextFactory = new ContextFactory();
@@ -113,11 +105,9 @@ class UpdateOrderService {
 
                    const olderQuote = await OrderRequestLogMongooseModel.find({transactionId:orderDetails?.transactionId,requestType:'update'});
 
-                   console.log("----------<<><><><><><><><><><><><><><><><><><><><><><><><><><><><>--------------------------olderQute--->", olderQuote);
 
                     let previouseQoute = olderQuote.map((item) => parseInt(item?.request?.payment? item?.request?.payment["@ondc/org/settlement_details"][0]?.settlement_amount:0)|| 0).reduce((a, b) => +a + +b)
 
-                    console.log("----------<<><><><><><><><><><><><><><><><><><><><><><><><><><><><>------------------previouseQoute--->", previouseQoute);
 
                     const refundAmount = parseInt(orderDetails?.quote?.price?.value) - parseInt(orderDetails?.updatedQuote?.price?.value) - previouseQoute
 
@@ -145,7 +135,6 @@ class UpdateOrderService {
                 // }
                 //
 
-                console.log("on update payment-> step last---->")
 
                 return await bppUpdateService.update(
                     context,
@@ -209,7 +198,6 @@ class UpdateOrderService {
     async onUpdateDbOperation(messageId) {
         try {
 
-            console.log("on update -> step 1---->")
             let protocolUpdateResponse = await onUpdateStatus(messageId);
 
             if (!(protocolUpdateResponse && protocolUpdateResponse.length)) {
@@ -229,7 +217,6 @@ class UpdateOrderService {
             else {
                 if (!(protocolUpdateResponse?.[0].error)) {
 
-                    console.log("on update -> step 2---->")
 
                     protocolUpdateResponse = protocolUpdateResponse?.[0];
 
@@ -245,7 +232,6 @@ class UpdateOrderService {
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
 
                         if(protocolUpdateResponse?.message?.order?.quote){
-                            //console.log("update qooute--------->",protocolUpdateResponse?.message?.order?.quote)
                             orderSchema.updatedQuote = protocolUpdateResponse?.message?.order?.quote
                         }
 
@@ -270,14 +256,12 @@ class UpdateOrderService {
                         //get item from db and update state for item
                         orderSchema.items = op;
 
-                        //console.log("orderSchema.items ===",orderSchema.items )
                         await addOrUpdateOrderWithTransactionIdAndOrderId(
                             protocolUpdateResponse.context.transaction_id,protocolUpdateResponse.message.order.id,
                             { ...orderSchema }
                         );
 
 
-                        console.log("on update -> step 3---->")
 
                         //retry /update with payment object with refund details
 
@@ -285,10 +269,8 @@ class UpdateOrderService {
                         const updateRequest = await getOrderRequest({transaction_id:protocolUpdateResponse.context.transaction_id,
                             message_id:protocolUpdateResponse.context.message_id,requestType:'update'})
 
-                        console.log("updateRequest*********>",updateRequest)
 
                         //save /on_update request save
-                        console.log("on update -> step 4---->")
                         const data = {context:protocolUpdateResponse.context,data:{...protocolUpdateResponse}};
 
                         const transactionId= data.context.transaction_id
@@ -299,7 +281,6 @@ class UpdateOrderService {
 
                         await orderSaved.save();
 
-                        console.log("on update -> step 5---->")
 
                         if(!updateRequest?.request?.payment){
                             setTimeout(async() => {
