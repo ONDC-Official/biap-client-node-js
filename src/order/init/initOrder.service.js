@@ -76,12 +76,13 @@ class InitOrderService {
                 {
                     id: item?.id?.toString(),
                     product: item?.product,
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    fulfillment_id:item?.fulfillment_id
                 }
                 itemProducts.push(itemObj);
             }
 
-            // console.log('itemProducts--------------->',itemProducts);
+            console.log('itemProducts--------------->',itemProducts);
             // console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
             console.log('itemProducts--------response?.context?.bpp_id------->',fulfillment);
 
@@ -123,7 +124,8 @@ class InitOrderService {
                 return {
                     id: item?.id?.toString(),
                     quantity: item.quantity,
-                    product: item.product
+                    product: item.product,
+                    fulfillment_id:item?.fulfillment_id
                 };
             }) || [];
 

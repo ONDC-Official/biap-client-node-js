@@ -21,7 +21,8 @@ class BppSelectService {
                         items: cart.items.map(cartItem => {
                             return {
                                 id: cartItem?.id?.toString(),
-                                quantity: cartItem?.quantity
+                                quantity: cartItem?.quantity,
+                                location_id: provider.locations[0]
                             }
                         }) || [],
                         provider: {

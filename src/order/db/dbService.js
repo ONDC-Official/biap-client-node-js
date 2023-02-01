@@ -1,5 +1,6 @@
 import NoRecordFoundError from "../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from './order.js';
+import OrderRequestLogMongooseModel from "./orderRequestLog.js";
 
 /**
 * update order
@@ -94,4 +95,28 @@ const getOrderById = async (orderId) => {
         return order?.[0];
 };
 
-export { addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };
+const saveOrderRequest = async (data) => {
+
+    //console.log("data---to save----->",data);
+    //console.log("data---to save----->",data.context);
+
+    const transactionId= data.context.transaction_id
+    const messageId= data.context.message_id
+    const request = data.data
+    const requestType = data.context.action
+    const order =new OrderRequestLogMongooseModel({requestType,transactionId,messageId,request})
+
+    await order.save();
+
+    return order;
+};
+
+const getOrderRequest = async (data) => {
+    const transactionId= data.transaction_id
+    const messageId= data.message_id
+    const requestType= data.requestType
+    const order = await OrderRequestLogMongooseModel.findOne({transactionId,messageId,requestType})
+    return order;
+};
+
+export {getOrderRequest,saveOrderRequest,addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };

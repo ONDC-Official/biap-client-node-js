@@ -179,12 +179,15 @@ class BppConfirmService {
                                     id: item.id,
                                     quantity: {
                                         count: item.quantity.count
-                                    }
+                                    },
+                                    fulfillment_id: item.fulfillment_id
                                 };
                             }) || [],
                         provider: storedOrder?.provider,
                         fulfillments: [...storedOrder.fulfillments].map((fulfillment) => {
                             return {
+                                id: fulfillment?.id,
+                                tracking: fulfillment?.tracking,
                                 end: {
                                     contact: {
                                         email: fulfillment?.end?.contact?.email,
@@ -218,8 +221,6 @@ class BppConfirmService {
                                 provider_id: storedOrder?.provider?.id
                             }
                         }),
-                        addOns: [],
-                        offers: [],
                         payment: {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),

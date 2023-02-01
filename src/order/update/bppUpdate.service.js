@@ -9,8 +9,9 @@ class BppUpdateService {
      * @param {String} cancellationReasonId 
      * @returns 
      */
-    async update(context, update_target,order) {
+    async update(context, update_target,order,orderDetails) {
         try {
+
 
             const cancelRequest = {
                 context: context,
@@ -21,7 +22,6 @@ class BppUpdateService {
             }
 
             const response = await protocolUpdate(cancelRequest);
-
             console.log("response----------------------->",response)
             return { context: context, message: response.message };
         }

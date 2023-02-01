@@ -53,7 +53,7 @@ class BppInitService {
                         fulfillments: [{
                             id: fulfillment?.id,
                             type: fulfillment?.type,
-                            provider_id: fulfillment?.provider_id,
+                            provider_id: provider.id,
                             tracking: fulfillment?.tracking,
                             end: {
                                 contact: {
@@ -72,8 +72,8 @@ class BppInitService {
                         }],
 
                     payment: {
-                        type: order?.payment?.type,
-                        collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
+                        type: 'ON-ORDER',
+                        collected_by: PAYMENT_COLLECTED_BY.BAP,
                         "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
                         "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
                         "@ondc/org/ondc-withholding_amount": 0.0,

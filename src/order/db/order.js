@@ -260,7 +260,8 @@ const ItemsSchema = new mongoose.Schema(
         product:{type:Object, required: false},
         fulfillment_status:{type: String, required:false },
         cancellation_status:{type: String, required:false },
-        return_status:{type: String, required:false }
+        return_status:{type: String, required:false },
+        fulfillment_id:{type:String}
     },
     { _id: false }
 );
