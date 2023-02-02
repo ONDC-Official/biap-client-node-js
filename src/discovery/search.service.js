@@ -63,11 +63,11 @@ class SearchService {
     }
 
     validateSchedule(searchObj) {
-        console.log("location_id------>", searchObj.location_id);
+        console.log("location_id------>", searchObj.id);
 
 
-            console.log(searchObj.location_details);
-            console.log(searchObj.location_details.time);
+          //  console.log(searchObj.location_details);
+          //  console.log(searchObj.location_details.time);
 
             let nowDate = new Date();
             let todayTimeStamp = nowDate.getTime();
@@ -81,13 +81,13 @@ class SearchService {
                     let opendays = searchObj.location_details.time.days.split(",")
                     if (day in opendays) {
                         //allowed response
-                        console.log("result is valid for the period", opendays)
+                    //    console.log("result is valid for the period", opendays)
                     } else {
                         return {status: false}
                     }
                 } else {
                     //store is all day open
-                    console.log("store is all day open")
+                 //   console.log("store is all day open")
                 }
 
                 //TODO: remove false and add searchObj.location_details.time.range
@@ -104,25 +104,25 @@ class SearchService {
                     searchObj.storeOpenTillDate = storeOpenTillDate
 
                     if(todayTimeStamp < storeOpenTillDate.getTime()){
-                        console.log("[Range] store is open")
+                     //   console.log("[Range] store is open")
                         return {status: true, data:searchObj}
                     }else{
-                        console.log("[Range] store is closed")
+                     //   console.log("[Range] store is closed")
                         return {status: false}//TODO: return false
                     }
 
                 }else if (searchObj.location_details.time.schedule) {
                     if (searchObj.location_details.time.schedule.holidays) {
                         if (date in searchObj.location_details.time.schedule.holidays) {
-                            console.log("[Holiday]store is closed today")
+                         //   console.log("[Holiday]store is closed today")
                             return {status: false}
                         }else{
                             //allow response
-                            console.log("[Holiday]store is open today")
+                         //   console.log("[Holiday]store is open today")
                         }
                     } else {
                         //allow response
-                        console.log("[Holiday]store is open today")
+                      //  console.log("[Holiday]store is open today")
                     }
 
 
@@ -149,10 +149,10 @@ class SearchService {
                         searchObj.storeOpenTillDate = storeOpenTillDate
 
                         if(todayTimeStamp < storeOpenTillDate.getTime()){
-                            console.log("[Range] store is open")
+                          //  console.log("[Range] store is open")
                             return {status: true, data:searchObj}
                         }else{
-                            console.log("[Range] store is closed")
+                         //   console.log("[Range] store is closed")
                             return {status: false}//TODO: return false
                         }
                     }
@@ -164,6 +164,20 @@ class SearchService {
 
 
         return {status: true, data: searchObj}
+
+    }
+
+    validateQty(searchObj) {
+      //  console.log("location_id------>",searchObj);
+        console.log("location_id------id>",searchObj.id);
+
+            console.log(searchObj.quantity)
+
+        if(!searchObj.quantity){
+            searchObj.quantity =  { available: { count: 0 }, maximum: { count: 0 } }
+        }
+
+        return { data: searchObj}
 
     }
 
@@ -181,6 +195,7 @@ class SearchService {
 
             let validatedSearchObject = this.validateSchedule(searchObj);
 
+            let validatedQty = this.validateQty(validatedSearchObject.data)
             if (validatedSearchObject.status === true) {
 
                 data.push({
