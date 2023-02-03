@@ -234,7 +234,13 @@ class BppConfirmService {
                             collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? 
                                 PAYMENT_COLLECTED_BY.BAP : 
                                 PAYMENT_COLLECTED_BY.BPP,
-                            ...storedOrder.settlementDetails
+                            '@ondc/org/buyer_app_finder_fee_type': process.env.BAP_FINDER_FEE_TYPE,
+                            '@ondc/org/buyer_app_finder_fee_amount':  process.env.BAP_FINDER_FEE_AMOUNT,
+                            '@ondc/org/withholding_amount': "0.0",
+                            '@ondc/org/return_window': "0",
+                            '@ondc/org/settlement_basis': "Collection",
+                            '@ondc/org/settlement_window': "P2D",
+                            "@ondc/org/settlement_details":storedOrder?.settlementDetails?.["@ondc/org/settlement_details"]
                         },
                         quote: {
                             ...(qoute)
