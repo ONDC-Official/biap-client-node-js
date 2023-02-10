@@ -78,8 +78,10 @@ class SearchService {
 
                 //check for days
                 if (searchObj.location_details.time.days) {
-                    let opendays = searchObj.location_details.time.days.split(",")
-                    if (day in opendays) {
+
+                    let opendays = searchObj.location_details.time.days.split(",").map( Number );
+
+                    if (opendays.indexOf(day) !== -1) {
                         //allowed response
                     //    console.log("result is valid for the period", opendays)
                     } else {
@@ -185,6 +187,7 @@ class SearchService {
     transform(searchResults = []) {
         let data = [];
 
+        console.log("searchResults---",searchResults)
 
         searchResults && searchResults.length && searchResults.forEach(result => {
             let searchObj = {...result};
@@ -192,6 +195,8 @@ class SearchService {
 
             let validatedSearchObject = this.validateSchedule(searchObj);
 
+
+            console.log("validated search object---->",validatedSearchObject)
             if (validatedSearchObject.status === true) {
                 let validatedQty = this.validateQty(validatedSearchObject.data)
                 data.push({
