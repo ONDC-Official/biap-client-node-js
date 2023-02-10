@@ -168,10 +168,7 @@ class SearchService {
     }
 
     validateQty(searchObj) {
-      //  console.log("location_id------>",searchObj);
-        console.log("location_id------id>",searchObj.id);
-
-            console.log(searchObj.quantity)
+      console.log("location_id------>",searchObj);
 
         if(!searchObj.quantity){
             searchObj.quantity =  { available: { count: 0 }, maximum: { count: 0 } }
@@ -195,9 +192,8 @@ class SearchService {
 
             let validatedSearchObject = this.validateSchedule(searchObj);
 
-            let validatedQty = this.validateQty(validatedSearchObject.data)
             if (validatedSearchObject.status === true) {
-
+                let validatedQty = this.validateQty(validatedSearchObject.data)
                 data.push({
                     ...validatedSearchObject.data
                 });

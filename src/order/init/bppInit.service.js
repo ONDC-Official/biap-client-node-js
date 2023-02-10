@@ -52,7 +52,7 @@ class BppInitService {
                         },
                         fulfillments: [{
                             id: fulfillment?.id,
-                            type: fulfillment?.type,
+                            type: order.delivery_info.type,
                             provider_id: provider.id,
                             tracking: fulfillment?.tracking,
                             end: {
