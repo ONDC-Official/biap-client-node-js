@@ -65,7 +65,8 @@ export const PROTOCOL_PAYMENT = {
 export const PROTOCOL_VERSION = {
     v_0_9_1: "0.9.1",
     v_0_9_3: "0.9.3",
-    v_1_0_0: "1.0.0"
+    v_1_0_0: "1.0.0",
+    v_1_1_0: "1.1.0"
 };
 
 export const SUBSCRIBER_TYPE = {

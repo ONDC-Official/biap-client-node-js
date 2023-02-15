@@ -172,6 +172,8 @@ class BppConfirmService {
                             phone: storedOrder?.billing?.phone,
                             name: storedOrder?.billing?.name,
                             email: storedOrder?.billing?.email,
+                            created_at:storedOrder?.billing?.createdAt,
+                            updated_at:storedOrder?.billing?.updatedAt
                         },
                         items: storedOrder?.items && storedOrder?.items?.length &&
                             [...storedOrder?.items].map(item => {
@@ -222,6 +224,8 @@ class BppConfirmService {
                             }
                         }),
                         payment: {
+                            uri:"", //TODO:In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
+                            tl_method:"http/get",
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
@@ -240,12 +244,13 @@ class BppConfirmService {
                             '@ondc/org/return_window': "0",
                             '@ondc/org/settlement_basis': "Collection",
                             '@ondc/org/settlement_window': "P2D",
-                            "@ondc/org/settlement_details":storedOrder?.settlementDetails?.["@ondc/org/settlement_details"]
+                            "@ondc/org/settlement_details":storedOrder?.settlementDetails?.["@ondc/org/settlement_details"],
+
                         },
                         quote: {
                             ...(qoute)
                         },
-                        created_at:new Date(),
+                        created_at:context.timestamp,
                         updated_at:new Date()
                     }
                 }

@@ -19,6 +19,9 @@ class BppInitService {
             order.billing_info.address.area_code = order.billing_info.address.areaCode
             delete order.billing_info.address.areaCode
 
+            order.billing_info.address.locality = order.billing_info.address.street
+            order.delivery_info.location.address.locality = order.delivery_info.location.address.street
+
             const fulfillments = order?.fulfillments
             let fulfillment = {}
             if(fulfillments && fulfillments.length>0){
@@ -48,7 +51,9 @@ class BppInitService {
                                 ...order.billing_info.address,
                                 name: order.billing_info.name,
                                 area_code: order?.billing_info?.address?.area_code
-                            }
+                            },
+                            created_at:new Date(),
+                            updated_at:new Date()
                         },
                         fulfillments: [{
                             id: fulfillment?.id,
