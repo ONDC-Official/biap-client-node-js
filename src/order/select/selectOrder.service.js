@@ -128,9 +128,7 @@ class SelectOrderService {
 
                 return {
                     context,
-                    error: {
-                        message: "No data found"
-                    }
+                    error: protocolSelectResponse?.[0]?.error
                 };
             } else {
                 return this.transform(protocolSelectResponse?.[0]);
