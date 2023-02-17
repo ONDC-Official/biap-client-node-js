@@ -28,6 +28,11 @@ class BppInitService {
                 fulfillment = fulfillments[0]
             }
 
+            delete order.billing_info.address.tag
+            delete order.billing_info.address.street
+            delete order.delivery_info.location.address.tag
+            delete order.delivery_info.location.address.street
+
             const initRequest = {
                 context: context,
                 message: {
@@ -74,21 +79,9 @@ class BppInitService {
                                     }
                                 },
                             }
-                        }],
-
-                    payment: {
-                        type: 'ON-ORDER',
-                        collected_by: PAYMENT_COLLECTED_BY.BAP,
-                        "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
-                        "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
-                        "@ondc/org/withholding_amount": "0.0",
-                        "@ondc/org/return_window": "0",
-                        "@ondc/org/settlement_basis": "Collection",
-                        "@ondc/org/settlement_window": "P2D"
-                    }
+                        }]
                 }
             }
-
 
             };
 

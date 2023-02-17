@@ -161,7 +161,6 @@ class BppConfirmService {
                                 door: storedOrder?.billing?.address?.door,
                                 name: storedOrder?.billing?.address?.name,
                                 building: storedOrder?.billing?.address?.building,
-                                street: storedOrder?.billing?.address?.street,
                                 locality: storedOrder?.billing?.address?.locality,
                                 ward: storedOrder?.billing?.address?.ward,
                                 city: storedOrder?.billing?.address?.city,
@@ -204,7 +203,6 @@ class BppConfirmService {
                                             door: fulfillment?.end?.location?.address?.door,
                                             name: fulfillment?.end?.location?.address?.name,
                                             building: fulfillment?.end?.location?.address?.building,
-                                            street: fulfillment?.end?.location?.address?.street,
                                             locality: fulfillment?.end?.location?.address?.locality,
                                             ward: fulfillment?.end?.location?.address?.ward,
                                             city: fulfillment?.end?.location?.address?.city,
@@ -215,11 +213,6 @@ class BppConfirmService {
                                     }
                                 },
                                 type: "Delivery",
-                                customer: {
-                                    person: {
-                                        name: fulfillment?.customer?.person?.name
-                                    }
-                                },
                                 provider_id: storedOrder?.provider?.id
                             }
                         }),
@@ -251,7 +244,7 @@ class BppConfirmService {
                             ...(qoute)
                         },
                         created_at:context.timestamp,
-                        updated_at:new Date()
+                        updated_at:context.timestamp
                     }
                 }
             };
