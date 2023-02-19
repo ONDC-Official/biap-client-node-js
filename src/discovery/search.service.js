@@ -72,6 +72,10 @@ class SearchService {
             let nowDate = new Date();
             let todayTimeStamp = nowDate.getTime();
             let day = nowDate.getDay();
+
+            if(day==0){
+                day=7 //new date.getDate() gives 0 for sunday
+            }
             let date = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1) + '-' + nowDate.getDate();
 
             if (searchObj.location_details.time) {
@@ -81,15 +85,17 @@ class SearchService {
 
                     let opendays = searchObj.location_details.time.days.split(",").map( Number );
 
+                    console.log("day---->",day)
                     if (opendays.indexOf(day) !== -1) {
                         //allowed response
-                    //    console.log("result is valid for the period", opendays)
+                        console.log("result is valid for the period", opendays)
                     } else {
+                        console.log("invalid days---->", opendays)
                         return {status: false}
                     }
                 } else {
                     //store is all day open
-                 //   console.log("store is all day open")
+                    console.log("store is all day open")
                 }
 
                 //TODO: remove false and add searchObj.location_details.time.range
@@ -106,25 +112,25 @@ class SearchService {
                     searchObj.storeOpenTillDate = storeOpenTillDate
 
                     if(todayTimeStamp < storeOpenTillDate.getTime()){
-                     //   console.log("[Range] store is open")
+                        console.log("[Range] store is open")
                         return {status: true, data:searchObj}
                     }else{
-                     //   console.log("[Range] store is closed")
+                        console.log("[Range] store is closed")
                         return {status: false}//TODO: return false
                     }
 
                 }else if (searchObj.location_details.time.schedule) {
                     if (searchObj.location_details.time.schedule.holidays) {
                         if (date in searchObj.location_details.time.schedule.holidays) {
-                         //   console.log("[Holiday]store is closed today")
+                            console.log("[Holiday]store is closed today")
                             return {status: false}
                         }else{
                             //allow response
-                         //   console.log("[Holiday]store is open today")
+                            console.log("[Holiday]store is open today")
                         }
                     } else {
                         //allow response
-                      //  console.log("[Holiday]store is open today")
+                        console.log("[Holiday]store is open today")
                     }
 
 
@@ -151,10 +157,10 @@ class SearchService {
                         searchObj.storeOpenTillDate = storeOpenTillDate
 
                         if(todayTimeStamp < storeOpenTillDate.getTime()){
-                          //  console.log("[Range] store is open")
+                            console.log("[Range] store is open")
                             return {status: true, data:searchObj}
                         }else{
-                         //   console.log("[Range] store is closed")
+                            console.log("[Range] store is closed")
                             return {status: false}//TODO: return false
                         }
                     }
