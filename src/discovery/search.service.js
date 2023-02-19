@@ -73,7 +73,7 @@ class SearchService {
             let todayTimeStamp = nowDate.getTime();
             let day = nowDate.getDay();
 
-            if(day==0){
+            if(day===0){
                 day=7 //new date.getDate() gives 0 for sunday
             }
             let date = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1) + '-' + nowDate.getDate();
