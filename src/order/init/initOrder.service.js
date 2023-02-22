@@ -152,7 +152,9 @@ class InitOrderService {
                 delete orderSchema.fulfillment;
             }
 
-            console.log("update order-----------fulfillment--------->",orderSchema.fulfillments);
+
+            console.log("update order----------orderSchema?.billing--------->",orderSchema?.billing);
+
 
             if (orderSchema.fulfillments && orderSchema.fulfillments.length) {
                 orderSchema.fulfillments = [...orderSchema?.fulfillments].map((fulfillment)=> {

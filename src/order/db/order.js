@@ -60,9 +60,11 @@ const BillingSchema = new mongoose.Schema(
         email: { type: String },
         time: { type: TimeSchema },
         taxNumber: { type: String },
-        locationId: { type: String }
+        locationId: { type: String },
+        updated_at:{type: String},
+        created_at:{type: String}
     },
-    { _id: false, timestamps: true }
+    { _id: false }
 );
 
 const DescriptorSchema = new mongoose.Schema(

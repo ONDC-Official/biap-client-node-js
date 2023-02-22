@@ -30,8 +30,10 @@ class BppInitService {
 
             delete order.billing_info.address.tag
             delete order.billing_info.address.street
+            delete order.billing_info.address.door
             delete order.delivery_info.location.address.tag
             delete order.delivery_info.location.address.street
+            delete order.delivery_info.location.address.door
 
             const initRequest = {
                 context: context,
@@ -57,13 +59,12 @@ class BppInitService {
                                 name: order.billing_info.name,
                                 area_code: order?.billing_info?.address?.area_code
                             },
-                            created_at:new Date(),
-                            updated_at:new Date()
+                            created_at:context.timestamp,
+                            updated_at:context.timestamp
                         },
                         fulfillments: [{
                             id: fulfillment?.id,
                             type: order.delivery_info.type,
-                            provider_id: provider.id,
                             tracking: fulfillment?.tracking,
                             end: {
                                 contact: {

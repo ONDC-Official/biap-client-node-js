@@ -158,7 +158,6 @@ class BppConfirmService {
                         state:"Created",
                         billing: {
                             address: {
-                                door: storedOrder?.billing?.address?.door,
                                 name: storedOrder?.billing?.address?.name,
                                 building: storedOrder?.billing?.address?.building,
                                 locality: storedOrder?.billing?.address?.locality,
@@ -171,8 +170,8 @@ class BppConfirmService {
                             phone: storedOrder?.billing?.phone,
                             name: storedOrder?.billing?.name,
                             email: storedOrder?.billing?.email,
-                            created_at:storedOrder?.billing?.createdAt,
-                            updated_at:storedOrder?.billing?.updatedAt
+                            created_at:storedOrder?.billing?.created_at,
+                            updated_at:storedOrder?.billing?.updated_at
                         },
                         items: storedOrder?.items && storedOrder?.items?.length &&
                             [...storedOrder?.items].map(item => {
@@ -200,7 +199,6 @@ class BppConfirmService {
                                     location: {
                                         gps: fulfillment?.end?.location?.gps,
                                         address: {
-                                            door: fulfillment?.end?.location?.address?.door,
                                             name: fulfillment?.end?.location?.address?.name,
                                             building: fulfillment?.end?.location?.address?.building,
                                             locality: fulfillment?.end?.location?.address?.locality,
@@ -212,12 +210,11 @@ class BppConfirmService {
                                         }
                                     }
                                 },
-                                type: "Delivery",
-                                provider_id: storedOrder?.provider?.id
+                                type: "Delivery"
                             }
                         }),
                         payment: {
-                            uri:"", //TODO:In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
+                            uri:"https://juspay.in/", //TODO:In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
                             tl_method:"http/get",
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
@@ -233,10 +230,6 @@ class BppConfirmService {
                                 PAYMENT_COLLECTED_BY.BPP,
                             '@ondc/org/buyer_app_finder_fee_type': process.env.BAP_FINDER_FEE_TYPE,
                             '@ondc/org/buyer_app_finder_fee_amount':  process.env.BAP_FINDER_FEE_AMOUNT,
-                            '@ondc/org/withholding_amount': "0.0",
-                            '@ondc/org/return_window': "0",
-                            '@ondc/org/settlement_basis': "Collection",
-                            '@ondc/org/settlement_window': "P2D",
                             "@ondc/org/settlement_details":storedOrder?.settlementDetails?.["@ondc/org/settlement_details"],
 
                         },
