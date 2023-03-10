@@ -110,8 +110,8 @@ class InitOrderService {
      */
     async updateOrder(response, dbResponse) {
 
-        console.log("update order-------------------->",dbResponse);
-        console.log("update order-----------response--------->",response);
+        //console.log("update order-------------------->",dbResponse);
+        //console.log("update order-----------response--------->",response);
         // console.log("update order-----------response--------->",orderSchema.fulfillment);
         if (response?.message?.order && dbResponse) {
             dbResponse = dbResponse?.toJSON();
@@ -154,7 +154,10 @@ class InitOrderService {
 
 
             console.log("update order----------orderSchema?.billing--------->",orderSchema?.billing);
+            console.log("update order----------orderSchema?.billing---quote------>",orderSchema?.quote);
+            console.log("update order----------orderSchema?.billing--response -quote------>",dbResponse?.quote);
 
+            dbResponse.quote = orderSchema.quote
 
             if (orderSchema.fulfillments && orderSchema.fulfillments.length) {
                 orderSchema.fulfillments = [...orderSchema?.fulfillments].map((fulfillment)=> {
@@ -305,12 +308,12 @@ class InitOrderService {
                     try {
                         let protocolInitResponse = await this.onInitOrder(messageId);
 
-                        console.log("protocolInitResponse------------->",protocolInitResponse);
-                        console.log("protocolInitResponse-------provider------>",protocolInitResponse.message.order.provider);
+                        //console.log("protocolInitResponse------------->",protocolInitResponse);
+                        //console.log("protocolInitResponse-------provider------>",protocolInitResponse.message.order.provider);
 
                         let dbResponse = await getOrderByTransactionIdAndProvider(protocolInitResponse?.context?.transaction_id,protocolInitResponse?.message.order.provider.id);
 
-                        console.log("on init --protocolInitResponse--dbResponse",dbResponse);
+                        //console.log("on init --protocolInitResponse--dbResponse",dbResponse);
 
                         await this.updateOrder(protocolInitResponse, dbResponse);
 
