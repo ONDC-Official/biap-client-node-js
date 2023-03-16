@@ -65,7 +65,6 @@ class BppInitService {
                         fulfillments: [{
                             id: fulfillment?.id,
                             type: order.delivery_info.type,
-                            tracking: fulfillment?.tracking,
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
