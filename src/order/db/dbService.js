@@ -119,4 +119,11 @@ const getOrderRequest = async (data) => {
     return order;
 };
 
-export {getOrderRequest,saveOrderRequest,addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };
+const getOrderRequestLatestFirst = async (data) => {
+    const transactionId= data.transaction_id
+    const requestType= data.requestType
+    const order = await OrderRequestLogMongooseModel.findOne({transactionId,requestType})
+    return order;
+};
+
+export {getOrderRequest,getOrderRequestLatestFirst,saveOrderRequest,addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };

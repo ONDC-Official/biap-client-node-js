@@ -1,16 +1,19 @@
 import { onOrderStatus } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionId,getOrderRequestLatestFirst,
     addOrUpdateOrderWithTransactionIdAndProvider,
-    getOrderById
+    getOrderById, getOrderRequest, saveOrderRequest
 } from "../db/dbService.js";
 import OrderMongooseModel from '../db/order.js';
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppOrderStatusService from "./bppOrderStatus.service.js";
-
+import CustomError from "../../lib/errors/custom.error.js";
+import OrderRequestLogMongooseModel from "../db/orderRequestLog.js";
+import BppUpdateService from "../update/bppUpdate.service.js";
 const bppOrderStatusService = new BppOrderStatusService();
+const bppUpdateService = new BppUpdateService();
 
 class OrderStatusService {
 
@@ -160,11 +163,22 @@ class OrderStatusService {
 
                                 orderSchema.items = op;
 
+
+                                const updateRequest = await getOrderRequestLatestFirst({transaction_id:onOrderStatusResponse.context.transaction_id
+                                    ,requestType:'update'}) //TODO: sort by latest first
+
+                                console.log("update request-------->",updateRequest);
+
+                                if(updateRequest){
+                                    await this.updateForPaymentObject(updateRequest?.request,onOrderStatusResponse)
+                                }
+
                                 await addOrUpdateOrderWithTransactionIdAndProvider(
                                     onOrderStatusResponse?.context?.transaction_id,onOrderStatusResponse.message.order.provider.id,
                                     { ...orderSchema }
                                 );
-                                
+
+
                                 return { ...onOrderStatusResponse };
 
                             }
@@ -199,6 +213,109 @@ class OrderStatusService {
             throw err;
         }
     }
+
+    async updateForPaymentObject(orderRequest,protocolUpdateResponse) {
+        try {
+
+            console.log("orderRequest.message--->",orderRequest)
+            const orderDetails = await getOrderById(orderRequest.message.order.id);
+
+            const orderRequestDb = await getOrderRequest({transaction_id:orderRequest?.context?.transaction_id,requestType:'update'})
+
+            if(!orderRequestDb?.request?.data?.payment){
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    action: PROTOCOL_CONTEXT.UPDATE,
+                    transactionId: orderDetails?.transactionId,
+                    bppId: orderRequest?.context?.bpp_id,
+                    bpp_uri: orderDetails?.bpp_uri,
+                    cityCode:orderDetails.city
+                });
+
+                const { message = {} } = orderRequest || {};
+                const { update_target,order } = message || {};
+
+                if (!(context?.bpp_id)) {
+                    throw new CustomError("BPP Id is mandatory");
+                }
+
+                console.log("orderDetails?.updatedQuote?.price?.value----->",orderDetails?.updatedQuote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value----->",protocolUpdateResponse.message.order.quote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value---message id-->",protocolUpdateResponse.context.message_id)
+
+                if(parseInt(orderDetails?.updatedQuote?.price?.value) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)){
+
+                    //check if item state is liquidated or cancelled
+
+                    let dbItems = orderDetails.items
+                    let updatedItems = protocolUpdateResponse.message.order.items
+
+                    let updateQoute = false
+                    for(const item of updatedItems){
+
+                        let updateItem =  dbItems.find((i)=>{return i.id===item.id});
+                        if(updateItem){
+                            console.log("update item found---->",updateItem.id)
+                            console.log("update item found----item?.tags?.status>",item?.tags?.status)
+                            console.log("update item found----updateItem.return_status",updateItem.return_status)
+                            //check the status
+                            if(['Cancelled','Liquidated','Return_Picked'].includes(item?.tags?.status)  && item?.tags?.status !== updateItem.return_status){
+                                updateQoute =true;
+                                console.log("update item found--mark true-->",updateItem.id)
+                            }
+                        }
+                    }
+
+                    console.log("-updateQoute--->",updateQoute)
+                    //if there is update qoute recieved from on_update we need to calculate refund amount
+                    //refund amount = original quote - update quote
+
+                    if(updateQoute){
+
+                        const refundAmount = parseInt(orderDetails?.updatedQuote?.price?.value) - parseInt(protocolUpdateResponse.message.order.quote?.price?.value)
+
+                        let paymentSettlementDetails =
+                            {
+                                "@ondc/org/settlement_details":
+                                    [
+                                        {
+                                            "settlement_counterparty": "buyer",
+                                            "settlement_phase": "refund",
+                                            "settlement_type":"upi",//TODO: take it from payment object of juspay
+                                            "settlement_amount":''+refundAmount,
+                                            "settlement_timestamp":new Date()
+                                        }
+                                    ]
+                            }
+
+                        order.payment= paymentSettlementDetails
+
+                        orderRequest.payment = paymentSettlementDetails
+
+
+                        //if(orderRequest.context.message_id){ //if messageId exist then do not save order again
+                        await saveOrderRequest({context,data:orderRequest});
+                        // }
+                        //
+
+                        return await bppUpdateService.update(
+                            context,
+                            update_target,
+                            order,
+                            orderDetails
+                        );
+                    }
+
+                }
+
+            }
+
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 
     async onOrderStatusDbOperation(messageIds) {
         try {
