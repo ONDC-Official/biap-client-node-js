@@ -300,7 +300,7 @@ class OrderStatusService {
 
                         return await bppUpdateService.update(
                             context,
-                            update_target,
+                            'billing',
                             order,
                             orderDetails
                         );
