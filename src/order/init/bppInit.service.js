@@ -30,10 +30,11 @@ class BppInitService {
 
             delete order.billing_info.address.tag
             delete order.billing_info.address.street
-            delete order.billing_info.address.door
+            delete order.billing_info.address.ward
             delete order.delivery_info.location.address.tag
             delete order.delivery_info.location.address.street
             delete order.delivery_info.location.address.door
+            delete order.delivery_info.location.address.ward
 
             const initRequest = {
                 context: context,
