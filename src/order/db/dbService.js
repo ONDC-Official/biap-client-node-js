@@ -122,7 +122,7 @@ const getOrderRequest = async (data) => {
 const getOrderRequestLatestFirst = async (data) => {
     const transactionId= data.transaction_id
     const requestType= data.requestType
-    const order = await OrderRequestLogMongooseModel.findOne({transactionId,requestType})
+    const order = await OrderRequestLogMongooseModel.findOne({transactionId,requestType}).sort({"createdAt":-1})
     return order;
 };
 
