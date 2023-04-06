@@ -103,7 +103,7 @@ class UpdateOrderService {
                 console.log("orderDetails?.updatedQuote?.price?.value---message id-->",protocolUpdateResponse.context.message_id)
 
                 let updateQoute = false
-                if(parseInt(orderDetails?.updatedQuote?.price?.value) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)){
+                if(parseInt(orderDetails?.updatedQuote?.price?.value) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)  || !orderDetails?.updatedQuote?.price?.value){
 
                     //check if item state is liquidated or cancelled
 
@@ -126,9 +126,14 @@ class UpdateOrderService {
                         }
                     }
 
-                   const olderQuote = await OrderRequestLogMongooseModel.find({transactionId:orderDetails?.transactionId,requestType:'on_update'}).sort({createdAt:'desc'});
-
-                   let previouseQoute = olderQuote.map((item) => parseInt(item?.request?.payment? item?.request?.payment["@ondc/org/settlement_details"][0]?.settlement_amount:0)|| 0).reduce((a, b) => +a + +b)
+                   // const olderQuote = await OrderRequestLogMongooseModel.find({transactionId:orderDetails?.transactionId,requestType:'on_update'}).sort({createdAt:'desc'});
+                   //
+                   //  let previouseQoute ;
+                   //  if(!olderQuote){
+                   //      previouseQoute = olderQuote.map((item) => parseInt(item?.request?.payment? item?.request?.payment["@ondc/org/settlement_details"][0]?.settlement_amount:0)|| 0).reduce((a, b) => +a + +b)
+                   //  }else{
+                   //      previouseQoute = olderQuote.map((item) => parseInt(item?.request?.payment? item?.request?.payment["@ondc/org/settlement_details"][0]?.settlement_amount:0)|| 0).reduce((a, b) => +a + +b)
+                   //  }
 
                     let lastUpdatedQoute = parseInt(orderDetails?.updatedQuote?.price?.value??0);
                     console.log("orderDetails?.updatedQuote?.price?.value??0--->",orderDetails?.updatedQuote?.price?.value??0)
@@ -143,7 +148,7 @@ class UpdateOrderService {
                     console.log("refund value--->",refundAmount)
                     console.log("refund value--orderDetails?.quote?.price?.value->",orderDetails?.quote?.price?.value)
                     console.log("refund value---orderDetails?.updatedQuote?.price?.value>",protocolUpdateResponse.message.order.quote?.price?.value)
-                    console.log("refund value--previouseQoute->",previouseQoute)
+                   // console.log("refund value--previouseQoute->",previouseQoute)
                     let paymentSettlementDetails =
                         {
                             "@ondc/org/settlement_details":
