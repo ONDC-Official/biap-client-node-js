@@ -283,35 +283,66 @@ class UpdateOrderService {
                             orderSchema.updatedQuote = protocolUpdateResponse?.message?.order?.quote
                         }
 
-                        let op =orderSchema?.items.map((e,i)=>{
+                        /***
+                         * Updated return and cancellation flow
+                         * scenario #1. only 1 item qty is purchased and returned/cancelled
+                         * scenario #2. more than 1 item is purchased and cancelled all
+                         * scenario #3. more than 1 item is purchased and returned all
+                         * scenario #4. more than 2 item is purchased and canceled only 1
+                         * scenario #5. more than 2 item is purchased and canceled 2 items once
+                         * scenario #6. more than 2 item is purchased and canceled 2 items one by one
+                         * scenario #7. more than 2 item is purchased and returned only 1
+                         * scenario #8. more than 2 item is purchased and returned 2 items once
+                         * scenario #9. more than 2 item is purchased and returned 2 items one by one
+                         * scenario #10. more than 4 item is purchased and returned 2 cancelled 2 items one by one
+                         */
 
+                        // let op =orderSchema?.items.map((e,i)=>{
+                        //
+                        //     let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
+                        //     if(temp) {
+                        //         e.return_status = temp?.tags?.status;
+                        //         e.cancellation_status = temp?.tags?.status;
+                        //
+                        //         // if(!e.cancellation_status || !e.return_status ){
+                        //         //     e.cancellation_status ='Cancelled' //TODO: change from actual response
+                        //         //     e.return_status ='Return Approved' //TODO: change from actual response
+                        //         // }
+                        //     }
+                        //     return e;
+                        // })
 
-                            let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
-                            if(temp) {
-                                e.return_status = temp?.tags?.status;
-                                e.cancellation_status = temp?.tags?.status;
+                        let protocolItems = protocolUpdateResponse?.message?.order?.items
 
-                                // if(!e.cancellation_status || !e.return_status ){
-                                //     e.cancellation_status ='Cancelled' //TODO: change from actual response
-                                //     e.return_status ='Return Approved' //TODO: change from actual response
-                                // }
-
+                        let updateItems = []
+                        for(let item of protocolItems){
+                            let updatedItem = {}
+                            updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
+                            let temp=updatedItem[0];
+                            //console.log("item------>",temp)
+                            if(item.tags){
+                                item.return_status = item?.tags?.status;
+                                item.cancellation_status = item?.tags?.status;
+                                delete item.tags
                             }
+                            item.fulfillment_status = temp.fulfillment_status;
+                            item.product = temp.product;
+                            //item.quantity = item.quantity.count
 
-                            return e;
-                        })
+                            console.log("item ---->",item)
+                            updateItems.push(item)
+                        }
 
+                        console.log("updateItems",updateItems)
                         //get item from db and update state for item
-                        orderSchema.items = op;
-
+                        orderSchema.items = updateItems;
 
                         //get /update request data
                         const updateRequest = await getOrderRequest({transaction_id:protocolUpdateResponse.context.transaction_id,
                             message_id:protocolUpdateResponse.context.message_id,requestType:'update'})
 
-
                         console.log("updateRequest?.request?.payment---->",updateRequest?.request?.payment)
-                        if(!updateRequest?.request?.payment){
+                        if(!updateRequest?.request?.payment && updateRequest){
                             //setTimeout(async() => {
                                 await this.updateForPaymentObject(updateRequest.request,protocolUpdateResponse)
                            // }, 5000);
