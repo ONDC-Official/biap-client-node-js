@@ -1,6 +1,11 @@
 import { onOrderCancel } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
-import {addOrUpdateOrderWithTransactionId, getOrderById} from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId,
+    addOrUpdateOrderWithTransactionIdAndProvider,
+    addOrUpdateOrderWithTransactionIdAndOrderId,
+    getOrderById
+} from "../db/dbService.js";
 
 import BppCancelService from "./bppCancel.service.js";
 import ContextFactory from "../../factories/ContextFactory.js";
@@ -27,8 +32,9 @@ class CancelOrderService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CANCEL,
-                transactionId: orderRequest?.context?.transaction_id,
+                transactionId: orderDetails.transactionId,
                 bppId: orderRequest?.context?.bpp_id,
+                bpp_uri: orderDetails?.bpp_uri,
                 cityCode:orderDetails.city
             });
 
@@ -76,10 +82,46 @@ class CancelOrderService {
                 if (!(protocolCancelResponse?.[0].error)) {
 
                     protocolCancelResponse = protocolCancelResponse?.[0];
+                }
+                return protocolCancelResponse;
+            }
+        }
+        catch (err) {
+            return err.response.data;
+        }
+    }
 
+    async onCancelOrderDbOperation(messageId) {
+        try {
+            let protocolCancelResponse = await onOrderCancel(messageId);
+
+            if (!(protocolCancelResponse && protocolCancelResponse.length)) {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_CANCEL
+                });
+
+                return {
+                    context,
+                    error: {
+                        message: "No data found"
+                    }
+                };
+            }
+            else {
+                if (!(protocolCancelResponse?.[0].error)) {
+
+                    protocolCancelResponse = protocolCancelResponse?.[0];
+
+                    console.log("protocolCancelResponse----------------->",protocolCancelResponse);
+
+                    // message: { order: { id: '7488750', state: 'Cancelled', tags: [Object] } }
                     const dbResponse = await OrderMongooseModel.find({
-                        transactionId: protocolCancelResponse.context.transaction_id
+                        transactionId: protocolCancelResponse.context.transaction_id,id: protocolCancelResponse.message.order.id
                     });
+
+                    console.log("dbResponse----------------->",dbResponse);
 
 
                     if (!(dbResponse || dbResponse.length))
@@ -88,13 +130,13 @@ class CancelOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
 
-                        await addOrUpdateOrderWithTransactionId(
-                            protocolCancelResponse.context.transaction_id,
+                        await addOrUpdateOrderWithTransactionIdAndOrderId(
+                            protocolCancelResponse.context.transaction_id,protocolCancelResponse.message.order.id,
                             { ...orderSchema }
                         );
                     }
                 }
-                
+
                 return protocolCancelResponse;
             }
 

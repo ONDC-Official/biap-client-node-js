@@ -12,6 +12,30 @@ class BppInitService {
         try {
             const provider = order?.items?.[0]?.provider || {};
 
+            console.log("context---------------->",context);
+            order.delivery_info.location.address.area_code = order.delivery_info.location.address.areaCode
+            delete order.delivery_info.location.address.areaCode
+
+            order.billing_info.address.area_code = order.billing_info.address.areaCode
+            delete order.billing_info.address.areaCode
+
+            order.billing_info.address.locality = order.billing_info.address.street
+            order.delivery_info.location.address.locality = order.delivery_info.location.address.street
+
+            const fulfillments = order?.fulfillments
+            let fulfillment = {}
+            if(fulfillments && fulfillments.length>0){
+                fulfillment = fulfillments[0]
+            }
+
+            delete order.billing_info.address.tag
+            delete order.billing_info.address.street
+            delete order.billing_info.address.ward
+            delete order.delivery_info.location.address.tag
+            delete order.delivery_info.location.address.street
+            delete order.delivery_info.location.address.door
+            delete order.delivery_info.location.address.ward
+
             const initRequest = {
                 context: context,
                 message: {
@@ -25,20 +49,23 @@ class BppInitService {
                         items: order?.items.map(item => {
                             return {
                                 id: item?.id?.toString(),
-                                quantity: item.quantity
+                                quantity: item.quantity,
+                                fulfillment_id:item?.fulfillment_id
                             };
                         }) || [],
-                        add_ons: [],
-                        offers: [],
                         billing: {
                             ...order.billing_info,
                             address: {
                                 ...order.billing_info.address,
                                 name: order.billing_info.name,
-                                area_code: order?.billing_info?.address?.areaCode
-                            }
+                                area_code: order?.billing_info?.address?.area_code
+                            },
+                            created_at:context.timestamp,
+                            updated_at:context.timestamp
                         },
                         fulfillments: [{
+                            id: fulfillment?.id,
+                            type: order.delivery_info.type,
                             end: {
                                 contact: {
                                     email: order.delivery_info.email,
@@ -49,28 +76,19 @@ class BppInitService {
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
-                                        area_code: order?.delivery_info?.location?.address?.areaCode
+                                        area_code: order?.delivery_info?.location?.address?.area_code
                                     }
                                 },
-                            },
-                            type: order.delivery_info.type,
-                            provider_id: provider.id
-                        }],
-                        payment: {
-                            type: order?.payment?.type,
-                            collected_by: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ? PAYMENT_COLLECTED_BY.BAP : PAYMENT_COLLECTED_BY.BPP,
-                            "@ondc/org/buyer_app_finder_fee_type": order?.payment?.buyer_app_finder_fee_type || process.env.BAP_FINDER_FEE_TYPE,
-                            "@ondc/org/buyer_app_finder_fee_amount": order?.payment?.buyer_app_finder_fee_amount || process.env.BAP_FINDER_FEE_AMOUNT,
-                            "@ondc/org/ondc-withholding_amount": 0.0,
-                            "@ondc/org/ondc-return_window": 0.0,
-                            "@ondc/org/ondc-settlement_basis": "Collection",
-                            "@ondc/org/ondc-settlement_window": "PT2D"
-                        }
-                    }
+                            }
+                        }]
                 }
+            }
+
             };
 
             const response = await protocolInit(initRequest);
+
+            // return initRequest
 
             return {
                 context: {
@@ -82,6 +100,10 @@ class BppInitService {
             };
         }
         catch (err) {
+
+            console.log("error------->",err)
+            err.response.data.initRequest =order
+
             throw err;
         }
     }

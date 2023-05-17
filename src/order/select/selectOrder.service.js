@@ -1,5 +1,6 @@
 import { onOrderSelect } from "../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../utils/constants.js";
+import {RetailsErrorCode} from "../../utils/retailsErrorCode.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppSelectService from "./bppSelect.service.js";
@@ -32,13 +33,19 @@ class SelectOrderService {
      * @returns 
      */
     transform(response) {
+
+        let error =  response.error ? Object.assign({}, response.error, {
+            message: RetailsErrorCode[response.error.code],
+        }):null;
+
         return {
             context: response?.context,
             message: {
                 quote: {
                     ...response?.message?.order
                 }
-            }
+            },
+            error:error
         };
     }
 
@@ -56,6 +63,7 @@ class SelectOrderService {
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
                 bppId: cart?.items[0]?.bpp_id,
+                bpp_uri: cart?.items[0]?.bpp_uri,
                 city:requestContext?.city,
                 state:requestContext?.state
             });
@@ -101,7 +109,7 @@ class SelectOrderService {
                     return response;
                 }
                 catch (err) {
-                    throw err;
+                    return err.response.data;
                 }
             })
         );
@@ -117,23 +125,21 @@ class SelectOrderService {
         try {
             const protocolSelectResponse = await onOrderSelect(messageId);
 
-            if (!(protocolSelectResponse && protocolSelectResponse.length)  ||
-                protocolSelectResponse?.[0]?.error) {
-                const contextFactory = new ContextFactory();
-                const context = contextFactory.create({
-                    messageId: messageId,
-                    action: PROTOCOL_CONTEXT.ON_SELECT
-                });
-
-                return {
-                    context,
-                    error: {
-                        message: "No data found"
-                    }
-                };
-            } else {
+            // if (!(protocolSelectResponse && protocolSelectResponse.length)  ||
+            //     protocolSelectResponse?.[0]?.error) {
+            //     const contextFactory = new ContextFactory();
+            //     const context = contextFactory.create({
+            //         messageId: messageId,
+            //         action: PROTOCOL_CONTEXT.ON_SELECT
+            //     });
+            //
+            //     return {
+            //         context,
+            //         error: protocolSelectResponse?.[0]?.error
+            //     };
+            // } else {
                 return this.transform(protocolSelectResponse?.[0]);
-            }
+            // }
         }
         catch (err) {
             throw err;

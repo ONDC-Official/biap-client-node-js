@@ -49,13 +49,21 @@ class ContextFactory {
 
     }
 
+    getTransactionId(transactionId){
+        if(transactionId){
+            return transactionId
+        }else{
+            return uuidv4()
+        }
+    }
+
     create(contextObject = {}) {
         const {
-            transactionId = uuidv4(), //FIXME: if ! found in args then create new
+            transactionId, //FIXME: if ! found in args then create new
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
-            city,state,cityCode
+            city,state,cityCode,bpp_uri
 
         } = contextObject || {};
 
@@ -64,13 +72,15 @@ class ContextFactory {
             country: this.country,
             city: this.getCity(city,state,cityCode) ,
             action: action,
-            core_version: PROTOCOL_VERSION.v_1_0_0,
+            core_version: PROTOCOL_VERSION.v_1_1_0,
             bap_id: this.bapId,
             bap_uri: this.bapUrl,
-            transaction_id: transactionId,
+            bpp_uri: bpp_uri,
+            transaction_id: this.getTransactionId(transactionId),
             message_id: messageId,
             timestamp: this.timestamp,
-            ...(bppId && { bpp_id: bppId })
+            ...(bppId && { bpp_id: bppId }),
+            ttl:"PT30S"
         };
 
     }

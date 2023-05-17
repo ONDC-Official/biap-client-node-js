@@ -60,9 +60,11 @@ const BillingSchema = new mongoose.Schema(
         email: { type: String },
         time: { type: TimeSchema },
         taxNumber: { type: String },
-        locationId: { type: String }
+        locationId: { type: String },
+        updated_at:{type: String},
+        created_at:{type: String}
     },
-    { _id: false, timestamps: true }
+    { _id: false }
 );
 
 const DescriptorSchema = new mongoose.Schema(
@@ -260,7 +262,8 @@ const ItemsSchema = new mongoose.Schema(
         product:{type:Object, required: false},
         fulfillment_status:{type: String, required:false },
         cancellation_status:{type: String, required:false },
-        return_status:{type: String, required:false }
+        return_status:{type: String, required:false },
+        fulfillment_id:{type:String}
     },
     { _id: false }
 );
@@ -325,7 +328,8 @@ const OrderSchema = new mongoose.Schema(
         offers: { type: [OfferSchema] },
         billing: { type: BillingSchema },
         fulfillments: { type: [FulfillmentSchema] },
-        quote: { type: QuotationSchema },
+        quote: { type: Object },
+        updatedQuote: { type: Object},
         payment: { type: PaymentSchema },
         id: { type: String },
         city: { type: String },
@@ -336,7 +340,9 @@ const OrderSchema = new mongoose.Schema(
         parentOrderId: { type: String },
         paymentStatus: { type: String, enum: ['PAID', 'NOT-PAID'], default: null },
         bppId: { type: String },
-        bapOrderId: { type: String }
+        bpp_uri: { type: String },
+        bapOrderId: { type: String },
+        settlementDetails:{type:Object}
     },
     { _id: true, timestamps: true }
 );

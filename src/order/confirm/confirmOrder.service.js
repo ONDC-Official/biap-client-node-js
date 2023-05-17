@@ -1,6 +1,10 @@
 import { onOrderConfirm } from "../../utils/protocolApis/index.js";
 import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../utils/constants.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../db/dbService.js";
+import {
+    addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderByTransactionId,
+    getOrderByTransactionIdAndProvider
+} from "../db/dbService.js";
 
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
@@ -65,8 +69,8 @@ class ConfirmOrderService {
         if (paymentType === PAYMENT_TYPES["ON-ORDER"])
             orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
 
-        await addOrUpdateOrderWithTransactionId(
-            confirmResponse?.context?.transaction_id,
+        await addOrUpdateOrderWithTransactionIdAndProvider(
+            confirmResponse?.context?.transaction_id,dbResponse.provider.id,
             { ...orderSchema }
         );
     }
@@ -83,7 +87,11 @@ class ConfirmOrderService {
             message: order = {}
         } = orderRequest || {};
 
-        const dbResponse = await getOrderByTransactionId(orderRequest?.context?.transaction_id);
+        // console.log("message---------------->",orderRequest.message)
+
+        const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id,orderRequest.message.providers.id);
+
+        console.log("dbResponse---------------->",dbResponse)
 
         if (dbResponse?.paymentStatus === null) {
 
@@ -92,6 +100,7 @@ class ConfirmOrderService {
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse.bppId,
+                bpp_uri: dbResponse.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state
             });
@@ -120,6 +129,8 @@ class ConfirmOrderService {
                 {...order,jusPayTransactionId:paymentStatus.txn_id},
                 dbResponse
             );
+
+            console.log("bppConfirmResponse-------------------->",bppConfirmResponse);
 
             if (bppConfirmResponse?.message?.ack)
                 await this.updateOrder(dbResponse, bppConfirmResponse, order?.payment?.type);
@@ -155,9 +166,12 @@ class ConfirmOrderService {
      */
     async processOnConfirmResponse(response = {}) {
         try {
+
+            console.log("processOnConfirmResponse------------------------------>",response)
+            console.log("processOnConfirmResponse------------------------------>",response?.message?.order.provider)
             if (response?.message?.order) {
-                const dbResponse = await getOrderByTransactionId(
-                    response?.context?.transaction_id
+                const dbResponse = await getOrderByTransactionIdAndProvider(
+                    response?.context?.transaction_id,response?.message?.order.provider.id
                 );
 
                 let orderSchema = { ...response?.message?.order };
@@ -175,7 +189,11 @@ class ConfirmOrderService {
                     orderSchema.fulfillments = [orderSchema.fulfillment];
                     delete orderSchema.fulfillment;
                 }
-                if(orderSchema.items) {
+
+                console.log("processOnConfirmResponse----------------dbResponse.items-------------->",dbResponse)
+                console.log("processOnConfirmResponse----------------dbResponse.orderSchema-------------->",orderSchema)
+
+                if(orderSchema.items && dbResponse.items) {
                     orderSchema.items = dbResponse.items
                 }
 
@@ -188,8 +206,7 @@ class ConfirmOrderService {
                                 location: {
                                     ...fulfillment?.end?.location,
                                     address: {
-                                        ...fulfillment?.end?.location?.address,
-                                        areaCode: fulfillment?.end?.location?.address?.area_code
+                                        ...fulfillment?.end?.location?.address
                                     }
                                 }
                             },
@@ -197,8 +214,10 @@ class ConfirmOrderService {
                     });
                 }
 
-                await addOrUpdateOrderWithTransactionId(
-                    response.context.transaction_id,
+                console.log("orderSchema.fulfillments",orderSchema.fulfillments)
+
+                await addOrUpdateOrderWithTransactionIdAndProvider(
+                    response.context.transaction_id,dbResponse.provider.id,
                     { ...orderSchema }
                 );
 
@@ -289,7 +308,7 @@ class ConfirmOrderService {
                     return await this.confirmAndUpdateOrder(orderRequest, total, true);
                 }
                 catch (err) {
-                    throw err;
+                    return err.response.data;
                 }
             })
         );
@@ -331,7 +350,7 @@ class ConfirmOrderService {
 
         }
         catch (err) {
-            throw err;
+            throw err
         }
     }
 

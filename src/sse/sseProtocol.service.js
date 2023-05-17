@@ -1,5 +1,13 @@
 import { PROTOCOL_CONTEXT } from '../utils/constants.js';
 import { sendSSEResponse } from '../utils/sse.js';
+
+import OrderStatusService from "../order/status/orderStatus.service.js";
+import UpdateOrderService from "../order/update/updateOrder.service.js";
+import CancelOrderService from "../order/cancel/cancelOrder.service.js";
+const orderStatusService = new OrderStatusService();
+const updateOrderService = new UpdateOrderService();
+const cancelOrderService = new CancelOrderService();
+
 class SseProtocol {
 
     /**
@@ -15,6 +23,8 @@ class SseProtocol {
                 PROTOCOL_CONTEXT.ON_CANCEL,
                 response,
             );
+
+            await cancelOrderService.onCancelOrderDbOperation(messageId);
 
             return {
                 message: {
@@ -153,6 +163,8 @@ class SseProtocol {
                 response,
             );
 
+            await orderStatusService.onOrderStatusV2([messageId]);
+
             return {
                 message: {
                     ack: {
@@ -233,6 +245,8 @@ class SseProtocol {
                 PROTOCOL_CONTEXT.ON_UPDATE,
                 response,
             );
+
+            await updateOrderService.onUpdateDbOperation(messageId);
 
             return {
                 message: {
