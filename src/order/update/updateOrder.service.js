@@ -81,7 +81,7 @@ class UpdateOrderService {
 
             const orderRequestDb = await getOrderRequest({transaction_id:orderRequest.context.transaction_id,message_id:orderRequest.context.message_id,requestType:'update'})
 
-            if(!orderRequestDb?.request?.data?.payment){
+            if(!orderRequestDb?.request?.message?.payment){
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({
                     action: PROTOCOL_CONTEXT.UPDATE,
@@ -98,30 +98,40 @@ class UpdateOrderService {
                     throw new CustomError("BPP Id is mandatory");
                 }
 
-                console.log("orderDetails?.updatedQuote?.price?.value----->",orderDetails?.updatedQuote?.price?.value)
-                console.log("orderDetails?.updatedQuote?.price?.value----->",protocolUpdateResponse.message.order.quote?.price?.value)
-                console.log("orderDetails?.updatedQuote?.price?.value---message id-->",protocolUpdateResponse.context.message_id)
+                console.log("orderDetails?.updatedQuote?.price?.value----1->",orderDetails?.updatedQuote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value----2->",protocolUpdateResponse.message.order.quote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value---message id--3>",protocolUpdateResponse.context.message_id)
 
+                let originalQouteUpdated = false;
                 let updateQoute = false
-                if(parseInt(orderDetails?.updatedQuote?.price?.value) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)  || !orderDetails?.updatedQuote?.price?.value){
+                if(parseInt(orderDetails?.updatedQuote?.price?.value) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)){
+                    originalQouteUpdated = true;
+                    const lastUpdatedItems = orderRequestDb.request.message.items;
+                    console.log("qoute updated ------originalQouteUpdated---->",originalQouteUpdated)
+
+                    console.log("qoute updated ------originalQouteUpdated---qoute-items>",lastUpdatedItems)
+
+                    console.log("qoute updated ------originalQouteUpdated---qoute-items protocolUpdateResponse.message.order.items>",protocolUpdateResponse.message.order.items)
+
 
                     //check if item state is liquidated or cancelled
-
                     //if there is update qoute recieved from on_update we need to calculate refund amount
                     //refund amount = original quote - update quote
-
-
 
                     for(const item of protocolUpdateResponse.message.order.items){
                         let updateItem =  orderDetails.items.find((i)=>{return i.id===item.id});
                         if(updateItem){
+                            console.log("**************************************",)
                             console.log("update item found---->",updateItem.id)
-                            console.log("update item found----item?.tags?.status>",item?.tags?.status)
+                            console.log("update item found----item?.tags?.status>item?.tags?.status",item?.tags?.status);
+                            console.log("update item found----item?.tags?.status>item?.tags?.status",item);
                             console.log("update item found----updateItem.return_status",updateItem.return_status)
                             //check the status
-                            if(['Cancelled','Liquidated','Return_Picked'].includes(item?.tags?.status)  && item?.tags?.status !== updateItem.return_status){
+                            if(['Cancelled','Liquidated','Return_Picked'].includes(item?.return_status)  && item?.return_status !== updateItem.return_status && item?.cancellation_status !== updateItem.cancellation_status){
                                 updateQoute =true;
                                 console.log("update item found--mark true-->",updateItem.id)
+                            }else{
+                                console.log("-----does not match------")
                             }
                         }
                     }
@@ -136,18 +146,16 @@ class UpdateOrderService {
                    //  }
 
                     let lastUpdatedQoute = parseInt(orderDetails?.updatedQuote?.price?.value??0);
-                    console.log("orderDetails?.updatedQuote?.price?.value??0--->",orderDetails?.updatedQuote?.price?.value??0)
+                    console.log("lastUpdatedQoute--->",orderDetails?.updatedQuote?.price?.value??0)
 
                     let refundAmount = 0
-                    if(lastUpdatedQoute==0){
-                        refundAmount = parseInt(orderDetails?.quote?.price?.value) - parseInt(protocolUpdateResponse.message.order.quote?.price?.value)//- previouseQoute
-                    }else{
+                    // if(lastUpdatedQoute==0){
+                    //     refundAmount = parseInt(orderDetails?.quote?.price?.value) - parseInt(protocolUpdateResponse.message.order.quote?.price?.value)//- previouseQoute
+                    // }else{
                         refundAmount = lastUpdatedQoute-parseInt(protocolUpdateResponse.message.order.quote?.price?.value)//- previouseQoute
-                    }
+//                    }
 
                     console.log("refund value--->",refundAmount)
-                    console.log("refund value--orderDetails?.quote?.price?.value->",orderDetails?.quote?.price?.value)
-                    console.log("refund value---orderDetails?.updatedQuote?.price?.value>",protocolUpdateResponse.message.order.quote?.price?.value)
                    // console.log("refund value--previouseQoute->",previouseQoute)
                     let paymentSettlementDetails =
                         {
@@ -342,7 +350,7 @@ class UpdateOrderService {
                             message_id:protocolUpdateResponse.context.message_id,requestType:'update'})
 
                         console.log("updateRequest?.request?.payment---->",updateRequest?.request?.payment)
-                        if(!updateRequest?.request?.payment && updateRequest){
+                        if(!updateRequest?.request?.message?.order?.payment && updateRequest){
                             //setTimeout(async() => {
                                 await this.updateForPaymentObject(updateRequest.request,protocolUpdateResponse)
                            // }, 5000);
