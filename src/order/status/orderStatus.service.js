@@ -239,17 +239,19 @@ class OrderStatusService {
                     throw new CustomError("BPP Id is mandatory");
                 }
 
+                //order value 4160
+                //updated qoute - 4040
                 let updatedValue = orderDetails?.updatedQuote?.price?.value;
 
-                console.log("orderDetails?.updatedQuote?.price?.value----->",orderDetails?.updatedQuote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value----1->",orderDetails?.updatedQuote?.price?.value)
 
                 if(!orderDetails?.updatedQuote?.price?.value){
                     updatedValue = orderDetails?.quote?.price?.value
                 }
-                console.log("orderDetails?.updatedQuote?.price?.value----->",protocolUpdateResponse.message.order.quote?.price?.value)
+                console.log("orderDetails?.updatedQuote?.price?.value----2->",protocolUpdateResponse.message.order.quote?.price?.value)
                 console.log("orderDetails?.updatedQuote?.price?.value---message id-->",protocolUpdateResponse.context.message_id)
 
-                if(parseInt(updatedValue) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)){
+                if(parseInt(updatedValue) > parseInt(protocolUpdateResponse.message.order.quote?.price?.value)  ){
 
                     //check if item state is liquidated or cancelled
 
