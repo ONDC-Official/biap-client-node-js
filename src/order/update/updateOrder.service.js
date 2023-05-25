@@ -275,7 +275,6 @@ class UpdateOrderService {
                     console.log("orderDetails?.updatedQuote?.price?.value----->",protocolUpdateResponse.message.order.quote?.price?.value)
                     console.log("orderDetails?.updatedQuote?.price?.value---message id-->",protocolUpdateResponse.context.message_id)
 
-
                     const dbResponse = await OrderMongooseModel.find({
                         transactionId: protocolUpdateResponse.context.transaction_id,
                         id: protocolUpdateResponse.message.order.id
@@ -284,6 +283,10 @@ class UpdateOrderService {
                     if (!(dbResponse || dbResponse.length))
                         throw new NoRecordFoundError();
                     else {
+
+                        if(protocolUpdateResponse?.message?.update_target ===  'billing'){
+                            return protocolUpdateResponse;
+                        }
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolUpdateResponse?.message?.order?.state;
 
