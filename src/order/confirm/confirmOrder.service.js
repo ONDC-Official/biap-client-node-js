@@ -214,7 +214,8 @@ class ConfirmOrderService {
                     });
                 }
 
-                console.log("orderSchema.fulfillments",orderSchema.fulfillments)
+                orderSchema.updatedQuote= orderSchema.quote;
+                //console.log("orderSchema.fulfillments",orderSchema.fulfillments)
 
                 await addOrUpdateOrderWithTransactionIdAndProvider(
                     response.context.transaction_id,dbResponse.provider.id,
