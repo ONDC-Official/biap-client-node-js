@@ -325,12 +325,13 @@ class UpdateOrderService {
 
                         let protocolItems = protocolUpdateResponse?.message?.order?.items
 
+                       // console.log("updateItems",updateItems)
                         let updateItems = []
                         for(let item of protocolItems){
                             let updatedItem = {}
                             updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
                             let temp=updatedItem[0];
-                            //console.log("item------>",temp)
+                            console.log("item----length-before->",item)
                             if(item.tags){
                                 item.return_status = item?.tags?.status;
                                 item.cancellation_status = item?.tags?.status;
@@ -340,7 +341,7 @@ class UpdateOrderService {
                             item.product = temp.product;
                             //item.quantity = item.quantity.count
 
-                            console.log("item ---->",item)
+                            console.log("item --after-->",item)
                             updateItems.push(item)
                         }
 

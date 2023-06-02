@@ -30,6 +30,7 @@ class OrderHistoryService {
             } = params;
 
 
+            orderStatus = orderStatus??ORDER_STATUS.COMPLETED
             limit = parseInt(limit);
             let skip = (pageNumber - 1) * limit;
             
