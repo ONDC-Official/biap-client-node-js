@@ -86,7 +86,7 @@ class ConfirmOrderService {
             context: requestContext,
             message: order = {}
         } = orderRequest || {};
-
+        let paymentStatus = {}
         // console.log("message---------------->",orderRequest.message)
 
         const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id,orderRequest.message.providers.id);
@@ -105,24 +105,28 @@ class ConfirmOrderService {
                 state:requestContext.state
             });
 
-            if (await this.arePaymentsPending(
-                order?.payment,
-                orderRequest?.context?.parent_order_id,
-                total,
-                confirmPayment,
-            )) {
-                return {
-                    context,
-                    error: {
-                        message: "BAP hasn't received payment yet",
-                        status: "BAP_015",
-                        name: "PAYMENT_PENDING"
-                    }
-                };
+            if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
+                if (await this.arePaymentsPending(
+                    order?.payment,
+                    orderRequest?.context?.parent_order_id,
+                    total,
+                    confirmPayment,
+                )) {
+                    return {
+                        context,
+                        error: {
+                            message: "BAP hasn't received payment yet",
+                            status: "BAP_015",
+                            name: "PAYMENT_PENDING"
+                        }
+                    };
+                }
+
+                paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
+            }else{
+                paymentStatus = {txn_id:requestContext?.transaction_id}
             }
-
-
-            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
