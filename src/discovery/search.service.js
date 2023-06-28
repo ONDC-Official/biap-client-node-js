@@ -53,8 +53,8 @@ class SearchService {
 
     convertHourMinuteToDate(storeOpenTillDate){
 
-        let hours = storeOpenTillDate.substring(0, 2)
-        let minutes= storeOpenTillDate.substring(2)
+        let hours = storeOpenTillDate?.substring(0, 2)
+        let minutes= storeOpenTillDate?.substring(2)
 
         //get hours and minutes from end
         let newDate = new Date().setHours(parseInt(hours),parseInt(minutes),0)
@@ -138,31 +138,26 @@ class SearchService {
 
                         const timeOpen =searchObj.location_details.time.schedule.times
                         let storeOpenTime =null ;
-                        const  firstTime = this.convertHourMinuteToDate(timeOpen[0]);
-                        const  secondTime = this.convertHourMinuteToDate(timeOpen[1]);
+                        let periodList = []
+                        let isOpen = false
+                            for(let time of timeOpen){
+                                const  timeObj = this.convertHourMinuteToDate(time);
+                                    storeOpenTime =new Date(timeObj)
 
-                        if(todayTimeStamp>firstTime || todayTimeStamp<secondTime)
-                        {
-                            //take first timeStamp
-                            storeOpenTime =new Date(firstTime)
-                        }else{
-                            //take second timestamp
-                            storeOpenTime =new Date(secondTime)
-                        }
+                                let period =  createPeriod({start:storeOpenTime, duration:searchObj.location_details.time.schedule.frequency, recurrence: 1})
 
-                        let period =  createPeriod({start:storeOpenTime, duration:searchObj.location_details.time.schedule.frequency, recurrence: 1})
+                                let storeOpenTillDate = new Date(period[1]);
+                                let storeOpenDate = new Date(period[0]);
+                                if(todayTimeStamp < storeOpenTillDate.getTime() && storeOpenDate<todayTimeStamp){
+                                    console.log("[Range] store is open")
+                                    isOpen=true;
+                                }else{
+                                    console.log("[Range] store is closed")
+                                }
+                                periodList.push(period);
+                            }
 
-                        let storeOpenTillDate = new Date(period[1]);
-
-                        searchObj.storeOpenTillDate = storeOpenTillDate
-
-                        if(todayTimeStamp < storeOpenTillDate.getTime()){
-                            console.log("[Range] store is open")
-                            return {status: true, data:searchObj}
-                        }else{
-                            console.log("[Range] store is closed")
-                            return {status: false}//TODO: return false
-                        }
+                        return {status: isOpen, data:searchObj}
                     }
 
                 }
