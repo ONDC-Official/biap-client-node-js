@@ -1,9 +1,9 @@
 import { PROTOCOL_CONTEXT } from '../utils/constants.js';
 import { sendSSEResponse } from '../utils/sse.js';
 
-import OrderStatusService from "../order/status/orderStatus.service.js";
-import UpdateOrderService from "../order/update/updateOrder.service.js";
-import CancelOrderService from "../order/cancel/cancelOrder.service.js";
+import OrderStatusService from "../order/v1/status/orderStatus.service.js";
+import UpdateOrderService from "../order/v1/update/updateOrder.service.js";
+import CancelOrderService from "../order/v1/cancel/cancelOrder.service.js";
 const orderStatusService = new OrderStatusService();
 const updateOrderService = new UpdateOrderService();
 const cancelOrderService = new CancelOrderService();

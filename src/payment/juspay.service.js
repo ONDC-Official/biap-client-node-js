@@ -7,11 +7,11 @@ import { PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } fr
 
 // import { accessSecretVersion } from "../utils/accessSecretKey.js";
 import { getJuspayOrderStatus } from "../utils/juspayApis.js";
-import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../order/db/dbService.js";
+import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId } from "../order/v1/db/dbService.js";
 import { NoRecordFoundError } from "../lib/errors/index.js";
 
 import ContextFactory from "../factories/ContextFactory.js";
-import BppConfirmService from "../order/confirm/bppConfirm.service.js";
+import BppConfirmService from "../order/v1/confirm/bppConfirm.service.js";
 
 const bppConfirmService = new BppConfirmService();
 

@@ -1,4 +1,4 @@
-import OrderMongooseModel from '../../order/db/order.js';
+import OrderMongooseModel from '../../order/v1/db/order.js';
 
 const changeFulfillmentType = async (req, res, next) => {
     try {
