@@ -15,9 +15,78 @@ class SearchController {
     * @return {callback}
     */
     search(req, res, next) {
-        const searchRequest = req.body;
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
 
         searchService.search(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
+    * get item
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getItem(req, res, next) {
+        const searchRequest = req.query;
+        const {id:itemId} = req.params;
+
+        console.log({searchRequest})
+
+        searchService.getItem(searchRequest,itemId).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
+    * get attributes
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getAttributes(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getAttributes(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
+    * get attribute values
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getAttributesValues(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getAttributesValues(searchRequest).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else

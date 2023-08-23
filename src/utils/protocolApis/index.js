@@ -131,6 +131,80 @@ const protocolSearch = async (data) => {
 }
 
 /**
+ * search items
+ * @param {Object} data
+ * @returns
+ */
+const protocolSearchItems = async (data) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM,
+        "GET",
+        {
+            ...data
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+/**
+ * search items
+ * @param {Object} data
+ * @returns
+ */
+const protocolGetItems = async (searchRequest,itemId) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM +"/"+itemId,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetAttributes = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ATTRIBUTE,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetAttributesValues = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ATTRIBUTE_VALUE,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+/**
  * on search products
  * @param {Object} query 
  */
@@ -347,5 +421,9 @@ export {
     protocolTrack,
     protocolSelect,
     protocolUpdate,
-    onUpdateStatus
+    onUpdateStatus,
+    protocolSearchItems,
+    protocolGetItems,
+    protocolGetAttributes,
+    protocolGetAttributesValues
 };

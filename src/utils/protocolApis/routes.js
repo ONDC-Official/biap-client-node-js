@@ -17,6 +17,9 @@ const STATUS = "protocol/status";
 const SUPPORT = "protocol/support";
 const TRACK = "protocol/track";
 const UPDATE = "protocol/update";
+const SEARCH_ITEM = "protocol/items";
+const SEARCH_ATTRIBUTE = "protocol/attributes";
+const SEARCH_ATTRIBUTE_VALUE = "protocol/attribute-values";
 // const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
@@ -32,12 +35,15 @@ const PROTOCOL_API_URLS = {
     ON_SUPPORT,
     ON_TRACK,
     SEARCH,
+    SEARCH_ITEM,
     SELECT,
     STATUS,
     SUPPORT,
     TRACK,
     UPDATE,
-    ON_UPDATE
+    ON_UPDATE,
+    SEARCH_ATTRIBUTE,
+    SEARCH_ATTRIBUTE_VALUE
 };
 
 export default PROTOCOL_API_URLS;

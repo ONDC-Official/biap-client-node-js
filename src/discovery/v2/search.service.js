@@ -26,24 +26,57 @@ class SearchService {
     async search(searchRequest = {}) {
         try {
 
-            // logger.info(`[SearchService][search] Search product`, {params: searchRequest});
-
-            const {context: requestContext = {}, message = {}} = searchRequest;
-            const {criteria = {}, payment} = message;
-
-
-            // console.log("City---------------->",city);
-            const contextFactory = new ContextFactory();
-            const protocolContext = contextFactory.create({
-                transactionId: requestContext?.transaction_id,
-                bppId: requestContext?.bpp_id,
-                city: requestContext.city,
-                state: requestContext.state
-            });
-
             return await bppSearchService.search(
-                protocolContext,
-                {criteria, payment}
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * getItem
+     * @param {Object} searchRequest
+     */
+    async getItem(searchRequest,itemId) {
+        try {
+
+            return await bppSearchService.getItem(
+                searchRequest,
+                itemId
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * getItem
+     * @param {Object} searchRequest
+     */
+    async getAttributes(searchRequest) {
+        try {
+
+            return await bppSearchService.getAttributes(
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * getItem
+     * @param {Object} searchRequest
+     */
+    async getAttributesValues(searchRequest) {
+        try {
+
+            return await bppSearchService.getAttributesValues(
+                searchRequest
             );
 
         } catch (err) {

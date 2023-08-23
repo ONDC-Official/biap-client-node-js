@@ -7,16 +7,23 @@ const router = new Router();
 const searchController = new SearchController();
 
 // search
-router.post(
-    '/v2/search',
-    authentication(),
-    searchController.search,
+router.get(
+    '/v2/search', authentication(), searchController.search,
 );
 
-// on search
-router.get('/v2/on_search', authentication(), searchController.onSearch);
+// get item details
+router.get(
+    '/v2/items/:id', authentication(), searchController.getItem,
+);
 
-// filter
-router.get('/v2/getFilterParams', authentication(), searchController.getFilterParams);
+// get item details
+router.get(
+    '/v2/attributes', authentication(), searchController.getAttributes,
+);
+
+// get item details
+router.get(
+    '/v2/attributeValues', authentication(), searchController.getAttributesValues,
+);
 
 export default router;
