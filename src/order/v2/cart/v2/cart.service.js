@@ -34,7 +34,7 @@ class CartService {
     async updateItem(data) {
         try {
 
-                let cartItem = await CartItem.findOne({where:{cart:data.userId,"item.id":data.itemId}});
+                let cartItem = await CartItem.findOne({where:{cart:data.userId,_id:data.itemId}});
                 cartItem.item =data;
                 return  await cartItem.save();
 
@@ -46,7 +46,7 @@ class CartService {
 
     async removeItem(data) {
         try {
-            return  await CartItem.deleteOne({where:{cart:data.userId,"item.id":data.itemId}});
+            return  await CartItem.deleteOne({where:{cart:data.userId,_id:data.itemId}});
         }
         catch (err) {
             throw err;
