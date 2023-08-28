@@ -14,6 +14,7 @@ import orderRoutesv2 from "../order/v2/order.routes.js";
 import searchRoutesv2 from "../discovery/v2/search.routes.js";
 import supportRoutesv2 from "../support/v2/support.routes.js";
 import trackRoutesv2 from "../fulfillment/v2/track.routes.js";
+import cartRoutesv2 from "../order/v2/cart/v2/cart.routes.js";
 
 const router = new Router();
 //v1
@@ -31,6 +32,7 @@ router.use(orderRoutesv2);
 router.use(searchRoutesv2);
 router.use(supportRoutesv2);
 router.use(trackRoutesv2);
+router.use(cartRoutesv2);
 
 
 export default router;
