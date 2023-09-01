@@ -204,6 +204,38 @@ const protocolGetAttributesValues = async (searchRequest) => {
     return result.data;
 }
 
+const protocolGetCustomMenus = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.CUSTOM_MENU,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetProviders = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.PROVIDERS,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
 /**
  * on search products
  * @param {Object} query 
@@ -425,5 +457,7 @@ export {
     protocolSearchItems,
     protocolGetItems,
     protocolGetAttributes,
-    protocolGetAttributesValues
+    protocolGetAttributesValues,
+    protocolGetProviders,
+    protocolGetCustomMenus
 };

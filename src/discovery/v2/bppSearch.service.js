@@ -1,4 +1,9 @@
-import { protocolSearchItems,protocolGetItems,protocolGetAttributes,protocolGetAttributesValues } from "../../utils/protocolApis/index.js";
+import { protocolSearchItems,
+    protocolGetItems,
+    protocolGetAttributes,
+    protocolGetAttributesValues,
+    protocolGetProviders,
+    protocolGetCustomMenus} from "../../utils/protocolApis/index.js";
 
 class BppSearchService {
 
@@ -60,6 +65,31 @@ class BppSearchService {
             throw err;
         }
     }
+
+    async getProviders(searchRequest) {
+        try {
+
+            const response = await protocolGetProviders(searchRequest);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async getCustomMenus(searchRequest) {
+        try {
+
+            const response = await protocolGetCustomMenus(searchRequest);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 }
 
 export default BppSearchService;

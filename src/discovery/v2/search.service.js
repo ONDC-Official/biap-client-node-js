@@ -84,6 +84,38 @@ class SearchService {
         }
     }
 
+    /**
+     * get providers
+     * @param {Object} searchRequest
+     */
+    async getProviders(searchRequest) {
+        try {
+
+            return await bppSearchService.getProviders(
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * get custom menus
+     * @param {Object} searchRequest
+     */
+    async getCustomMenus(searchRequest) {
+        try {
+
+            return await bppSearchService.getCustomMenus(
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
     convertHourMinuteToDate(storeOpenTillDate){
 
         let hours = storeOpenTillDate.substring(0, 2)

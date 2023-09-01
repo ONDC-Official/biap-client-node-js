@@ -16,14 +16,24 @@ router.get(
     '/v2/items/:id', authentication(), searchController.getItem,
 );
 
-// get item details
+// get item attributes
 router.get(
     '/v2/attributes', authentication(), searchController.getAttributes,
 );
 
-// get item details
+// get item attributes values
 router.get(
     '/v2/attributeValues', authentication(), searchController.getAttributesValues,
+);
+
+// get providers
+router.get(
+    '/v2/providers', authentication(), searchController.getProviders,
+);
+
+// get custom menus
+router.get(
+    '/v2/custom-menus', authentication(), searchController.getCustomMenus,
 );
 
 export default router;

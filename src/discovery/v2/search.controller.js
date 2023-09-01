@@ -97,6 +97,50 @@ class SearchController {
     }
 
     /**
+    * get providers
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getProviders(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getProviders(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
+    * get custom menu
+    * @param {*} req    HTTP request object
+    * @param {*} res    HTTP response object
+    * @param {*} next   Callback argument to the middleware function
+    * @return {callback}
+    */
+    getCustomMenus(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getCustomMenus(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    /**
     * on search 
     * @param {*} req    HTTP request object
     * @param {*} res    HTTP response object
