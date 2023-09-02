@@ -31,7 +31,7 @@ rootRouter.delete(
     cartController.removeItem,
 );
 
-rootRouter.patch(
+rootRouter.put(
     '/v2/cart/:userId/:itemId',
     authentication(),
     cartController.updateItem,
