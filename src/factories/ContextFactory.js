@@ -72,7 +72,7 @@ class ContextFactory {
             country: this.country,
             city: this.getCity(city,state,cityCode) ,
             action: action,
-            core_version: PROTOCOL_VERSION.v_1_1_0,
+            core_version:PROTOCOL_VERSION.v_1_2_0 ,
             bap_id: this.bapId,
             bap_uri: this.bapUrl,
             bpp_uri: bpp_uri,

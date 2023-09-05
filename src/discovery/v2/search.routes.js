@@ -36,4 +36,24 @@ router.get(
     '/v2/custom-menus', authentication(), searchController.getCustomMenus,
 );
 
+// // get custom menus
+// router.get(
+//     '/v2/custom-menus/:id', authentication(), searchController.getProviderCustomMenus,
+// );
+//
+// // get item details
+// router.get(
+//     '/v2/locations/:id', authentication(), searchController.getProviderLocations,
+// );
+//
+// // get item details
+// router.get(
+//     '/v2/locations', authentication(), searchController.getLocations,
+// );
+//
+// // get providers
+// router.get(
+//     '/v2/providers/:id', authentication(), searchController.getProviderDetails,
+// );
+
 export default router;

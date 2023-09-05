@@ -24,7 +24,7 @@ const complaintOrderController  = new  ComplaintOrderController ();
 const uploadController = new  UploadController();
 
 //#region confirm order
-
+/**
 // confirm order v1
 rootRouter.post(
     '/v1/confirm_order',
@@ -143,5 +143,5 @@ rootRouter.get('/v2/on_update', authentication(), updateOrderController.onUpdate
 rootRouter.post('/v2/getSignUrlForUpload/:orderId', authentication(), uploadController.upload);
 
 //#endregion
-
+**/
 export default rootRouter;
