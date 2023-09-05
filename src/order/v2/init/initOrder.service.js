@@ -38,9 +38,9 @@ class InitOrderService {
             const provider = orderRequest?.items?.[0]?.provider || {};
 
             const providerDetails = {
-                id: provider.id,
+                id: provider.local_id,
                 locations: provider.locations.map(location => {
-                    return { id: location };
+                    return { id: location.local_id };
                 })
             };
 
@@ -67,14 +67,14 @@ class InitOrderService {
                         name: orderRequest?.delivery_info?.name
                     }
                 },
-                provider_id: provider?.id
+                provider_id: provider?.local_id
             };
 
             let itemProducts = []
             for(const item of orderRequest?.items){
                 let itemObj =
                 {
-                    id: item?.id?.toString(),
+                    id: item?.local_id?.toString(),
                     product: item?.product,
                     quantity: item.quantity,
                     fulfillment_id:item?.fulfillment_id
@@ -87,7 +87,7 @@ class InitOrderService {
             console.log('itemProducts--------response?.context?.bpp_id------->',fulfillment);
 
             await addOrUpdateOrderWithTransactionIdAndProvider(
-                response.context.transaction_id,provider.id,
+                response.context.transaction_id,provider.local_id,
                 {
                     userId: userId,
                     messageId: response?.context?.message_id,
@@ -194,6 +194,7 @@ class InitOrderService {
             const { context: requestContext = {}, message: order = {} } = orderRequest || {};
             const parentOrderId = requestContext?.transaction_id; //FIXME: verify usage
 
+            console.log("order--->",orderRequest)
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.INIT,
@@ -245,15 +246,18 @@ class InitOrderService {
      */
     async initMultipleOrder(orders, user) {
 
+        console.log("orders------->",orders)
         const initOrderResponse = await Promise.all(
             orders.map(async order => {
                 try {
+                    console.log("orders---pre---->",order)
                     const bppResponse = await this.initOrder(order, orders.length > 1);
                     await this.createOrder(bppResponse, user?.decodedToken?.uid, order?.message);
 
                     return bppResponse;
                 }
                 catch (err) {
+                    console.log(err)
                     return err.response.data;
                 }
 

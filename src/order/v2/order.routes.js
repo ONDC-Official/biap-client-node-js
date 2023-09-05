@@ -66,7 +66,7 @@ rootRouter.get('/v2/orders', authentication(), orderHistoryController.getOrdersL
 
 // initialize order v1
 rootRouter.post(
-    '/v2/initialize_order',
+    '/v1/initialize_order',
     initOrderController.initOrder,
 );
 

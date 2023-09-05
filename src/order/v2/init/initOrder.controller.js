@@ -33,7 +33,7 @@ class InitOrderController {
         const { body: orderRequests, user } = req;
 
         if (orderRequests && orderRequests.length) {
-
+            console.log("orderRequests-->",orderRequests)
             initOrderService.initMultipleOrder(orderRequests, user).then(response => {
                 res.json(response);
             }).catch((err) => {
