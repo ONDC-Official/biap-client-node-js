@@ -201,7 +201,8 @@ class InitOrderService {
                 bpp_uri: order?.items[0]?.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state,
-                transactionId: requestContext?.transaction_id
+                transactionId: requestContext?.transaction_id,
+                domain:requestContext?.domain
                 // ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 

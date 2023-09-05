@@ -102,7 +102,8 @@ class ConfirmOrderService {
                 bppId: dbResponse.bppId,
                 bpp_uri: dbResponse.bpp_uri,
                 city:requestContext.city,
-                state:requestContext.state
+                state:requestContext.state,
+                domain:requestContext.domain
             });
 
             if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
@@ -149,7 +150,8 @@ class ConfirmOrderService {
                 bppId: dbResponse?.bppId,
                 messageId: dbResponse?.messageId,
                 city:requestContext.city,
-                state:requestContext.state
+                state:requestContext.state,
+                domain:requestContext.domain
             });
 
             return {

@@ -30,8 +30,9 @@ const protocolConfirm = async (data) => {
 const onOrderConfirm = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_CONFIRM + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_confirm',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -100,8 +101,9 @@ const protocolInit = async (data) => {
 const onOrderInit = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_INIT + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_init',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -427,8 +429,9 @@ const protocolSelect = async (data) => {
 const onOrderSelect = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_SELECT + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_select',messageId:messageId}
     );
 
     const result = await apiCall.send();

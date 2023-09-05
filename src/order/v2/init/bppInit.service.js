@@ -41,14 +41,14 @@ class BppInitService {
                 message: {
                     order: {
                         provider: {
-                            id: provider.id,
+                            id: provider.local_id,
                             locations: provider.locations.map(location => {
-                                return { id: location };
+                                return { id: location.local_id };
                             })
                         },
                         items: order?.items.map(item => {
                             return {
-                                id: item?.id?.toString(),
+                                id: item?.local_id?.toString(),
                                 quantity: item.quantity,
                                 fulfillment_id:item?.fulfillment_id
                             };

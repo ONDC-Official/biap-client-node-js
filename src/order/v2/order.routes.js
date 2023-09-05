@@ -78,7 +78,7 @@ rootRouter.post(
 );
 
 // on initialize order v1
-rootRouter.get('/v2/on_initialize_order', initOrderController.onInitOrder);
+//rootRouter.get('/v2/on_initialize_order', initOrderController.onInitOrder);
 
 // on initialize order v2
 rootRouter.get('/v2/on_initialize_order', authentication(), initOrderController.onInitMultipleOrder);
