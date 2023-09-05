@@ -65,7 +65,8 @@ class SelectOrderService {
                 bppId: cart?.items[0]?.bpp_id,
                 bpp_uri: cart?.items[0]?.bpp_uri,
                 city:requestContext?.city,
-                state:requestContext?.state
+                state:requestContext?.state,
+                domain:requestContext?.domain
             });
 
             if (!(cart?.items || cart?.items?.length)) {

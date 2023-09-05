@@ -7,7 +7,7 @@ class ContextFactory {
 
     constructor(arg = {}) {
         let {
-            domain = process.env.DOMAIN,
+            domain,
            //TODO: map city to city code. eg. Haydrabad
             country = process.env.COUNTRY,
             bapId = process.env.BAP_ID,
@@ -63,12 +63,14 @@ class ContextFactory {
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
-            city,state,cityCode,bpp_uri
+            city,state,cityCode,bpp_uri,
+            domain
 
         } = contextObject || {};
 
+        console.log("domain------>",domain);
         return {
-            domain: this.domain,
+            domain: domain,
             country: this.country,
             city: this.getCity(city,state,cityCode) ,
             action: action,

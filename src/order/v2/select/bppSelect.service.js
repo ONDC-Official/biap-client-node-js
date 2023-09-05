@@ -20,15 +20,15 @@ class BppSelectService {
                     order: {
                         items: cart.items.map(cartItem => {
                             return {
-                                id: cartItem?.id?.toString(),
+                                id: cartItem?.local_id?.toString(),
                                 quantity: cartItem?.quantity,
-                                location_id: provider.locations[0]
+                                location_id: provider.locations[0].local_id?.toString()
                             }
                         }) || [],
                         provider: {
-                            id: provider?.id,
+                            id: provider?.local_id,
                             locations: provider.locations.map(location => {
-                                return { id: location };
+                                return { id: location.local_id };
                             })
                         },
                         fulfillments: fulfillments && fulfillments.length ? 

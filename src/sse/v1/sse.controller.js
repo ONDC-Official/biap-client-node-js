@@ -1,5 +1,5 @@
-import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
-import { addSSEConnection } from '../utils/sse.js';
+import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
+import { addSSEConnection } from '../../utils/sse.js';
 
 import SseProtocol from './sseProtocol.service.js';
 import ConfigureSse from "./configureSse.service.js";
