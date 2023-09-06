@@ -39,7 +39,7 @@ rootRouter.post(
 );
 
 // on confirm order v1
-rootRouter.get('/v2/on_confirm_order', confirmOrderController.onConfirmOrder);
+rootRouter.get('/v1/on_confirm_order', confirmOrderController.onConfirmOrder);
 
 // on confirm order v2
 rootRouter.get('/v2/on_confirm_order', authentication(), confirmOrderController.onConfirmMultipleOrder);
