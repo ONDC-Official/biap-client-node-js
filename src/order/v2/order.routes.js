@@ -27,7 +27,7 @@ const uploadController = new  UploadController();
 
 // confirm order v1
 rootRouter.post(
-    '/v2/confirm_order',
+    '/v1/confirm_order',
     confirmOrderController.confirmOrder,
 );
 
