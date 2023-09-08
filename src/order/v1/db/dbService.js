@@ -92,7 +92,7 @@ const getOrderById = async (orderId) => {
     if (!(order || order.length))
         throw new NoRecordFoundError();
     else
-        return order?.[0];
+        return order;
 };
 
 const saveOrderRequest = async (data) => {

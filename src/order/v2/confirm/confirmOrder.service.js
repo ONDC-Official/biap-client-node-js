@@ -3,12 +3,14 @@ import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMEN
 import {
     addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
     getOrderByTransactionId,
-    getOrderByTransactionIdAndProvider
+    getOrderByTransactionIdAndProvider,
+    getOrderById
 } from "../../v1/db/dbService.js";
 
 import ContextFactory from "../../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../../payment/juspay.service.js";
+import {re} from "@babel/core/lib/vendor/import-meta-resolve.js";
 
 const bppConfirmService = new BppConfirmService();
 const juspayService = new JuspayService();
@@ -321,6 +323,12 @@ class ConfirmOrderService {
         );
 
         return confirmOrderResponse;
+    }
+
+    async getOrderDetails(orderId){
+
+        const dbResponse = await getOrderById(orderId);
+        return dbResponse
     }
 
     /**

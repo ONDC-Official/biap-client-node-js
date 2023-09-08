@@ -86,6 +86,17 @@ class ConfirmOrderController {
         else
             throw new BadRequestParameterError();
     }
+
+    orderDetails(req, res, next) {
+        const { params } = req;
+        const { orderId } = params;
+
+            confirmOrderService.getOrderDetails(orderId).then(orders => {
+                res.json(orders);
+            }).catch((err) => {
+                next(err);
+            });
+    }
 }
 
 export default ConfirmOrderController;

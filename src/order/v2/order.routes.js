@@ -142,6 +142,8 @@ rootRouter.get('/v2/on_update', authentication(), updateOrderController.onUpdate
 
 rootRouter.post('/v2/getSignUrlForUpload/:orderId', authentication(), uploadController.upload);
 
+rootRouter.get('/v2/orders/:orderId', authentication(), confirmOrderController.orderDetails);
+
 //#endregion
 
 export default rootRouter;
