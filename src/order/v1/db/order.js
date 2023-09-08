@@ -242,7 +242,8 @@ const ProviderLocationSchema = new mongoose.Schema(
 const ProviderSchema = new mongoose.Schema(
     {
         id: { type: String, required: true },
-        locations: [ProviderLocationSchema]
+        locations: [ProviderLocationSchema],
+        descriptor:{type:Object}
     },
     { _id: false }
 );

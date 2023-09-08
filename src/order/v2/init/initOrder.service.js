@@ -39,6 +39,7 @@ class InitOrderService {
 
             const providerDetails = {
                 id: provider.local_id,
+                descriptor:provider.descriptor,
                 locations: provider.locations.map(location => {
                     return { id: location.local_id };
                 })
@@ -86,6 +87,7 @@ class InitOrderService {
                 }
                 selectitem.parent_item_id = parentItemId;
                 selectitem.fulfillment_id =item?.fulfillment_id
+                selectitem.product= item?.product
                 itemProducts.push(selectitem);
 
                 for(let customisation of item.customisations){
@@ -99,8 +101,9 @@ class InitOrderService {
                         // tag= customisation.item_details.tags.findAll(i => i.code==='type' || i.code==='parent'|| i.code==='child');
                         selectitem.tags =customisation.item_details.tags;
                     }
-                    selectitem.fulfillment_id =item?.fulfillment_id
+                    selectitem.fulfillment_id =customisation?.fulfillment_id
                     selectitem.parent_item_id = parentItemId;
+                    selectitem.product= customisation
                     itemProducts.push(selectitem);
                 }
 
@@ -161,6 +164,7 @@ class InitOrderService {
                     dbResponse?.provider?.locations ?
                         dbResponse?.provider?.locations :
                         [],
+                descriptor: orderSchema?.provider
             };
 
             orderSchema.settlementDetails = orderSchema.payment
