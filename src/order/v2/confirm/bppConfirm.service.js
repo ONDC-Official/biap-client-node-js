@@ -55,12 +55,7 @@ class BppConfirmService {
                     order: {
                         id: uuidv4(),
                         billing: order.billing_info,
-                        items: order?.items.map(item => {
-                            return {
-                                id: item.id,
-                                quantity: item.quantity
-                            };
-                        }) || [],
+                        items: order?.items,
                         provider: {
                             id: provider.id,
                             locations: provider.locations.map(location => {
@@ -180,7 +175,8 @@ class BppConfirmService {
                                     quantity: {
                                         count: item.quantity.count
                                     },
-                                    fulfillment_id: item.fulfillment_id
+                                    fulfillment_id: item.fulfillment_id,
+                                    tags:item.tags
                                 };
                             }) || [],
                         provider: storedOrder?.provider,

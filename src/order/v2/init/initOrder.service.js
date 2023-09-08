@@ -71,15 +71,39 @@ class InitOrderService {
             };
 
             let itemProducts = []
-            for(const item of orderRequest?.items){
-                let itemObj =
-                {
+            for(let item of orderRequest.items){
+
+                let parentItemId = item?.local_id?.toString();
+                let selectitem = {
                     id: item?.local_id?.toString(),
-                    product: item?.product,
-                    quantity: item.quantity,
-                    fulfillment_id:item?.fulfillment_id
+                    quantity: item?.quantity,
+                    location_id: provider.locations[0].local_id?.toString()
                 }
-                itemProducts.push(itemObj);
+                let tag=undefined
+                if(item.tags && item.tags.length>0){
+                    tag= item.tags.find(i => i.code==='type');
+                    selectitem.tags =[tag];
+                }
+                selectitem.parent_item_id = parentItemId;
+                selectitem.fulfillment_id =item?.fulfillment_id
+                itemProducts.push(selectitem);
+
+                for(let customisation of item.customisations){
+                    let selectitem = {
+                        id: customisation?.local_id?.toString(),
+                        quantity: customisation.quantity,
+                        location_id: provider.locations[0].local_id?.toString()
+                    }
+                    let tag=undefined
+                    if(customisation.item_details.tags && customisation.item_details.tags.length>0){
+                        // tag= customisation.item_details.tags.findAll(i => i.code==='type' || i.code==='parent'|| i.code==='child');
+                        selectitem.tags =customisation.item_details.tags;
+                    }
+                    selectitem.fulfillment_id =item?.fulfillment_id
+                    selectitem.parent_item_id = parentItemId;
+                    itemProducts.push(selectitem);
+                }
+
             }
 
             console.log('itemProducts--------------->',itemProducts);
@@ -125,7 +149,8 @@ class InitOrderService {
                     id: item?.id?.toString(),
                     quantity: item.quantity,
                     product: item.product,
-                    fulfillment_id:item?.fulfillment_id
+                    fulfillment_id:item?.fulfillment_id,
+                    tags:item.tags
                 };
             }) || [];
 
