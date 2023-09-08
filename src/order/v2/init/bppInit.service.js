@@ -36,6 +36,43 @@ class BppInitService {
             delete order.delivery_info.location.address.door
             delete order.delivery_info.location.address.ward
 
+            //check if item has customisation present
+
+            let items  = []
+            for(let item of order.items){
+
+                let parentItemId = item?.local_id?.toString();
+                let selectitem = {
+                    id: item?.local_id?.toString(),
+                    quantity: item?.quantity,
+                    location_id: provider.locations[0].local_id?.toString()
+                }
+                let tag=undefined
+                if(item.tags && item.tags.length>0){
+                    tag= item.tags.find(i => i.code==='type');
+                    selectitem.tags =[tag];
+                }
+                selectitem.parent_item_id = parentItemId;
+
+                items.push(selectitem);
+
+                for(let customisation of item.customisations){
+                    let selectitem = {
+                        id: customisation?.local_id?.toString(),
+                        quantity: customisation.quantity,
+                        location_id: provider.locations[0].local_id?.toString()
+                    }
+                    let tag=undefined
+                    if(customisation.item_details.tags && customisation.item_details.tags.length>0){
+                        // tag= customisation.item_details.tags.findAll(i => i.code==='type' || i.code==='parent'|| i.code==='child');
+                        selectitem.tags =customisation.item_details.tags;
+                    }
+                    selectitem.parent_item_id = parentItemId;
+                    items.push(selectitem);
+                }
+
+            }
+
             const initRequest = {
                 context: context,
                 message: {
@@ -46,13 +83,7 @@ class BppInitService {
                                 return { id: location.local_id };
                             })
                         },
-                        items: order?.items.map(item => {
-                            return {
-                                id: item?.local_id?.toString(),
-                                quantity: item.quantity,
-                                fulfillment_id:item?.fulfillment_id
-                            };
-                        }) || [],
+                        items: items,
                         billing: {
                             ...order.billing_info,
                             address: {
