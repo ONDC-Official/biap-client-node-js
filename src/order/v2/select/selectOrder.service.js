@@ -110,7 +110,7 @@ class SelectOrderService {
                     return response;
                 }
                 catch (err) {
-                    return err.response.data;
+                    return err;
                 }
             })
         );
