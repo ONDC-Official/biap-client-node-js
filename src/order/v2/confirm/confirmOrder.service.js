@@ -11,8 +11,10 @@ import ContextFactory from "../../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../../payment/juspay.service.js";
 import {re} from "@babel/core/lib/vendor/import-meta-resolve.js";
+import CartService from "../cart/v2/cart.service.js";
 
 const bppConfirmService = new BppConfirmService();
+const cartService = new CartService();
 const juspayService = new JuspayService();
 
 class ConfirmOrderService {
@@ -233,6 +235,9 @@ class ConfirmOrderService {
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
             }
 
+            //clear cart
+
+            cartService.clearCart({userId:dbResponse.userId});
             return response;
         }
         catch (err) {
