@@ -231,11 +231,12 @@ class ConfirmOrderService {
                 );
 
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
+                //clear cart
+
+                cartService.clearCart({userId:dbResponse.userId});
             }
 
-            //clear cart
 
-            cartService.clearCart({userId:dbResponse.userId});
             return response;
         }
         catch (err) {
