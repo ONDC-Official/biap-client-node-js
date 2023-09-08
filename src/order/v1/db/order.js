@@ -259,6 +259,7 @@ const ItemsSchema = new mongoose.Schema(
     {
         id: { type: String, required: true },
         quantity: { type: ItemQuantityAllocatedSchema, required: true },
+        tags: { type: Object },
         product:{type:Object, required: false},
         fulfillment_status:{type: String, required:false },
         cancellation_status:{type: String, required:false },

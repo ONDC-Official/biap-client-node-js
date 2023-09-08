@@ -77,7 +77,8 @@ class InitOrderService {
                     id: item?.id?.toString(),
                     product: item?.product,
                     quantity: item.quantity,
-                    fulfillment_id:item?.fulfillment_id
+                    fulfillment_id:item?.fulfillment_id,
+                    tags:item.tags
                 }
                 itemProducts.push(itemObj);
             }
@@ -125,7 +126,8 @@ class InitOrderService {
                     id: item?.id?.toString(),
                     quantity: item.quantity,
                     product: item.product,
-                    fulfillment_id:item?.fulfillment_id
+                    fulfillment_id:item?.fulfillment_id,
+                    tags:item.tags
                 };
             }) || [];
 
