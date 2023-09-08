@@ -58,7 +58,8 @@ class BppConfirmService {
                         items: order?.items.map(item => {
                             return {
                                 id: item.id,
-                                quantity: item.quantity
+                                quantity: item.quantity,
+                                tags:item.tags
                             };
                         }) || [],
                         provider: {
@@ -180,7 +181,8 @@ class BppConfirmService {
                                     quantity: {
                                         count: item.quantity.count
                                     },
-                                    fulfillment_id: item.fulfillment_id
+                                    fulfillment_id: item.fulfillment_id,
+                                    tags:item.tags
                                 };
                             }) || [],
                         provider: storedOrder?.provider,
