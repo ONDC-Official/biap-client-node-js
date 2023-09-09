@@ -164,7 +164,7 @@ class InitOrderService {
                     dbResponse?.provider?.locations ?
                         dbResponse?.provider?.locations :
                         [],
-                descriptor: orderSchema?.provider
+                descriptor: dbResponse?.provider?.descriptor
             };
 
             orderSchema.settlementDetails = orderSchema.payment
