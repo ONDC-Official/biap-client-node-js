@@ -17,9 +17,9 @@ class BppSelectService {
             //check if item has customisation present
 
             let items  = []
-            for(let item of cart.items){
+            for(let [index,item] of cart.items.entries()){
 
-                let parentItemId = item?.local_id?.toString();
+                let parentItemId = "DI"+index.toString();
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -33,7 +33,6 @@ class BppSelectService {
                 selectitem.parent_item_id = parentItemId;
 
                 items.push(selectitem);
-
                 for(let customisation of item.customisations){
                     let selectitem = {
                         id: customisation?.local_id?.toString(),
@@ -41,17 +40,25 @@ class BppSelectService {
                         location_id: provider.locations[0].local_id?.toString()
                     }
                     let tag=undefined
-                    if(customisation.item_details.tags && customisation.item_details.tags.length>0){
-                        // tag= customisation.item_details.tags.findAll(i => i.code==='type' || i.code==='parent'|| i.code==='child');
-                        selectitem.tags =customisation.item_details.tags;
+                    if(customisation.item_details?.tags && customisation.item_details?.tags.length>0){
+                        tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
+                        let finalTags = []
+                        for(let tg of tag){tag
+                            if(tg.code==='parent'){
+                                if(tg.list.length>0){
+                                    tg.list= tg.list.filter(i =>{ return i.code==='id'});
+                                }
+                               finalTags.push(tg);
+                            }else{
+                                finalTags.push(tg);
+                             }
+                        }
+                        selectitem.tags =finalTags;
                     }
                     selectitem.parent_item_id = parentItemId;
                     items.push(selectitem);
                 }
-
             }
-
-
             const selectRequest = {
                 context: context,
                 message: {
@@ -75,6 +82,7 @@ class BppSelectService {
             return { context: context, message: response.message };
         }
         catch (err) {
+
 
             err.response.data.selectRequest =order
 
