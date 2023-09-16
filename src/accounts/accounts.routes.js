@@ -3,10 +3,12 @@ import { authentication } from '../middlewares/index.js';
 
 import BillingController from './billings/billing.controller.js';
 import DeliveryAddressController from './deliveryAddress/deliveryAddress.controller.js';
+import MapController from "./map/map.controller.js";
 
 const rootRouter = new Router();
 
 const billingController = new BillingController();
+const mapController = new MapController();
 const deliveryAddressController = new DeliveryAddressController();
 
 //#region billing details
@@ -46,5 +48,12 @@ rootRouter.post(
     authentication(),
     deliveryAddressController.updateDeliveryAddress,
 );
+
+rootRouter.get(
+    '/v2/map/accesstoken',
+    authentication(),
+    mapController.mmiToken
+);
+
 //#endregion
 export default rootRouter;
