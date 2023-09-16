@@ -82,10 +82,8 @@ class OrderHistoryService {
             const { orders, totalCount } = await this.findOrders(user, params);
             if (!orders.length) {
                 return {
-                    error: {
-                        message: "No data found",
-                        status: "BAP_010",
-                    }
+                    totalCount: 0,
+                    orders: [],
                 };
             }
             else {
