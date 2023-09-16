@@ -47,9 +47,10 @@ class OrderHistoryService {
             if (userId)
                 clonedFilterObj = { ...clonedFilterObj, userId: userId };
 
-            if (_.isEmpty(clonedFilterObj))
-                clonedFilterObj = { userId: user.decodedToken.uid };
+           // if (_.isEmpty(clonedFilterObj))
+                clonedFilterObj = {...clonedFilterObj, userId: user.decodedToken.uid };
 
+            console.log("clonedFilter obj --->",clonedFilterObj)
             switch (orderStatus) {
                 case ORDER_STATUS.COMPLETED:
                     clonedFilterObj = { ...clonedFilterObj, id: { "$ne": null } };
@@ -61,7 +62,7 @@ class OrderHistoryService {
                     break;
             }
             
-            orders = await OrderMongooseModel.find({ ...clonedFilterObj }).limit(limit).skip(skip);
+            orders = await OrderMongooseModel.find({ ...clonedFilterObj }).sort({createdAt: -1}).limit(limit).skip(skip);
             totalCount = await OrderMongooseModel.countDocuments({ ...clonedFilterObj });
 
             return { orders, totalCount };
