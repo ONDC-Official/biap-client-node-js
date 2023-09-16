@@ -176,7 +176,8 @@ class BppConfirmService {
                                         count: item.quantity.count
                                     },
                                     fulfillment_id: item.fulfillment_id,
-                                    tags:item.tags
+                                    tags:item.tags,
+                                    parent_item_id:item.parent_item_id??undefined
                                 };
                             }) || [],
                         provider: storedOrder?.provider,

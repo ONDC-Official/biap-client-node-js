@@ -42,7 +42,7 @@ class BppInitService {
             let items  = []
             for(let item of order.items){
 
-                let parentItemId = item?.local_id?.toString();
+                let parentItemId = item?.parent_item_id?.toString();
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -65,8 +65,19 @@ class BppInitService {
                     }
                     let tag=undefined
                     if(customisation.item_details.tags && customisation.item_details.tags.length>0){
-                        // tag= customisation.item_details.tags.findAll(i => i.code==='type' || i.code==='parent'|| i.code==='child');
-                        selectitem.tags =customisation.item_details.tags;
+                        tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
+                        let finalTags = []
+                        for(let tg of tag){tag
+                            if(tg.code==='parent'){
+                                if(tg.list.length>0){
+                                    tg.list= tg.list.filter(i =>{ return i.code==='id'});
+                                }
+                                finalTags.push(tg);
+                            }else{
+                                finalTags.push(tg);
+                            }
+                        }
+                        selectitem.tags =finalTags;
                     }
                     selectitem.parent_item_id = parentItemId;
                     items.push(selectitem);
