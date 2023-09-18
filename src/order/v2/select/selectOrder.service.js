@@ -35,7 +35,7 @@ class SelectOrderService {
     transform(response) {
 
         let error =  response.error ? Object.assign({}, response.error, {
-            message: response.error.message?"Out of stock items "+response.error.message:RetailsErrorCode[response.error.code],
+            message: response.error.message?response.error.message:RetailsErrorCode[response.error.code],
         }):null;
 
         return {
