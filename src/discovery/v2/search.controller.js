@@ -52,6 +52,37 @@ class SearchController {
         });
     }
 
+    getProvider(req, res, next) {
+        const searchRequest = req.query;
+        const {id:brandId} = req.params;
+
+        console.log({searchRequest})
+
+        searchService.getProvider(searchRequest,brandId).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+    getLocation(req, res, next) {
+        const searchRequest = req.query;
+        const {id:locationId} = req.params;
+
+        console.log({searchRequest})
+
+        searchService.getLocation(searchRequest,locationId).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
     /**
     * get attributes
     * @param {*} req    HTTP request object
@@ -65,6 +96,36 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getAttributes(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    getItems(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getItems(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    getLocations(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getLocations(searchRequest).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else

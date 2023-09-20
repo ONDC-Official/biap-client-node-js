@@ -24,6 +24,7 @@ const SEARCH_ATTRIBUTE = "protocol/attributes";
 const SEARCH_ATTRIBUTE_VALUE = "protocol/attribute-values";
 const PROVIDERS = "protocol/providers";
 const CUSTOM_MENU = "protocol/custom-menus";
+const LOCATIONS = "protocol/locations";
 // const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
@@ -49,6 +50,7 @@ const PROTOCOL_API_URLS = {
     SEARCH_ATTRIBUTE,
     SEARCH_ATTRIBUTE_VALUE,
     PROVIDERS,
+    LOCATIONS,
     CUSTOM_MENU,
     RESPONSE
 };

@@ -51,6 +51,31 @@ class SearchService {
             throw err;
         }
     }
+    async getProvider(searchRequest,brandId) {
+        try {
+
+            return await bppSearchService.getProvider(
+                searchRequest,
+                brandId
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getLocation(searchRequest,id) {
+        try {
+
+            return await bppSearchService.getLocation(
+                searchRequest,
+                id
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
 
     /**
      * getItem
@@ -60,6 +85,30 @@ class SearchService {
         try {
 
             return await bppSearchService.getAttributes(
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getItems(searchRequest) {
+        try {
+
+            return await bppSearchService.getItems(
+                searchRequest
+            );
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getLocations(searchRequest) {
+        try {
+
+            return await bppSearchService.getLocations(
                 searchRequest
             );
 

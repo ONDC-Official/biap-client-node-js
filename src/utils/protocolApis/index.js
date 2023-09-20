@@ -174,6 +174,22 @@ const protocolGetItems = async (searchRequest,itemId) => {
     return result.data;
 }
 
+const protocolGetItemList = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
 const protocolGetAttributes = async (searchRequest) => {
 
     const apiCall = new HttpRequest(
@@ -227,6 +243,54 @@ const protocolGetProviders = async (searchRequest) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
         PROTOCOL_API_URLS.PROVIDERS,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetProvider = async (searchRequest,brandId) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.PROVIDERS+"/"+brandId,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetLocation = async (searchRequest,id) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.LOCATIONS+"/"+id,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetLocations = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.LOCATIONS,
         "GET",
         {
             ...searchRequest
@@ -462,5 +526,9 @@ export {
     protocolGetAttributes,
     protocolGetAttributesValues,
     protocolGetProviders,
-    protocolGetCustomMenus
+    protocolGetCustomMenus,
+    protocolGetProvider,
+    protocolGetLocation,
+    protocolGetItemList,
+    protocolGetLocations
 };

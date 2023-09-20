@@ -3,7 +3,11 @@ import { protocolSearchItems,
     protocolGetAttributes,
     protocolGetAttributesValues,
     protocolGetProviders,
-    protocolGetCustomMenus} from "../../utils/protocolApis/index.js";
+    protocolGetCustomMenus,
+    protocolGetProvider,
+    protocolGetLocation,
+    protocolGetItemList,
+    protocolGetLocations} from "../../utils/protocolApis/index.js";
 
 class BppSearchService {
 
@@ -43,10 +47,56 @@ class BppSearchService {
         }
     }
 
+    async getProvider(searchRequest,brandId) {
+        try {
+
+            const response = await protocolGetProvider(searchRequest,brandId);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async getLocation(searchRequest,id) {
+        try {
+
+            const response = await protocolGetLocation(searchRequest,id);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
     async getAttributes(searchRequest) {
         try {
 
             const response = await protocolGetAttributes(searchRequest);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+    async getItems(searchRequest) {
+        try {
+
+            const response = await protocolGetItemList(searchRequest);
+
+            return { response };
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+    async getLocations(searchRequest) {
+        try {
+
+            const response = await protocolGetLocations(searchRequest);
 
             return { response };
         }

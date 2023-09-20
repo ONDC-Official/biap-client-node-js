@@ -16,9 +16,27 @@ router.get(
     '/v2/items/:id', authentication(), searchController.getItem,
 );
 
-// get item attributes
+// get item details
+router.get(
+    '/v2/providers/:brandId', authentication(), searchController.getProvider,
+);
+
+// get item details
+router.get(
+    '/v2/locations/:locationId', authentication(), searchController.getLocation,
+);
+
+
 router.get(
     '/v2/attributes', authentication(), searchController.getAttributes,
+);
+
+router.get(
+    '/v2/items', authentication(), searchController.getItems,
+);
+
+router.get(
+    '/v2/locations', authentication(), searchController.getLocations,
 );
 
 // get item attributes values
