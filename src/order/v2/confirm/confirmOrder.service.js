@@ -223,7 +223,8 @@ class ConfirmOrderService {
                 }
 
                 orderSchema.updatedQuote= orderSchema.quote;
-                //console.log("orderSchema.fulfillments",orderSchema.fulfillments)
+                orderSchema.tags= orderSchema.tags;
+                orderSchema.domain= response?.context.domain
 
                 await addOrUpdateOrderWithTransactionIdAndProvider(
                     response.context.transaction_id,dbResponse.provider.id,

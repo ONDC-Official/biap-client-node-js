@@ -233,6 +233,29 @@ class BppConfirmService {
                         quote: {
                             ...(qoute)
                         },
+                        tags:
+                            [
+                                {
+                                    code:"bpp_terms",
+                                    list:
+                                        [
+                                            {
+                                                "code":"tax_number",
+                                                "value":"BUYER-APP-GSTN"
+                                            }
+                                        ]
+                                },
+                                {
+                                    code:"bap_terms",
+                                    list:
+                                        [
+                                            {
+                                                "code":"tax_number",
+                                                "value":"gst_number_of_buyerNP"
+                                            }
+                                        ]
+                                }
+                            ],
                         created_at:context.timestamp,
                         updated_at:context.timestamp
                     }
