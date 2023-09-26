@@ -420,8 +420,9 @@ const protocolOrderStatus = async (data) => {
 const onOrderStatus = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_STATUS + "?messageId="+ messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_status',messageId:messageId}
     );
 
     const result = await apiCall.send();
