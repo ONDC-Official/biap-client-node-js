@@ -32,10 +32,10 @@ class OrderStatusService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
-                transactionId: orderDetails?.transactionId,
+                transactionId: orderDetails[0]?.transactionId,
                 bppId: requestContext?.bpp_id,
-                bpp_uri: orderDetails?.bpp_uri,
-                cityCode: orderDetails.city,
+                bpp_uri: orderDetails[0]?.bpp_uri,
+                cityCode: orderDetails[0].city,
                 domain:orderDetails[0].domain
             });
 
@@ -166,23 +166,26 @@ class OrderStatusService {
                                 let protocolItems = onOrderStatusResponse?.message?.order?.items
 
                                 let updateItems = []
-                                for(let item of protocolItems){
-                                    let updatedItem = {}
-                                    updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
-                                    let temp=updatedItem[0];
-                                    console.log("item----length-before->",item)
-                                    if(item.tags){
-                                        item.return_status = item?.tags?.status;
-                                        item.cancellation_status = item?.tags?.status;
-                                        delete item.tags
-                                    }
-                                    item.fulfillment_status = temp.fulfillment_status;
-                                    item.product = temp.product;
-                                    //item.quantity = item.quantity.count
-
-                                    console.log("item --after-->",item)
-                                    updateItems.push(item)
-                                }
+                                // for(let item of protocolItems){
+                                //     let updatedItem = {}
+                                //
+                                //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items
+                                //     updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
+                                //     let temp=updatedItem[0];
+                                //     console.log("item----length-before->",item)
+                                //     console.log("item----length-before temp->",temp)
+                                //     // if(item.tags){
+                                //     //     item.return_status = item?.tags?.status;
+                                //     //     item.cancellation_status = item?.tags?.status;
+                                //     //     delete item.tags
+                                //     // }
+                                //    // item.fulfillment_status = temp.fulfillment_status;
+                                //     item.product = temp.product;
+                                //     //item.quantity = item.quantity.count
+                                //
+                                //     console.log("item --after-->",item)
+                                //     updateItems.push(item)
+                                // }
 
                                 console.log("updateItems",updateItems)
                                 //get item from db and update state for item
@@ -191,14 +194,14 @@ class OrderStatusService {
                                // orderSchema.items = op;
 
 
-                                const updateRequest = await getOrderRequestLatestFirst({transaction_id:onOrderStatusResponse.context.transaction_id
-                                    ,requestType:'update'}) //TODO: sort by latest first
-
-                                console.log("update request-------->",updateRequest);
-
-                                if(updateRequest){
-                                    await this.updateForPaymentObject(updateRequest?.request,onOrderStatusResponse)
-                                }
+                                // const updateRequest = await getOrderRequestLatestFirst({transaction_id:onOrderStatusResponse.context.transaction_id
+                                //     ,requestType:'update'}) //TODO: sort by latest first
+                                //
+                                // console.log("update request-------->",updateRequest);
+                                //
+                                // if(updateRequest){
+                                //     await this.updateForPaymentObject(updateRequest?.request,onOrderStatusResponse)
+                                // }
 
                                 await addOrUpdateOrderWithTransactionIdAndProvider(
                                     onOrderStatusResponse?.context?.transaction_id,onOrderStatusResponse.message.order.provider.id,
