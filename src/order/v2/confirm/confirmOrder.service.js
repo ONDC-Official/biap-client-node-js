@@ -205,6 +205,7 @@ class ConfirmOrderService {
                     orderSchema.items = dbResponse.items
                 }
 
+                orderSchema.provider = dbResponse.provider
                 if(orderSchema.fulfillment) {
                     orderSchema.fulfillments = [...orderSchema.fulfillments].map((fulfillment) => {
                         return {
