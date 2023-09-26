@@ -30,34 +30,40 @@ class BppSelectService {
                    tag= item.tags.find(i => i.code==='type');
                    selectitem.tags =[tag];
                 }
-                selectitem.parent_item_id = parentItemId;
+                if(item.customisations && item.customisations.length >0){
+                    selectitem.parent_item_id = parentItemId;
+
+                }
 
                 items.push(selectitem);
-                for(let customisation of item.customisations){
-                    let selectitem = {
-                        id: customisation?.local_id?.toString(),
-                        quantity: customisation.quantity,
-                        location_id: provider.locations[0].local_id?.toString()
-                    }
-                    let tag=undefined
-                    if(customisation.item_details?.tags && customisation.item_details?.tags.length>0){
-                        tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
-                        let finalTags = []
-                        for(let tg of tag){tag
-                            if(tg.code==='parent'){
-                                if(tg.list.length>0){
-                                    tg.list= tg.list.filter(i =>{ return i.code==='id'});
-                                }
-                               finalTags.push(tg);
-                            }else{
-                                finalTags.push(tg);
-                             }
+                if(item.customisations){
+                    for(let customisation of item.customisations){
+                        let selectitem = {
+                            id: customisation?.local_id?.toString(),
+                            quantity: customisation.quantity,
+                            location_id: provider.locations[0].local_id?.toString()
                         }
-                        selectitem.tags =finalTags;
+                        let tag=undefined
+                        if(customisation.item_details?.tags && customisation.item_details?.tags.length>0){
+                            tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
+                            let finalTags = []
+                            for(let tg of tag){tag
+                                if(tg.code==='parent'){
+                                    if(tg.list.length>0){
+                                        tg.list= tg.list.filter(i =>{ return i.code==='id'});
+                                    }
+                                    finalTags.push(tg);
+                                }else{
+                                    finalTags.push(tg);
+                                }
+                            }
+                            selectitem.tags =finalTags;
+                        }
+                        selectitem.parent_item_id = parentItemId;
+                        items.push(selectitem);
                     }
-                    selectitem.parent_item_id = parentItemId;
-                    items.push(selectitem);
                 }
+
             }
             const selectRequest = {
                 context: context,
@@ -77,6 +83,7 @@ class BppSelectService {
                 }
             };
 
+            console.log("select request",selectRequest)
             const response = await protocolSelect(selectRequest);
 
             return { context: context, message: response.message };
@@ -84,6 +91,7 @@ class BppSelectService {
         catch (err) {
 
 
+            console.log(err);
             err.response.data.selectRequest =order
 
             throw err;

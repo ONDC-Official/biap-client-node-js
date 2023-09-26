@@ -18,12 +18,12 @@ router.get(
 
 // get item details
 router.get(
-    '/v2/providers/:brandId', authentication(), searchController.getProvider,
+    '/v2/providers/:itemId', authentication(), searchController.getProvider,
 );
 
 // get item details
 router.get(
-    '/v2/locations/:locationId', authentication(), searchController.getLocation,
+    '/v2/locations/:id', authentication(), searchController.getLocation,
 );
 
 

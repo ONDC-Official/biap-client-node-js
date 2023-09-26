@@ -54,15 +54,15 @@ class SearchController {
 
     getProvider(req, res, next) {
         const searchRequest = req.query;
-        const {id:brandId} = req.params;
+        const {itemId} = req.params;
 
-        console.log({searchRequest})
+        console.log("get providers*****1*********" ,{searchRequest,itemId})
 
-        searchService.getProvider(searchRequest,brandId).then(response => {
+        searchService.getProvider(searchRequest,itemId).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response);
+                res.json(response.response);
         }).catch((err) => {
             next(err);
         });
@@ -77,7 +77,7 @@ class SearchController {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response);
+                res.json(response.response);
         }).catch((err) => {
             next(err);
         });
@@ -114,7 +114,7 @@ class SearchController {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response);
+                res.json(response.response);
         }).catch((err) => {
             next(err);
         });
@@ -129,7 +129,7 @@ class SearchController {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response);
+                res.json(response.response);
         }).catch((err) => {
             next(err);
         });
@@ -167,7 +167,6 @@ class SearchController {
     getProviders(req, res, next) {
         const searchRequest = req.query;
 
-        console.log({searchRequest})
 
         searchService.getProviders(searchRequest).then(response => {
             if(!response || response === null)
@@ -195,7 +194,7 @@ class SearchController {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response);
+                res.json(response.response);
         }).catch((err) => {
             next(err);
         });
