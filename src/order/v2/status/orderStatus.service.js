@@ -28,13 +28,15 @@ class OrderStatusService {
 
             const orderDetails = await getOrderById(order.message.order_id);
 
+            console.log('domain--------XX------>',orderDetails)
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.STATUS,
                 transactionId: orderDetails?.transactionId,
                 bppId: requestContext?.bpp_id,
                 bpp_uri: orderDetails?.bpp_uri,
-                cityCode: orderDetails.city
+                cityCode: orderDetails.city,
+                domain:orderDetails[0].domain
             });
 
             return await bppOrderStatusService.getOrderStatus(
@@ -254,7 +256,8 @@ class OrderStatusService {
                     transactionId: orderDetails?.transactionId,
                     bppId: orderRequest?.context?.bpp_id,
                     bpp_uri: orderDetails?.bpp_uri,
-                    cityCode:orderDetails.city
+                    cityCode:orderDetails.city,
+                    domain:orderDetails.domain
                 });
 
                 const { message = {} } = orderRequest || {};

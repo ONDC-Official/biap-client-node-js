@@ -157,6 +157,7 @@ class SseProtocol {
         try {
             const { messageId } = response;
 
+            console.log("messageId--->",messageId)
             sendSSEResponse(
                 messageId,
                 PROTOCOL_CONTEXT.ON_STATUS,

@@ -89,7 +89,7 @@ rootRouter.get('/v2/on_initialize_order', authentication(), initOrderController.
 
 // order status v1
 rootRouter.post(
-    '/v2/order_status',
+    '/v1/order_status',
     orderStatusController.orderStatus,
 );
 

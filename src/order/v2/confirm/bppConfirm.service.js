@@ -251,7 +251,7 @@ class BppConfirmService {
                                         [
                                             {
                                                 "code":"tax_number",
-                                                "value":"gst_number_of_buyerNP"
+                                                "value":"BUYER-APP-GSTN"
                                             }
                                         ]
                                 }
