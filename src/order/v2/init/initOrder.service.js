@@ -85,7 +85,9 @@ class InitOrderService {
                     tag= item.tags.find(i => i.code==='type');
                     selectitem.tags =[tag];
                 }
-                if(item.customisations && item.customisations.length > 0){
+
+                if(item?.parent_item_id){
+                    let parentItemId = item?.parent_item_id?.toString();
                     selectitem.parent_item_id = parentItemId;
                 }
 
@@ -104,7 +106,7 @@ class InitOrderService {
                         if(customisation.item_details.tags && customisation.item_details.tags.length>0){
                             tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
                             let finalTags = []
-                            for(let tg of tag){tag
+                            for(let tg of tag){
                                 if(tg.code==='parent'){
                                     if(tg.list.length>0){
                                         tg.list= tg.list.filter(i =>{ return i.code==='id'});
@@ -116,7 +118,7 @@ class InitOrderService {
                             }
                             selectitem.tags =finalTags;
                         }
-                        selectitem.fulfillment_id =customisation?.fulfillment_id
+                        selectitem.fulfillment_id =item?.fulfillment_id
                         selectitem.parent_item_id = parentItemId;
                         selectitem.product= customisation
                         itemProducts.push(selectitem);
@@ -170,7 +172,8 @@ class InitOrderService {
                     quantity: item.quantity,
                     product: item.product,
                     fulfillment_id:item?.fulfillment_id,
-                    tags:item.tags
+                    tags:item.tags,
+                    parent_item_id:item.parent_item_id
                 };
             }) || [];
 

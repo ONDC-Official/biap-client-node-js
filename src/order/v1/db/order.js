@@ -265,7 +265,8 @@ const ItemsSchema = new mongoose.Schema(
         fulfillment_status:{type: String, required:false },
         cancellation_status:{type: String, required:false },
         return_status:{type: String, required:false },
-        fulfillment_id:{type:String}
+        fulfillment_id:{type:String},
+        parent_item_id:{type:String}
     },
     { _id: false }
 );

@@ -9,14 +9,20 @@ class BppCancelService {
      * @param {String} cancellationReasonId 
      * @returns 
      */
-    async cancelOrder(context, orderId, cancellationReasonId = "001") {
+    async cancelOrder(context, orderId, cancellationReasonId = "001",fulfillmentId) {
         try {
 
             const cancelRequest = {
                 context: context,
                 message: {
                     order_id: orderId,
-                    cancellation_reason_id: "001"
+                    cancellation_reason_id: cancellationReasonId,
+                    descriptor:
+                        {
+                            name:"fulfillment",
+                            short_desc:fulfillmentId
+                        }
+
                 }
             }
 

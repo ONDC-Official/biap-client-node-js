@@ -66,8 +66,9 @@ const protocolCancel = async (data) => {
 const onOrderCancel = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_CANCEL + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_cancel',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -454,8 +455,9 @@ const protocolUpdate = async (data) => {
 const onUpdateStatus = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_UPDATE+ "?messageId="+ messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_update',messageId:messageId}
     );
 
     const result = await apiCall.send();

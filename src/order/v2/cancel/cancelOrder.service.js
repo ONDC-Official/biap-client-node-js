@@ -35,8 +35,11 @@ class CancelOrderService {
                 transactionId: orderDetails.transactionId,
                 bppId: orderRequest?.context?.bpp_id,
                 bpp_uri: orderDetails?.bpp_uri,
-                cityCode:orderDetails.city
+                cityCode:orderDetails.city,
+                domain:orderDetails[0].domain
             });
+
+            let fulfillmentId =orderDetails[0].items[0].fulfillment_id;
 
             const { message = {} } = orderRequest || {};
             const { order_id, cancellation_reason_id } = message || {};
@@ -48,7 +51,8 @@ class CancelOrderService {
             return await bppCancelService.cancelOrder(
                 context,
                 order_id,
-                cancellation_reason_id
+                cancellation_reason_id,
+                fulfillmentId
             );
         }
         catch (err) {

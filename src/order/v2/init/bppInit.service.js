@@ -58,7 +58,7 @@ class BppInitService {
                     selectitem.parent_item_id = parentItemId;
                 }
                 // selectitem.parent_item_id = parentItemId;
-
+                selectitem.fulfillment_id =item?.fulfillment_id
                 items.push(selectitem);
                 if(item.customisations){
                     for(let customisation of item.customisations){
@@ -83,6 +83,7 @@ class BppInitService {
                             }
                             selectitem.tags =finalTags;
                         }
+                        selectitem.fulfillment_id =item?.fulfillment_id
                         selectitem.parent_item_id = parentItemId;
                         items.push(selectitem);
                     }
