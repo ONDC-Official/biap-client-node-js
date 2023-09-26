@@ -127,17 +127,17 @@ class OrderStatusService {
                             if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
-                                if(onOrderStatusResponse?.message?.order?.quote){
+                                if (onOrderStatusResponse?.message?.order?.quote) {
 
-                                   // console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
+                                    // console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
                                     orderSchema.updatedQuote = onOrderStatusResponse?.message?.order?.quote
                                 }
 
-                                let op =orderSchema?.items.map((e,i)=>{
-                                    let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment=> fulfillment?.id === e?.fulfillment_id)
-                                    if(temp) {
-                                        e.fulfillment_status = temp.state?.descriptor?.code??""
-                                    }else{
+                                let op = orderSchema?.items.map((e, i) => {
+                                    let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment => fulfillment?.id === e?.fulfillment_id)
+                                    if (temp) {
+                                        e.fulfillment_status = temp.state?.descriptor?.code ?? ""
+                                    } else {
                                         e.fulfillment_status = ""
                                     }
                                     return e;
@@ -166,7 +166,7 @@ class OrderStatusService {
                                 let protocolItems = onOrderStatusResponse?.message?.order?.items
 
                                 let updateItems = []
-                                // for(let item of protocolItems){
+                                //for(let item of protocolItems){
                                 //     let updatedItem = {}
                                 //
                                 //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items
@@ -184,12 +184,12 @@ class OrderStatusService {
                                 //     //item.quantity = item.quantity.count
                                 //
                                 //     console.log("item --after-->",item)
-                                //     updateItems.push(item)
-                                // }
+                                    //updateItems.push(item)
+                            //}
 
                                 console.log("updateItems",updateItems)
                                 //get item from db and update state for item
-                                orderSchema.items = updateItems;
+                                orderSchema.items = protocolItems;
 
                                // orderSchema.items = op;
 
