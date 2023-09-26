@@ -53,7 +53,8 @@ class BppInitService {
                     tag= item.tags.find(i => i.code==='type');
                     selectitem.tags =[tag];
                 }
-                if(item.customisations && item.customisations.length > 0){
+                if(item?.parent_item_id){
+                    let parentItemId = item?.parent_item_id?.toString();
                     selectitem.parent_item_id = parentItemId;
                 }
                 // selectitem.parent_item_id = parentItemId;
