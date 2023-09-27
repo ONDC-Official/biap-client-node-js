@@ -223,6 +223,30 @@ class ConfirmOrderService {
                     });
                 }
 
+                let updateItems = []
+                for(let item of dbResponse.items){
+                    let temp = orderSchema?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
+                    item.fulfillment_status = temp.state?.descriptor?.code??""
+                    //     let updatedItem = {}
+                    //
+                    //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items
+                    //     updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
+                    //     let temp=updatedItem[0];
+                    //     console.log("item----length-before->",item)
+                    //     console.log("item----length-before temp->",temp)
+                    //     // if(item.tags){
+                    //     //     item.return_status = item?.tags?.status;
+                    //     //     item.cancellation_status = item?.tags?.status;
+                    //     //     delete item.tags
+                    //     // }
+                    //    // item.fulfillment_status = temp.fulfillment_status;
+                    //     item.product = temp.product;
+                    //     //item.quantity = item.quantity.count
+                    //
+                    //     console.log("item --after-->",item)
+                    updateItems.push(item)
+                }
+                orderSchema.items = updateItems;
                 orderSchema.updatedQuote= orderSchema.quote;
                 orderSchema.tags= orderSchema.tags;
                 orderSchema.domain= response?.context.domain

@@ -166,7 +166,9 @@ class OrderStatusService {
                                 let protocolItems = onOrderStatusResponse?.message?.order?.items
 
                                 let updateItems = []
-                                //for(let item of protocolItems){
+                                for(let item of protocolItems){
+                                    let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
+                                    item.fulfillment_status = temp.state?.descriptor?.code??""
                                 //     let updatedItem = {}
                                 //
                                 //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items
@@ -184,12 +186,12 @@ class OrderStatusService {
                                 //     //item.quantity = item.quantity.count
                                 //
                                 //     console.log("item --after-->",item)
-                                    //updateItems.push(item)
-                            //}
+                                    updateItems.push(item)
+                            }
 
                                 console.log("updateItems",updateItems)
                                 //get item from db and update state for item
-                                orderSchema.items = protocolItems;
+                                orderSchema.items = updateItems;
 
                                // orderSchema.items = op;
 
