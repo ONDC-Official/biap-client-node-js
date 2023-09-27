@@ -166,7 +166,7 @@ class OrderStatusService {
                                 let protocolItems = onOrderStatusResponse?.message?.order?.items
 
                                 let updateItems = []
-                                for(let item of protocolItems){
+                                for(let item of dbResponse[0].items){
                                     let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
                                     item.fulfillment_status = temp.state?.descriptor?.code??""
                                 //     let updatedItem = {}
@@ -182,7 +182,7 @@ class OrderStatusService {
                                 //     //     delete item.tags
                                 //     // }
                                 //    // item.fulfillment_status = temp.fulfillment_status;
-                                //     item.product = temp.product;
+                                    //item.product = temp.product;
                                 //     //item.quantity = item.quantity.count
                                 //
                                 //     console.log("item --after-->",item)
