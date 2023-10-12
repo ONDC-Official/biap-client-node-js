@@ -83,7 +83,9 @@ class InitOrderService {
                 let tag=undefined
                 if(item.tags && item.tags.length>0){
                     tag= item.tags.find(i => i.code==='type');
-                    selectitem.tags =[tag];
+                    if(tag){
+                        selectitem.tags =[tag];
+                    }
                 }
 
                 if(item?.parent_item_id){

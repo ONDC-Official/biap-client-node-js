@@ -226,7 +226,7 @@ class ConfirmOrderService {
                 let updateItems = []
                 for(let item of dbResponse.items){
                     let temp = orderSchema?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
-                    item.fulfillment_status = temp.state?.descriptor?.code??""
+                    item.fulfillment_status = temp?.state?.descriptor?.code??""
                     //     let updatedItem = {}
                     //
                     //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items

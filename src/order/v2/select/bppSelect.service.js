@@ -28,7 +28,9 @@ class BppSelectService {
                 let tag=undefined
                 if(item.tags && item.tags.length>0){
                    tag= item.tags.find(i => i.code==='type');
-                   selectitem.tags =[tag];
+                   if(tag){
+                       selectitem.tags =[tag];
+                   }
                 }
                 if(item.customisations && item.customisations.length >0){
                     selectitem.parent_item_id = parentItemId;
