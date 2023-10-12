@@ -132,6 +132,11 @@ class OrderStatusService {
                                     // console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
                                     orderSchema.updatedQuote = onOrderStatusResponse?.message?.order?.quote
                                 }
+                                if (onOrderStatusResponse?.message?.order?.documents) {
+
+                                    // console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
+                                    orderSchema.documents = onOrderStatusResponse?.message?.order?.documents
+                                }
 
                                 let op = orderSchema?.items.map((e, i) => {
                                     let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment => fulfillment?.id === e?.fulfillment_id)

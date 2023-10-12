@@ -347,7 +347,8 @@ const OrderSchema = new mongoose.Schema(
         bapOrderId: { type: String },
         settlementDetails:{type:Object},
         tags:{type:Object},
-        domain:{type:String}
+        domain:{type:String},
+        documents:{type:Object}
     },
     { _id: true, timestamps: true }
 );
