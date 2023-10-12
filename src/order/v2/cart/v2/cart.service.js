@@ -66,7 +66,12 @@ class CartService {
     async getCartItem(data) {
         try {
             const cart = await Cart.findOne({userId:data.userId})
-            return  await CartItem.find({cart:cart._id});
+            if(cart){
+                return  await CartItem.find({cart:cart._id});
+            }else{
+                return  []
+            }
+
         }
         catch (err) {
             throw err;
