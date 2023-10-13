@@ -71,6 +71,8 @@ class InitOrderService {
                 provider_id: provider?.local_id
             };
 
+            console.log('itemProducts--------before------->',orderRequest.items);
+
             let itemProducts = []
             for(let item of orderRequest.items){
 
@@ -130,7 +132,7 @@ class InitOrderService {
 
             }
 
-            console.log('itemProducts--------------->',itemProducts);
+            console.log('itemProducts--------aftr------->',itemProducts);
             // console.log('itemProducts--------response?.context?.bpp_id------->',response?.context?.bpp_id);
             console.log('itemProducts--------response?.context?.bpp_id------->',fulfillment);
 
