@@ -30,7 +30,7 @@ class UpdateOrderService {
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.UPDATE,
-                bppId: orderDetails[0]?.bpp_id,
+                bppId: orderDetails[0]?.bppId,
                 transactionId: orderDetails[0]?.transactionId,
                 bpp_uri: orderDetails[0]?.bpp_uri,
                 cityCode: orderDetails[0].city,
@@ -185,7 +185,7 @@ class UpdateOrderService {
                     if(updateQoute){
                         return await bppUpdateService.update(
                             context,
-                            'billing',
+                            'payment',
                             order,
                             orderDetails
                         );

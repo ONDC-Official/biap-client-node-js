@@ -19,6 +19,8 @@ class DeliveryAddressService {
                 gps: request?.gps,
                 defaultAddress: true,
                 address: request?.address,
+                lat: request?.lat,
+                lng: request?.lng
             };
                         
             await DeliveryAddressMongooseModel.updateMany(
@@ -36,7 +38,9 @@ class DeliveryAddressService {
                 descriptor: storedDeliveryAddress?.descriptor,
                 gps: storedDeliveryAddress?.gps,
                 defaultAddress: storedDeliveryAddress?.defaultAddress,
-                address: storedDeliveryAddress?.address
+                address: storedDeliveryAddress?.address,
+                lat: storedDeliveryAddress?.lat,
+                lng: storedDeliveryAddress?.lng
             };
         }
         catch (err) {
@@ -75,6 +79,8 @@ class DeliveryAddressService {
                 gps: request?.gps,
                 defaultAddress: request?.defaultAddress,
                 address: request?.address,
+                lat: request?.lat,
+                lng: request?.lng
             };
 
             if(request?.defaultAddress)
@@ -98,7 +104,9 @@ class DeliveryAddressService {
                     descriptor: storedDeliveryAddress?.descriptor,
                     gps: storedDeliveryAddress?.gps,
                     defaultAddress: storedDeliveryAddress?.defaultAddress,
-                    address: storedDeliveryAddress?.address
+                    address: storedDeliveryAddress?.address,
+                    lat: storedDeliveryAddress?.lat,
+                    lng: storedDeliveryAddress?.lng
                 };
             else
                 throw new NoRecordFoundError(`Delivery address with ${id} not found`);
