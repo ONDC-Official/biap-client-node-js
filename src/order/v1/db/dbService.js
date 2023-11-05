@@ -56,6 +56,21 @@ const addOrUpdateOrderWithTransactionIdAndOrderId = async (transactionId, orderI
     );
 
 };
+const addOrUpdateOrderWithdOrderId = async ( orderId, orderSchema = {}) => {
+
+
+    // console.log("items------------------->",transactionId,orderSchema.items)
+    return await OrderMongooseModel.findOneAndUpdate(
+        {
+            "id":orderId
+        },
+        {
+            ...orderSchema
+        },
+        { upsert: true }
+    );
+
+};
 
 /**
  * get the order with passed transaction id from the database
@@ -126,4 +141,4 @@ const getOrderRequestLatestFirst = async (data) => {
     return order;
 };
 
-export {getOrderRequest,getOrderRequestLatestFirst,saveOrderRequest,addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };
+export {getOrderRequest,addOrUpdateOrderWithdOrderId,getOrderRequestLatestFirst,saveOrderRequest,addOrUpdateOrderWithTransactionIdAndOrderId,addOrUpdateOrderWithTransactionId,getOrderByTransactionIdAndProvider, getOrderByTransactionId,getOrderById,addOrUpdateOrderWithTransactionIdAndProvider };

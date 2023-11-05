@@ -15,10 +15,7 @@ class BppUpdateService {
 
             const cancelRequest = {
                 context: context,
-                message: {
-                    update_target: update_target,
-                    order:order
-                }
+                message: order
             }
 
             const response = await protocolUpdate(cancelRequest);

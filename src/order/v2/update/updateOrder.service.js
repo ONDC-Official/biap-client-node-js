@@ -1,9 +1,8 @@
 import { onOrderCancel ,onUpdateStatus} from "../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionIdAndOrderId,
-    addOrUpdateOrderWithTransactionIdAndProvider,
-    getOrderById, saveOrderRequest,getOrderRequest
+    getOrderById, saveOrderRequest,getOrderRequest,
+    addOrUpdateOrderWithdOrderId
 } from "../../v1/db/dbService.js";
 
 import BppUpdateService from "./bppUpdate.service.js";
@@ -12,6 +11,8 @@ import CustomError from "../../../lib/errors/custom.error.js";
 import NoRecordFoundError from "../../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from '../../v1/db/order.js';
 import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
+import Fulfillments from "../db/fulfillments.js";
+import Settlements from "../db/settlement.js";
 
 const bppUpdateService = new BppUpdateService();
 
@@ -42,6 +43,92 @@ class UpdateOrderService {
                const data = {context:context,data:orderRequest}
            // }
 
+            let fulfilments = []
+            for(let item of orderRequest.message.order.items){
+
+                let type = '';
+                let code= '';
+                if(item.tags.update_type==="return"){
+                    type ='Return';
+                    code = 'return_request'
+                }
+
+                let dbFulfillment = new Fulfillments();
+                console.log("item---->",item);
+                let  fulfilment =
+                    {
+                        "type":type,
+                        "tags":
+                            [
+                                {
+                                    "code":code,
+                                    "list":
+                                        [
+                                            {
+                                                "code":"id",
+                                                "value":dbFulfillment._id
+                                            },
+                                            {
+                                                "code":"item_id",
+                                                "value":item.id
+                                            },
+                                            {
+                                                "code":"parent_item_id",
+                                                "value":''
+                                            },
+                                            {
+                                                "code":"item_quantity",
+                                                "value":`${item.quantity.count}`
+                                            },
+                                            {
+                                                "code":"reason_id",
+                                                "value": `${item.tags.reason_code}`
+                                            },
+                                            {
+                                                "code":"reason_desc",
+                                                "value":"detailed description for return"
+                                            },
+                                            {
+                                                "code":"images",
+                                                "value":"url_for_image1,url_for_image2"
+                                            },
+                                            {
+                                                "code":"ttl_approval",
+                                                "value":"PT24H"
+                                            },
+                                            {
+                                                "code":"ttl_reverseqc",
+                                                "value":"P3D"
+                                            }
+                                        ]
+                                }
+                            ]
+                    }
+
+                dbFulfillment.itemId = item.id
+                dbFulfillment.orderId = orderRequest.message.order.id
+                dbFulfillment.parent_item_id = ''
+                dbFulfillment.item_quantity = item.quantity.count
+                dbFulfillment.reason_id = item.tags.reason_code
+                dbFulfillment.reason_desc = 'detailed description for return'
+                dbFulfillment.images = "url_for_image1,url_for_image2"
+                dbFulfillment.type ='type'
+                dbFulfillment.id =dbFulfillment._id
+                await dbFulfillment.save();
+
+                fulfilments.push(fulfilment);
+            }
+            //1. create a new fullfillment
+
+           let order = {
+                "update_target":"item",
+                "order":
+                {
+                    "id":orderRequest.message.order.id,
+                    "fulfillments":fulfilments
+                }
+            }
+
             const transactionId= data.context.transaction_id
             const messageId= data.context.message_id
             const request = data.data
@@ -51,7 +138,7 @@ class UpdateOrderService {
             await orderSaved.save();
 
             const { message = {} } = orderRequest || {};
-            const { update_target,order } = message || {};
+            //const { update_target,order } = message || {};
 
             if (!(context?.bpp_id)) {
                 throw new CustomError("BPP Id is mandatory");
@@ -60,7 +147,7 @@ class UpdateOrderService {
 
             return await bppUpdateService.update(
                 context,
-                update_target,
+                '',
                 order,
                 orderDetails
             );
@@ -309,40 +396,121 @@ class UpdateOrderService {
                          * scenario #10. more than 4 item is purchased and returned 2 cancelled 2 items one by one
                          */
 
-                        // let op =orderSchema?.items.map((e,i)=>{
-                        //
-                        //     let temp = protocolUpdateResponse?.message?.order?.items.find(element=> element.id === e.id)
-                        //     if(temp) {
-                        //         e.return_status = temp?.tags?.status;
-                        //         e.cancellation_status = temp?.tags?.status;
-                        //
-                        //         // if(!e.cancellation_status || !e.return_status ){
-                        //         //     e.cancellation_status ='Cancelled' //TODO: change from actual response
-                        //         //     e.return_status ='Return Approved' //TODO: change from actual response
-                        //         // }
-                        //     }
-                        //     return e;
-                        // })
+                        let protocolItems = protocolUpdateResponse?.message?.order
 
-                        let protocolItems = protocolUpdateResponse?.message?.order?.items
+                        let fulfillments = protocolUpdateResponse?.message?.order?.fulfillments
+
+                        for(let fl of fulfillments){
+                            //find if fl present
+                            let dbFl = await Fulfillments.findOne({orderId:protocolUpdateResponse?.message?.order.id,id:fl.id});
+
+                            if(!fl){
+                                //save new fl
+                                let newFl = new Fulfillments();
+                                newFl.id = fl.id;
+                                newFl.orderId = protocolUpdateResponse?.message?.order.id;
+                                newFl.state = fl.state;
+                                if(fl.type ==='Return' || fl.type ==='Cancel'){
+                                    newFl.type=fl.type
+                                    dbFl.tags = fl.tags;
+                                }else{
+                                    newFl.type='orderFulfillment';
+                                }
+                                dbFl = await newFl.save();
+
+                            }else{
+                                dbFl.state = fl.state;
+                                if(fl.type ==='Return' || fl.type ==='Cancel'){
+                                    dbFl.tags = fl.tags;
+                                }
+                                await dbFl.save();
+                            }
+
+                            if(fl?.state?.descriptor?.code ==='Cancelled' || fl?.state?.descriptor?.code ==='Liquidated'|| fl?.state?.descriptor?.code ==='Liquidated'){
+                                //calculate refund amount from qoute trail
+                                //check if settlement already done!
+                                let oldSettlement = await Settlements.findOne({orderId:dbFl.orderId,fulfillmentId:dbFl.id})
+                                if(!oldSettlement){
+                                    let settlementContext =  protocolUpdateResponse.context;
+                                    let settlementTimeStamp = new Date();
+                                    //send update request
+                                    let updateRequest = {
+                                        "context":
+                                            {
+                                                "domain":settlementContext.domain,
+                                                "action":"update",
+                                                "core_version":"1.2.0",
+                                                "bap_id":settlementContext.bap_id,
+                                                "bap_uri":settlementContext.bap_uri,
+                                                "bpp_id":settlementContext.bpp_id,
+                                                "bpp_uri":settlementContext.bpp_uri,
+                                                "transaction_id":settlementContext.transaction_id,
+                                                "message_id":settlementContext.message_id,
+                                                "city":settlementContext.city,
+                                                "country":settlementContext.country,
+                                                "timestamp":settlementTimeStamp
+                                            },
+                                        "message":
+                                            {
+                                                "update_target":"payment",
+                                                "order":
+                                                    {
+                                                        "id":dbFl.orderId,
+                                                        "fulfillments":
+                                                            [
+                                                                {
+                                                                    "id":dbFl.id,
+                                                                    "type":dbFl.type
+                                                                }
+                                                            ],
+                                                        "payment":
+                                                            {
+                                                                "@ondc/org/settlement_details":
+                                                                    [
+                                                                        {
+                                                                            "settlement_counterparty":"buyer",
+                                                                            "settlement_phase":"refund",
+                                                                            "settlement_type":"upi",
+                                                                            "settlement_amount":"0.0", //TODO; fix this post qoute calculation
+                                                                            "settlement_timestamp":settlementTimeStamp
+                                                                        }
+                                                                    ]
+                                                            }
+                                                    }
+                                            }
+                                    }
+
+                                    let newSettlement = await Settlements();
+                                    newSettlement.orderId = dbFl.orderId;
+                                    newSettlement.settlement = updateRequest;
+                                    newSettlement.fulfillmentId = dbFl.id;
+                                    await newSettlement.save();
+
+                                    await bppUpdateService.update(
+                                        updateRequest.context,
+                                        updateRequest,
+                                        updateRequest
+                                    );
+                                }
+                            }
+                        }
 
                        // console.log("updateItems",updateItems)
                         let updateItems = []
-                        for(let item of protocolItems){
+                       for(let item of protocolItems){
                             let updatedItem = {}
+                            let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id});
+
                             updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
                             let temp=updatedItem[0];
                             console.log("item----length-before->",item)
-                            if(item.tags){
-                                item.return_status = item?.tags?.status;
-                                item.cancellation_status = item?.tags?.status;
-                                delete item.tags
+                            if(fulfillmentStatus){
+                                item.return_status = fulfillmentStatus?.state?.descriptor?.code;
+                                item.cancellation_status = fulfillmentStatus?.state?.descriptor?.code;
                             }
-                            item.fulfillment_status = temp.fulfillment_status;
+                            item.fulfillment_status = fulfillmentStatus?.state?.descriptor?.code;
                             item.product = temp.product;
                             //item.quantity = item.quantity.count
-
-                            console.log("item --after-->",item)
                             updateItems.push(item)
                         }
 
@@ -350,36 +518,10 @@ class UpdateOrderService {
                         //get item from db and update state for item
                         orderSchema.items = updateItems;
 
-                        //get /update request data
-                        const updateRequest = await getOrderRequest({transaction_id:protocolUpdateResponse.context.transaction_id,
-                            message_id:protocolUpdateResponse.context.message_id,requestType:'update'})
-
-                        console.log("updateRequest?.request?.payment---->",updateRequest?.request?.payment)
-                        if(!updateRequest?.request?.message?.order?.payment && updateRequest){
-                            //setTimeout(async() => {
-                                await this.updateForPaymentObject(updateRequest.request,protocolUpdateResponse)
-                           // }, 5000);
-                        }
-
-                        await addOrUpdateOrderWithTransactionIdAndOrderId(
-                            protocolUpdateResponse.context.transaction_id,protocolUpdateResponse.message.order.id,
+                        await addOrUpdateOrderWithdOrderId(
+                            protocolUpdateResponse.message.order.id,
                             { ...orderSchema }
                         );
-
-                        //retry /update with payment object with refund details
-
-                        //save /on_update request save
-                        const data = {context:protocolUpdateResponse.context,data:{...protocolUpdateResponse}};
-
-                        const transactionId= data.context.transaction_id
-                        const messageId= data.context.message_id
-                        const request = data.data
-                        const requestType = data.context.action
-                        const orderSaved =new OrderRequestLogMongooseModel({requestType,transactionId,messageId,request})
-
-                        await orderSaved.save();
-
-
 
                     }
                 }
