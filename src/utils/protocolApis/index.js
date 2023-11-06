@@ -351,8 +351,9 @@ const protocolTrack = async (data) => {
 const onOrderTrack = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_TRACK + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_track',messageId:messageId}
     );
 
     const result = await apiCall.send();
