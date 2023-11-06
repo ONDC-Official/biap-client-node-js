@@ -138,6 +138,34 @@ class BppConfirmService {
             console.log("confirm----------------------qoute---------->",qoute)
             console.log("confirm----------------------order?.jusPayTransactionId/---------->",order?.jusPayTransactionId)
 
+            //find terms from init call
+
+            let bpp_term = storedOrder?.tags?.find(x => x.code === 'bpp_terms')
+
+            let tax_number = bpp_term?.list?.find(x => x.code === 'tax_number')
+
+            let bpp_terms =[
+                {
+                    code:"bpp_terms",
+                    list:
+                        [
+                            {
+                                "code":"tax_number",
+                                "value":tax_number?.value
+                            }
+                        ]
+                },
+                {
+                    code:"bap_terms",
+                    list:
+                        [
+                            {
+                                "code":"tax_number",
+                                "value":"BUYER-APP-GSTN-ONDC"
+                            }
+                        ]
+                }
+            ]
 
             // Created - when created by the buyer app;
             // Accepted - when confirmed by the seller app;
@@ -233,29 +261,8 @@ class BppConfirmService {
                         quote: {
                             ...(qoute)
                         },
-                        tags:
-                            [
-                                {
-                                    code:"bpp_terms",
-                                    list:
-                                        [
-                                            {
-                                                "code":"tax_number",
-                                                "value":"BUYER-APP-GSTN"
-                                            }
-                                        ]
-                                },
-                                {
-                                    code:"bap_terms",
-                                    list:
-                                        [
-                                            {
-                                                "code":"tax_number",
-                                                "value":"BUYER-APP-GSTN"
-                                            }
-                                        ]
-                                }
-                            ],
+                        tags: bpp_terms
+                            ,
                         created_at:context.timestamp,
                         updated_at:context.timestamp
                     }
