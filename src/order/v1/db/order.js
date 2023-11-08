@@ -330,7 +330,7 @@ const OrderSchema = new mongoose.Schema(
         addOns: { type: [AddOnsSchema] },
         offers: { type: [OfferSchema] },
         billing: { type: BillingSchema },
-        fulfillments: { type: [FulfillmentSchema] },
+        fulfillments: { type: Object },
         quote: { type: Object },
         updatedQuote: { type: Object},
         payment: { type: PaymentSchema },

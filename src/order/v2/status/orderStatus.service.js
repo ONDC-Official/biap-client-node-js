@@ -12,6 +12,7 @@ import BppOrderStatusService from "./bppOrderStatus.service.js";
 import CustomError from "../../../lib/errors/custom.error.js";
 import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import BppUpdateService from "../update/bppUpdate.service.js";
+import Fulfillments from "../db/fulfillments.js";
 const bppOrderStatusService = new BppOrderStatusService();
 const bppUpdateService = new BppUpdateService();
 
@@ -127,6 +128,7 @@ class OrderStatusService {
                             if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
+                                orderSchema.fulfillments = onOrderStatusResponse?.message?.order?.fulfillments;
                                 if (onOrderStatusResponse?.message?.order?.quote) {
 
                                     // console.log("on status reponse qoute------->",onOrderStatusResponse?.message?.order?.quote)
@@ -170,7 +172,7 @@ class OrderStatusService {
 
                                 let protocolItems = onOrderStatusResponse?.message?.order?.items
 
-                                let updateItems = []
+                                //let updateItems = []
                                 // for(let item of dbResponse.items){
                                 //
                                 //     console.log("onOrderStatusResponse.message?.order?.fulfillments--->",onOrderStatusResponse.message?.order?.fulfillments[0].id)
@@ -196,11 +198,46 @@ class OrderStatusService {
                             //         updateItems.push(item)
                             // }
 
+
+                                // console.log("updateItems",updateItems)
+                                let updateItems = []
+                                for(let item of protocolItems){
+                                    let updatedItem = {}
+                                    //let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id});
+
+                                    updatedItem = orderSchema.items.filter(element=> element.id === item.id);
+                                    let temp=updatedItem[0];
+                                    console.log("item----length-before->",item)
+                                    console.log("item----length-before->",updatedItem)
+                                    // console.log("ifulfillmentStatus->",fulfillmentStatus)
+                                    let temp1 = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
+
+                                    if(temp1.type==='Return' || temp1.type==='Cancel' ){
+                                        item.return_status = temp1?.state?.descriptor?.code;
+                                        item.cancellation_status = temp1?.state?.descriptor?.code;
+                                    }else{
+                                        item.return_status = '';
+                                        item.cancellation_status = '';
+                                    }
+                                    item.fulfillment_status = temp1?.state?.descriptor?.code??""
+                                    // item.return_status = temp1?.state?.descriptor?.code??""
+                                    // item.cancellation_status = temp1?.state?.descriptor?.code??""
+                                    // if(fulfillmentStatus){
+                                    //     item.return_status = fulfillmentStatus?.state?.descriptor?.code;
+                                    //     item.cancellation_status = fulfillmentStatus?.state?.descriptor?.code;
+                                    // }
+                                    // item.fulfillment_status = fulfillmentStatus?.state?.descriptor?.code;
+                                    item.product = temp.product;
+                                    //item.quantity = item.quantity.count
+                                    updateItems.push(item)
+                                }
+
+
                                 console.log("updateItems",updateItems)
                                 //get item from db and update state for item
                                 // orderSchema.items = updateItems;
 
-                               orderSchema.items = op;
+                               orderSchema.items = updateItems;
 
 
                                 // const updateRequest = await getOrderRequestLatestFirst({transaction_id:onOrderStatusResponse.context.transaction_id

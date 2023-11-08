@@ -396,7 +396,7 @@ class UpdateOrderService {
                          * scenario #10. more than 4 item is purchased and returned 2 cancelled 2 items one by one
                          */
 
-                        let protocolItems = protocolUpdateResponse?.message?.order
+                        let protocolItems = protocolUpdateResponse?.message?.order.items
 
                         let fulfillments = protocolUpdateResponse?.message?.order?.fulfillments
 
@@ -404,7 +404,8 @@ class UpdateOrderService {
                             //find if fl present
                             let dbFl = await Fulfillments.findOne({orderId:protocolUpdateResponse?.message?.order.id,id:fl.id});
 
-                            if(!fl){
+                            console.log("dbFl--->",dbFl)
+                            if(!dbFl){
                                 //save new fl
                                 let newFl = new Fulfillments();
                                 newFl.id = fl.id;
@@ -412,7 +413,7 @@ class UpdateOrderService {
                                 newFl.state = fl.state;
                                 if(fl.type ==='Return' || fl.type ==='Cancel'){
                                     newFl.type=fl.type
-                                    dbFl.tags = fl.tags;
+                                    //dbFl.tags = fl.tags;
                                 }else{
                                     newFl.type='orderFulfillment';
                                 }
@@ -504,7 +505,7 @@ class UpdateOrderService {
                             updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
                             let temp=updatedItem[0];
                             console.log("item----length-before->",item)
-                            if(fulfillmentStatus){
+                            if(fulfillmentStatus.type==='Return' || fulfillmentStatus.type==='Cancel' ){
                                 item.return_status = fulfillmentStatus?.state?.descriptor?.code;
                                 item.cancellation_status = fulfillmentStatus?.state?.descriptor?.code;
                             }
@@ -517,6 +518,7 @@ class UpdateOrderService {
                         console.log("updateItems",updateItems)
                         //get item from db and update state for item
                         orderSchema.items = updateItems;
+                        orderSchema.fulfillments = protocolUpdateResponse?.message?.order?.fulfillments;
 
                         await addOrUpdateOrderWithdOrderId(
                             protocolUpdateResponse.message.order.id,
