@@ -17,14 +17,16 @@ class BppSelectService {
             //check if item has customisation present
 
             let items  = []
+            let locationSet = new Set()
             for(let [index,item] of cart.items.entries()){
 
                 let parentItemId = "DI"+index.toString();
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
-                    location_id: provider.locations[0].local_id?.toString()
+                    location_id: item?.product?.location_id?.toString()
                 }
+                locationSet.add(item?.product?.location_id?.toString());
                 let tag=undefined
                 if(item.tags && item.tags.length>0){
                    tag= item.tags.find(i => i.code==='type');
@@ -36,14 +38,13 @@ class BppSelectService {
                     selectitem.parent_item_id = parentItemId;
 
                 }
-
                 items.push(selectitem);
                 if(item.customisations){
                     for(let customisation of item.customisations){
                         let selectitem = {
                             id: customisation?.local_id?.toString(),
                             quantity: customisation.quantity,
-                            location_id: provider.locations[0].local_id?.toString()
+                            location_id: item?.product?.location_id?.toString()
                         }
                         let tag=undefined
                         if(customisation.item_details?.tags && customisation.item_details?.tags.length>0){
@@ -67,6 +68,8 @@ class BppSelectService {
                 }
 
             }
+
+            console.log({locationSet})
             const selectRequest = {
                 context: context,
                 message: {
@@ -74,8 +77,8 @@ class BppSelectService {
                         items: items,
                         provider: {
                             id: provider?.local_id,
-                            locations: provider.locations.map(location => {
-                                return { id: location.local_id };
+                            locations: Array.from(locationSet).map(location => {
+                                return { id: location };
                             })
                         },
                         fulfillments: fulfillments && fulfillments.length ? 

@@ -40,14 +40,16 @@ class BppInitService {
             //check if item has customisation present
 
             let items  = []
+            let locationSet = new Set()
             for(let item of order.items){
 
                 let parentItemId = item?.parent_item_id?.toString();
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
-                    location_id: provider.locations[0].local_id?.toString()
+                    location_id: item?.product?.location_id?.toString()
                 }
+                locationSet.add(item?.product?.location_id?.toString());
                 let tag=undefined
                 if(item.tags && item.tags.length>0){
                     tag= item.tags.find(i => i.code==='type');
@@ -67,7 +69,7 @@ class BppInitService {
                         let selectitem = {
                             id: customisation?.local_id?.toString(),
                             quantity: customisation.quantity,
-                            location_id: provider.locations[0].local_id?.toString()
+                            location_id: item?.product?.location_id?.toString()
                         }
                         let tag=undefined
                         if(customisation.item_details.tags && customisation.item_details.tags.length>0){
@@ -94,14 +96,15 @@ class BppInitService {
 
             }
 
+
             const initRequest = {
                 context: context,
                 message: {
                     order: {
                         provider: {
                             id: provider.local_id,
-                            locations: provider.locations.map(location => {
-                                return { id: location.local_id };
+                            locations: Array.from(locationSet).map(location => {
+                                return { id: location };
                             })
                         },
                         items: items,
