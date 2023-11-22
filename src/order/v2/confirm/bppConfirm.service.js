@@ -208,7 +208,7 @@ class BppConfirmService {
                                     parent_item_id:item.parent_item_id??undefined
                                 };
                             }) || [],
-                        provider: storedOrder?.provider,
+                        provider: {id:storedOrder?.provider.id,location:toredOrder?.provider.location},
                         fulfillments: [...storedOrder.fulfillments].map((fulfillment) => {
                             return {
                                 id: fulfillment?.id,

@@ -29,6 +29,8 @@ class BppInitService {
             }
 
             delete order.billing_info.address.tag
+            delete order.billing_info.address.lat
+            delete order.billing_info.address.lng
             delete order.billing_info.address.street
             delete order.billing_info.address.ward
             delete order.billing_info.address.door
@@ -47,7 +49,7 @@ class BppInitService {
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
-                    location_id: item?.product?.location_id?.toString()
+                    // location_id: item?.product?.location_id?.toString()
                 }
                 locationSet.add(item?.product?.location_id?.toString());
                 let tag=undefined

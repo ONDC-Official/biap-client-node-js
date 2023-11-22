@@ -512,9 +512,11 @@ class UpdateOrderService {
                             let updatedItem = {}
                             let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id});
 
-                            updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
+                            // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO TEMP testing
+                            // updatedItem = orderSchema.items.filter(element=> element.id === item.id);
                             let temp=updatedItem[0];
                             console.log("item----length-before->",item)
+                            console.log("item----length-before-temp>",temp)
                             if(fulfillmentStatus.type==='Return' || fulfillmentStatus.type==='Cancel' ){
                                 item.return_status = fulfillmentStatus?.state?.descriptor?.code;
                                 item.cancellation_status = fulfillmentStatus?.state?.descriptor?.code;
