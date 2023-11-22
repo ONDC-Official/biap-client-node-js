@@ -513,7 +513,7 @@ class UpdateOrderService {
                             let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id});
 
                             // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO TEMP testing
-                            // updatedItem = orderSchema.items.filter(element=> element.id === item.id);
+                            updatedItem = orderSchema.items.filter(element=> element.id === item.id);
                             let temp=updatedItem[0];
                             console.log("item----length-before->",item)
                             console.log("item----length-before-temp>",temp)
