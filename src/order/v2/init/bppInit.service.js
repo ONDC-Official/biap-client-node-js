@@ -49,7 +49,7 @@ class BppInitService {
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
-                    // location_id: item?.product?.location_id?.toString()
+                    location_id: item?.product?.location_id?.toString()
                 }
                 locationSet.add(item?.product?.location_id?.toString());
                 let tag=undefined
