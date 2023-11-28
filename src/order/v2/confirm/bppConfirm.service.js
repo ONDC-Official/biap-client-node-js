@@ -173,6 +173,7 @@ class BppConfirmService {
             // Completed - when all fulfillments completed
             // Cancelled - when order cancelled
 
+            console.log({id:storedOrder?.provider.id,locations:storedOrder?.provider.locations})
             const confirmRequest = {
                 context: context,
                 message: {
@@ -208,7 +209,7 @@ class BppConfirmService {
                                     parent_item_id:item.parent_item_id??undefined
                                 };
                             }) || [],
-                        provider: storedOrder?.provider,
+                        provider: {id:storedOrder?.provider.id,locations:storedOrder?.provider.locations},
                         fulfillments: [...storedOrder.fulfillments].map((fulfillment) => {
                             return {
                                 id: fulfillment?.id,
@@ -244,7 +245,7 @@ class BppConfirmService {
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
-                                transaction_id:order?.jusPayTransactionId//payment transaction id
+                                transaction_id:uuidv4()//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :

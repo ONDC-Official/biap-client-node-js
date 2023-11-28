@@ -90,7 +90,7 @@ class UpdateOrderService {
                                             },
                                             {
                                                 "code":"images",
-                                                "value":"url_for_image1,url_for_image2"
+                                                "value":`${item.tags.image}`
                                             },
                                             {
                                                 "code":"ttl_approval",
@@ -482,7 +482,7 @@ class UpdateOrderService {
                                                                             "settlement_counterparty":"buyer",
                                                                             "settlement_phase":"refund",
                                                                             "settlement_type":"upi",
-                                                                            "settlement_amount":`${refundAmount}`, //TODO; fix this post qoute calculation
+                                                                            "settlement_amount":`${refundAmount*-1}`, //TODO; fix this post qoute calculation
                                                                             "settlement_timestamp":settlementTimeStamp
                                                                         }
                                                                     ]
@@ -499,8 +499,8 @@ class UpdateOrderService {
 
                                     await bppUpdateService.update(
                                         updateRequest.context,
-                                        updateRequest,
-                                        updateRequest
+                                        updateRequest.message,
+                                        updateRequest.message
                                     );
                                 }
                             }

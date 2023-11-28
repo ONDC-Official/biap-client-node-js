@@ -31,6 +31,8 @@ class BppInitService {
             delete order.billing_info.address.tag
             delete order.billing_info.address.lat
             delete order.billing_info.address.lng
+            delete order.delivery_info.location.address.lat
+            delete order.delivery_info.location.address.lng
             delete order.billing_info.address.street
             delete order.billing_info.address.ward
             delete order.billing_info.address.door
