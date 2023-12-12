@@ -112,7 +112,7 @@ class UpdateOrderService {
                 dbFulfillment.reason_id = item.tags.reason_code
                 dbFulfillment.reason_desc = 'detailed description for return'
                 dbFulfillment.images = "url_for_image1,url_for_image2"
-                dbFulfillment.type ='type'
+                dbFulfillment.type =type
                 dbFulfillment.id =dbFulfillment._id
                 await dbFulfillment.save();
 
@@ -550,5 +550,7 @@ class UpdateOrderService {
     }
 
 }
+
+
 
 export default UpdateOrderService;
