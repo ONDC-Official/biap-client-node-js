@@ -16,13 +16,7 @@ class BppCancelService {
                 context: context,
                 message: {
                     order_id: orderId,
-                    cancellation_reason_id: cancellationReasonId,
-                    descriptor:
-                        {
-                            name:"fulfillment",
-                            short_desc:fulfillmentId
-                        }
-
+                    cancellation_reason_id: cancellationReasonId
                 }
             }
 
