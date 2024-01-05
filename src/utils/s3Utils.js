@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
  async function getSignedUrlForUpload(data) {
 
      const version = process.env.S3_VERSION;
-     const region = process.env.s3_REGION;
-     const bucket = process.env.S3_PUBLIC_BUCKET;
+     const region = process.env.S3_REGION;
+     const bucket = process.env.S3_BUCKET;
      const publicPath = process.env.S3_PUBLIC_PATH;
 
      console.log({version,region,bucket,publicPath})
@@ -27,7 +27,7 @@ import { v4 as uuidv4 } from 'uuid';
     console.log("data------>",data)
     //TODO: Use Axios to send http request
     try {
-        const myKey = publicPath+'/'+data.path + '/' + uuidv4() + data.fileType.replace(/^\.?/, '.');
+        const myKey = data.path + '/' + uuidv4() + data.fileType.replace(/^\.?/, '.');
         const params = {
             Bucket: myBucket,
             Key: myKey,

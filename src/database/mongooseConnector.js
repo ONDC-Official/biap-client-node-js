@@ -12,4 +12,9 @@ const dbConnect = async () => {
     return mongoose.connect(dbUri);
 };
 
+mongoose.set('debug', (collectionName, method, query, doc) => {
+    console.log(`[MONGOOS]:${collectionName}.${method}`, JSON.stringify(query), doc);
+});
+
+
 export default dbConnect;

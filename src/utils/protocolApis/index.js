@@ -30,8 +30,9 @@ const protocolConfirm = async (data) => {
 const onOrderConfirm = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_CONFIRM + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_confirm',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -65,8 +66,9 @@ const protocolCancel = async (data) => {
 const onOrderCancel = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_CANCEL + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_cancel',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -100,8 +102,9 @@ const protocolInit = async (data) => {
 const onOrderInit = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_INIT + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_init',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -123,6 +126,176 @@ const protocolSearch = async (data) => {
             ...data
         },
         
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+/**
+ * search items
+ * @param {Object} data
+ * @returns
+ */
+const protocolSearchItems = async (data) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM,
+        "GET",
+        {
+            ...data
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+/**
+ * search items
+ * @param {Object} data
+ * @returns
+ */
+const protocolGetItems = async (searchRequest,itemId) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM +"/"+itemId,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetItemList = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ITEM,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetAttributes = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ATTRIBUTE,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetAttributesValues = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.SEARCH_ATTRIBUTE_VALUE,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetCustomMenus = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.CUSTOM_MENU,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetProviders = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.PROVIDERS,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetProvider = async (searchRequest,brandId) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.PROVIDERS+"/"+brandId,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetLocation = async (searchRequest,id) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.LOCATIONS+"/"+id,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
+const protocolGetLocations = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.LOCATIONS,
+        "GET",
+        {
+            ...searchRequest
+        }
     );
 
     const result = await apiCall.send();
@@ -178,8 +351,9 @@ const protocolTrack = async (data) => {
 const onOrderTrack = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_TRACK + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_track',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -248,8 +422,9 @@ const protocolOrderStatus = async (data) => {
 const onOrderStatus = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_STATUS + "?messageId="+ messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_status',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -281,8 +456,9 @@ const protocolUpdate = async (data) => {
 const onUpdateStatus = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_UPDATE+ "?messageId="+ messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_update',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -321,8 +497,9 @@ const protocolSelect = async (data) => {
 const onOrderSelect = async (messageId) => {
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.ON_SELECT + "?messageId=" + messageId,
+        PROTOCOL_API_URLS.RESPONSE,
         "get",
+        {requestType:'on_select',messageId:messageId}
     );
 
     const result = await apiCall.send();
@@ -347,5 +524,15 @@ export {
     protocolTrack,
     protocolSelect,
     protocolUpdate,
-    onUpdateStatus
+    onUpdateStatus,
+    protocolSearchItems,
+    protocolGetItems,
+    protocolGetAttributes,
+    protocolGetAttributesValues,
+    protocolGetProviders,
+    protocolGetCustomMenus,
+    protocolGetProvider,
+    protocolGetLocation,
+    protocolGetItemList,
+    protocolGetLocations
 };

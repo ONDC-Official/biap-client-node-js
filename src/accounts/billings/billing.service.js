@@ -22,6 +22,8 @@ class BillingService {
                 phone: request?.phone,
                 taxNumber: request?.taxNumber,
                 name: request?.name,
+                lat: request?.lat,
+                lng: request?.lng
             };
 
             let storedBillingAddress = await BillingMongooseModel.create({ ...billingSchema });
@@ -38,6 +40,8 @@ class BillingService {
                 phone: storedBillingAddress?.phone,
                 taxNumber: storedBillingAddress?.taxNumber,
                 name: storedBillingAddress?.name,
+                lat: storedBillingAddress?.lat,
+                lng: storedBillingAddress?.lng
             };
         }
         catch (err) {
@@ -77,6 +81,8 @@ class BillingService {
                 phone: request?.phone,
                 taxNumber: request?.taxNumber,
                 name: request?.name,
+                lat: request?.lat,
+                lng: request?.lng
             };
 
             let storedBillingAddress = await BillingMongooseModel.findOneAndUpdate(
@@ -100,6 +106,8 @@ class BillingService {
                     phone: storedBillingAddress?.phone,
                     taxNumber: storedBillingAddress?.taxNumber,
                     name: storedBillingAddress?.name,
+                    lat: storedBillingAddress?.lat,
+                    lng: storedBillingAddress?.lng
                 };
             else
                 throw new NoRecordFoundError(`Billing address with ${id} not found`);
