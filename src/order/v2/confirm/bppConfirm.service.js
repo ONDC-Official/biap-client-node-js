@@ -262,9 +262,9 @@ class BppConfirmService {
                                 PAYMENT_COLLECTED_BY.BPP,
                             '@ondc/org/buyer_app_finder_fee_type': process.env.BAP_FINDER_FEE_TYPE,
                             '@ondc/org/buyer_app_finder_fee_amount':  process.env.BAP_FINDER_FEE_AMOUNT,
-                            '@ondc/org/settlement_basis': order.payment['@ondc/org/settlement_basis']??'',
-                            '@ondc/org/settlement_window': order.payment['@ondc/org/settlement_window']??'',
-                            '@ondc/org/withholding_amount': order.payment['@ondc/org/withholding_amount']??'',
+                            '@ondc/org/settlement_basis': order.payment['@ondc/org/settlement_basis']??undefined,
+                            '@ondc/org/settlement_window': order.payment['@ondc/org/settlement_window']??undefined,
+                            '@ondc/org/withholding_amount': order.payment['@ondc/org/withholding_amount']??undefined,
                             "@ondc/org/settlement_details":order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 storedOrder?.settlementDetails?.["@ondc/org/settlement_details"]:
                                 order.payment['@ondc/org/settlement_details'],
