@@ -36,6 +36,7 @@ class CancelOrderService {
                 bppId: orderRequest?.context?.bpp_id,
                 bpp_uri: orderDetails[0].bpp_uri,
                 cityCode:orderDetails[0].city,
+                city:orderDetails[0].city,
                 domain:orderDetails[0].domain
             });
 

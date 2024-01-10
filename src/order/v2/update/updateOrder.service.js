@@ -35,6 +35,7 @@ class UpdateOrderService {
                 transactionId: orderDetails[0]?.transactionId,
                 bpp_uri: orderDetails[0]?.bpp_uri,
                 cityCode: orderDetails[0].city,
+                city: orderDetails[0].city,
                 domain:orderDetails[0].domain
             });
 
@@ -176,7 +177,8 @@ class UpdateOrderService {
                     transactionId: orderDetails?.transactionId,
                     bppId: orderRequest?.context?.bpp_id,
                     bpp_uri: orderDetails?.bpp_uri,
-                    cityCode:orderDetails.city
+                    cityCode:orderDetails.city,
+                    city:orderDetails.city
                 });
 
                 const { message = {} } = orderRequest || {};
