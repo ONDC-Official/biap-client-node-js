@@ -72,7 +72,7 @@ class ContextFactory {
         return {
             domain: domain,
             country: this.country,
-            city: this.getCity(city,state,cityCode) ,
+            city: city ,
             action: action,
             core_version:PROTOCOL_VERSION.v_1_2_0 ,
             bap_id: this.bapId,
