@@ -13,6 +13,8 @@ import CustomError from "../../../lib/errors/custom.error.js";
 import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import BppUpdateService from "../update/bppUpdate.service.js";
 import Fulfillments from "../db/fulfillments.js";
+import FulfillmentHistory from "../db/fulfillmentHistory.js";
+import OrderHistory from "../db/orderHistory.js";
 const bppOrderStatusService = new BppOrderStatusService();
 const bppUpdateService = new BppUpdateService();
 
@@ -199,6 +201,36 @@ class OrderStatusService {
                             //         updateItems.push(item)
                             // }
 
+                                for(let fulfillment of onOrderStatusResponse.message?.order?.fulfillments){
+                                    console.log("fulfillment--->",fulfillment)
+                                    if(fulfillment.type==='Delivery'){
+                                        let existingFulfillment  =await FulfillmentHistory.findOne({
+                                            id:fulfillment.id,
+                                            state:fulfillment.state.descriptor.code
+                                        })
+                                        if(!existingFulfillment){
+                                            await FulfillmentHistory.create({
+                                                orderId:onOrderStatusResponse.message.order.id,
+                                                type:fulfillment.type,
+                                                id:fulfillment.id,
+                                                state:fulfillment.state.descriptor.code,
+                                                updatedAt:onOrderStatusResponse.message.order.updated_at.toString()
+                                            })
+                                        }
+                                        console.log("existingFulfillment--->",existingFulfillment);
+                                    }
+                                }
+                                let orderHistory = await OrderHistory.findOne({
+                                    orderId:onOrderStatusResponse.message.order.id,
+                                    state:onOrderStatusResponse.message.order.state
+                                })
+                                if(!orderHistory){
+                                    await OrderHistory.create({
+                                        orderId:onOrderStatusResponse.message.order.id,
+                                        state:onOrderStatusResponse.message.order.state,
+                                        updatedAt:onOrderStatusResponse.message.order.updated_at.toString()
+                                    })
+                                }
 
                                 // console.log("updateItems",updateItems)
                                 let updateItems = []
