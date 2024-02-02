@@ -75,7 +75,7 @@ class UpdateOrderService {
                                             },
                                             {
                                                 "code":"parent_item_id",
-                                                "value":''
+                                                "value":item.parent_item_id??""
                                             },
                                             {
                                                 "code":"item_quantity",
