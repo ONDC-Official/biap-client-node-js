@@ -161,7 +161,7 @@ class BppConfirmService {
                         [
                             {
                                 "code":"tax_number",
-                                "value":"BUYER-APP-GSTN-ONDC"
+                                "value":"GSTIN1234567890"
                             }
                         ]
                 }
