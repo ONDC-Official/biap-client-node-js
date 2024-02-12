@@ -13,6 +13,7 @@ import OrderMongooseModel from '../../v1/db/order.js';
 import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import Fulfillments from "../db/fulfillments.js";
 import Settlements from "../db/settlement.js";
+import FulfillmentHistory from "../db/fulfillmentHistory.js";
 
 const bppUpdateService = new BppUpdateService();
 
@@ -428,6 +429,22 @@ class UpdateOrderService {
                                 }
                                 await dbFl.save();
                             }
+
+                                // if(fulfillment.type==='Delivery'){
+                                let existingFulfillment  =await FulfillmentHistory.findOne({
+                                    id:fl.id,
+                                    state:fl.state.descriptor.code
+                                })
+                                if(!existingFulfillment){
+                                    await FulfillmentHistory.create({
+                                        orderId:protocolUpdateResponse?.message?.order.id,
+                                        type:fl.type,
+                                        id:fl.id,
+                                        state:fl.state.descriptor.code,
+                                        updatedAt:protocolUpdateResponse?.message?.order?.updated_at?.toString()
+                                    })
+                                }
+                                // }
 
                             if(fl?.state?.descriptor?.code ==='Cancelled' || fl?.state?.descriptor?.code ==='Return_Picked'|| fl?.state?.descriptor?.code ==='Liquidated'){
                                 //calculate refund amount from qoute trail

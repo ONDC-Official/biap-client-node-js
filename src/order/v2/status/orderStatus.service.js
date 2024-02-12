@@ -203,7 +203,7 @@ class OrderStatusService {
 
                                 for(let fulfillment of onOrderStatusResponse.message?.order?.fulfillments){
                                     console.log("fulfillment--->",fulfillment)
-                                    if(fulfillment.type==='Delivery'){
+                                    // if(fulfillment.type==='Delivery'){
                                         let existingFulfillment  =await FulfillmentHistory.findOne({
                                             id:fulfillment.id,
                                             state:fulfillment.state.descriptor.code
@@ -218,7 +218,7 @@ class OrderStatusService {
                                             })
                                         }
                                         console.log("existingFulfillment--->",existingFulfillment);
-                                    }
+                                    // }
                                 }
                                 let orderHistory = await OrderHistory.findOne({
                                     orderId:onOrderStatusResponse.message.order.id,
