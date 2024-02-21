@@ -17,8 +17,8 @@ initializeFirebase();
 
 //app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(bodyParser.json());
 
 app.use(
@@ -46,7 +46,7 @@ app.use(logger('combined'))
 
 app.use(cors());
 app.use('/clientApis', cors(), router);
-app.use('/ondc/onboarding/', subscriberRoute)
+app.use('/ondc/onboarding', subscriberRoute)
 app.use(logErrors)
 // app.use(logger('dev'));
 
@@ -62,7 +62,7 @@ const port = process.env.PORT || 8080;
 dbConnect()
     .then((db) => {
         console.log("Database connection successful");
-        
+
         app.listen(port, () => {
             console.log(`Listening on port ${port}`);
         });
