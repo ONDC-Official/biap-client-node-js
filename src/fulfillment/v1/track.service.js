@@ -26,7 +26,7 @@ class TrackService {
                 bppId: orderDetails[0]?.bppId,
                 transactionId: orderDetails[0]?.transactionId,
                 bpp_uri: orderDetails[0]?.bpp_uri,
-                cityCode: orderDetails[0].city,
+                city: orderDetails[0].city,
                 domain:orderDetails[0].domain
             });
 

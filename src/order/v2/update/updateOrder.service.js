@@ -13,6 +13,7 @@ import OrderMongooseModel from '../../v1/db/order.js';
 import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import Fulfillments from "../db/fulfillments.js";
 import Settlements from "../db/settlement.js";
+import FulfillmentHistory from "../db/fulfillmentHistory.js";
 
 const bppUpdateService = new BppUpdateService();
 
@@ -35,6 +36,7 @@ class UpdateOrderService {
                 transactionId: orderDetails[0]?.transactionId,
                 bpp_uri: orderDetails[0]?.bpp_uri,
                 cityCode: orderDetails[0].city,
+                city: orderDetails[0].city,
                 domain:orderDetails[0].domain
             });
 
@@ -74,7 +76,7 @@ class UpdateOrderService {
                                             },
                                             {
                                                 "code":"parent_item_id",
-                                                "value":''
+                                                "value":item.tags.parent_item_id??""
                                             },
                                             {
                                                 "code":"item_quantity",
@@ -176,7 +178,8 @@ class UpdateOrderService {
                     transactionId: orderDetails?.transactionId,
                     bppId: orderRequest?.context?.bpp_id,
                     bpp_uri: orderDetails?.bpp_uri,
-                    cityCode:orderDetails.city
+                    cityCode:orderDetails.city,
+                    city:orderDetails.city
                 });
 
                 const { message = {} } = orderRequest || {};
@@ -426,6 +429,22 @@ class UpdateOrderService {
                                 }
                                 await dbFl.save();
                             }
+
+                                // if(fulfillment.type==='Delivery'){
+                                let existingFulfillment  =await FulfillmentHistory.findOne({
+                                    id:fl.id,
+                                    state:fl.state.descriptor.code
+                                })
+                                if(!existingFulfillment){
+                                    await FulfillmentHistory.create({
+                                        orderId:protocolUpdateResponse?.message?.order.id,
+                                        type:fl.type,
+                                        id:fl.id,
+                                        state:fl.state.descriptor.code,
+                                        updatedAt:protocolUpdateResponse?.message?.order?.updated_at?.toString()
+                                    })
+                                }
+                                // }
 
                             if(fl?.state?.descriptor?.code ==='Cancelled' || fl?.state?.descriptor?.code ==='Return_Picked'|| fl?.state?.descriptor?.code ==='Liquidated'){
                                 //calculate refund amount from qoute trail
