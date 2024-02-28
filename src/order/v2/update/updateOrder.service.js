@@ -14,6 +14,7 @@ import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import Fulfillments from "../db/fulfillments.js";
 import Settlements from "../db/settlement.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
+import {v4 as uuidv4} from "uuid";
 
 const bppUpdateService = new BppUpdateService();
 
@@ -475,7 +476,7 @@ class UpdateOrderService {
                                                 "bpp_id":settlementContext.bpp_id,
                                                 "bpp_uri":settlementContext.bpp_uri,
                                                 "transaction_id":settlementContext.transaction_id,
-                                                "message_id":settlementContext.message_id,
+                                                "message_id":uuidv4(),
                                                 "city":settlementContext.city,
                                                 "country":settlementContext.country,
                                                 "timestamp":settlementTimeStamp
@@ -529,7 +530,8 @@ class UpdateOrderService {
                         let updateItems = []
                        for(let item of protocolItems){
                             let updatedItem = {}
-                            let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id});
+                            let fulfillmentStatus = await Fulfillments.findOne({id:item.fulfillment_id}); //TODO: additional filter of order id required
+                           
 
                             // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO TEMP testing
                             updatedItem = orderSchema.items.filter(element=> element.id === item.id);

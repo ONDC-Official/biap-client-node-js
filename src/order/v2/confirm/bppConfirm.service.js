@@ -213,7 +213,7 @@ class BppConfirmService {
                         fulfillments: [...storedOrder.fulfillments].map((fulfillment) => {
                             return {
                                 id: fulfillment?.id,
-                                tracking: fulfillment?.tracking,
+                                tracking: fulfillment?.tracking??false,
                                 end: {
                                     contact: {
                                         email: fulfillment?.end?.contact?.email,
