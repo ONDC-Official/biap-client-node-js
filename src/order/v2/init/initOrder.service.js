@@ -183,11 +183,7 @@ class InitOrderService {
 
             orderSchema.provider = {
                 id: orderSchema?.provider?.id,
-                locations: orderSchema?.provider_location ?
-                    orderSchema?.provider_location :
-                    dbResponse?.provider?.locations ?
-                        dbResponse?.provider?.locations :
-                        [],
+                locations: orderSchema?.provider?.locations ?? [],
                 descriptor: dbResponse?.provider?.descriptor
             };
 
