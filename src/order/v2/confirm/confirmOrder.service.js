@@ -206,7 +206,7 @@ class ConfirmOrderService {
                     let existingFulfillment  =await FulfillmentHistory.findOne({
                         id:fulfillment.id,
                         state:fulfillment.state.descriptor.code,
-                        orderId:orderSchema.message.order.id
+                        orderId:orderSchema.id
                     })
                     if(!existingFulfillment){
                         await FulfillmentHistory.create({
