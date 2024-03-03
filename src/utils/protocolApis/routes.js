@@ -26,9 +26,11 @@ const SEARCH_ATTRIBUTE_VALUE = "protocol/attribute-values";
 const PROVIDERS = "protocol/providers";
 const CUSTOM_MENU = "protocol/custom-menus";
 const LOCATIONS = "protocol/locations";
+const LOCATIONS_DETAILS = "protocol/location-details";
 // const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
+    LOCATIONS_DETAILS,
     CONFIRM,
     CANCEL,
     INIT,

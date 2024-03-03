@@ -303,6 +303,22 @@ const protocolGetLocations = async (searchRequest) => {
     return result.data;
 }
 
+const protocolGetLocationDetails = async (searchRequest) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.LOCATIONS_DETAILS,
+        "GET",
+        {
+            ...searchRequest
+        }
+    );
+
+    const result = await apiCall.send();
+
+    return result.data;
+}
+
 /**
  * on search products
  * @param {Object} query 
@@ -534,5 +550,6 @@ export {
     protocolGetProvider,
     protocolGetLocation,
     protocolGetItemList,
-    protocolGetLocations
+    protocolGetLocations,
+    protocolGetLocationDetails
 };
