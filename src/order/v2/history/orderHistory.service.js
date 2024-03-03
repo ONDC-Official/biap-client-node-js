@@ -95,12 +95,11 @@ class OrderHistoryService {
 
                     //construct id
                     //bppid:domain_providerid_location_id
-                    let id = `${order.bppId}:${order.domain}_${order.provider.id}_${order.provider.locations[0].id}`
+                    let id = `${order.bppId}_${order.domain}_${order.provider.id}_${order.provider.locations[0].id}`
                     const response = await protocolGetLocationDetails({id:id})                    // locations.push(response)
-                    order.locations = response.data?response.data[0]:[]
+                    order.locations = response//.data?response.data[0]:[]
                     orderList.push({...order})
 
-                    console.log({orderList})
 
                 }
 
