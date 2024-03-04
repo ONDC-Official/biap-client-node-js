@@ -1,6 +1,8 @@
 import NoRecordFoundError from "../../../lib/errors/no-record-found.error.js";
 import OrderMongooseModel from './order.js';
 import OrderRequestLogMongooseModel from "./orderRequestLog.js";
+import OrderHistory from "../../v2/db/orderHistory.js";
+import FulfillmentHistory from "../../v2/db/fulfillmentHistory.js";
 
 /**
 * update order
@@ -100,14 +102,22 @@ const getOrderByTransactionIdAndProvider = async (transactionId, providerId) => 
 };
 
 const getOrderById = async (orderId) => {
-    const order = await OrderMongooseModel.find({
+    let order = await OrderMongooseModel.find({
         id: orderId
-    });
+    }).lean();
 
     if (!(order || order.length))
         throw new NoRecordFoundError();
-    else
+    else{
+        // order = order.toJSON();
+        let orderHistory =await OrderHistory.find({orderId:orderId})
+        let fulfillmentHistory =await FulfillmentHistory.find({orderId:orderId})
+        order[0].orderHistory = orderHistory
+        order[0].fulfillmentHistory = fulfillmentHistory
+        console.log({orderHistory,fulfillmentHistory})
         return order;
+    }
+
 };
 
 const saveOrderRequest = async (data) => {

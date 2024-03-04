@@ -161,7 +161,7 @@ class BppConfirmService {
                         [
                             {
                                 "code":"tax_number",
-                                "value":"BUYER-APP-GSTN-ONDC"
+                                "value":"GSTIN1234567890"
                             }
                         ]
                 }
@@ -240,12 +240,18 @@ class BppConfirmService {
                             }
                         }),
                         payment: {
-                            uri:"https://juspay.in/", //TODO:In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
-                            tl_method:"http/get",
+                            uri:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                "https://juspay.in/":
+                                undefined, //In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
+                            tl_method:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                "http/get":
+                                undefined,
                             params: {
                                 amount: order?.payment?.paid_amount?.toString(),
                                 currency: "INR",
-                                transaction_id:uuidv4()//payment transaction id
+                                transaction_id:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                    uuidv4():
+                                    undefined//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 PROTOCOL_PAYMENT.PAID :
@@ -256,7 +262,12 @@ class BppConfirmService {
                                 PAYMENT_COLLECTED_BY.BPP,
                             '@ondc/org/buyer_app_finder_fee_type': process.env.BAP_FINDER_FEE_TYPE,
                             '@ondc/org/buyer_app_finder_fee_amount':  process.env.BAP_FINDER_FEE_AMOUNT,
-                            "@ondc/org/settlement_details":storedOrder?.settlementDetails?.["@ondc/org/settlement_details"],
+                            '@ondc/org/settlement_basis': order.payment['@ondc/org/settlement_basis']??undefined,
+                            '@ondc/org/settlement_window': order.payment['@ondc/org/settlement_window']??undefined,
+                            '@ondc/org/withholding_amount': order.payment['@ondc/org/withholding_amount']??undefined,
+                            "@ondc/org/settlement_details":order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
+                                storedOrder?.settlementDetails?.["@ondc/org/settlement_details"]:
+                                order.payment['@ondc/org/settlement_details'],
 
                         },
                         quote: {
