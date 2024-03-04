@@ -252,7 +252,8 @@ class InitOrderService {
                 city:requestContext.city,
                 state:requestContext.state,
                 transactionId: requestContext?.transaction_id,
-                domain:requestContext?.domain
+                domain:requestContext?.domain,
+                pincode:requestContext?.pincode,
                 // ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 

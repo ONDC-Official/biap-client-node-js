@@ -106,7 +106,8 @@ class ConfirmOrderService {
                 bpp_uri: dbResponse.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state,
-                domain:requestContext.domain
+                domain:requestContext.domain,
+                pincode:requestContext?.pincode,
             });
 
             if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled

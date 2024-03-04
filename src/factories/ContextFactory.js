@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { PROTOCOL_CONTEXT, PROTOCOL_VERSION } from '../utils/constants.js';
 import {CITY_CODE} from "../utils/cityCode.js";
+import MappedCity from "../utils/mappedCityCode.js";
 
 
 class ContextFactory {
@@ -49,6 +50,33 @@ class ContextFactory {
 
     }
 
+
+    getCityByPinCode(pincode,city){
+
+        try{
+            console.log("city----",city,pincode)
+            //map city and pincode
+            // const cityCode = params.c//ity.split(':')[1];
+            if(pincode){
+                let cityData = MappedCity(parseInt(pincode));
+                console.log("city-- cityData--", cityData)
+                if(cityData.length>0){
+                    return `STD:${cityData[0]?.STDCode}`
+                }else{
+                    return 'STD:080'
+                }
+
+            }else{
+                return city
+            }
+        }catch (e) {
+            console.log(e)
+        }
+
+
+
+    }
+
     getTransactionId(transactionId){
         if(transactionId){
             return transactionId
@@ -64,15 +92,15 @@ class ContextFactory {
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
             city,state,cityCode,bpp_uri,
+            pincode,
             domain
 
         } = contextObject || {};
 
-        console.log("domain------>",domain);
         return {
             domain: domain,
             country: this.country,
-            city: city ,
+            city: this.getCityByPinCode(pincode,city) ,
             action: action,
             core_version:PROTOCOL_VERSION.v_1_2_0 ,
             bap_id: this.bapId,
