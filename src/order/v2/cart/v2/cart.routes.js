@@ -9,31 +9,26 @@ const cartController = new CartController();
 
 rootRouter.post(
     '/v2/cart/:userId',
-    authentication(),
     cartController.addItem,
 );
 
 rootRouter.get(
     '/v2/cart/:userId',
-    authentication(),
     cartController.getCartItem,
 );
 
 rootRouter.delete(
     '/v2/cart/:userId',
-    authentication(),
     cartController.clearCart,
 );
 
 rootRouter.delete(
     '/v2/cart/:userId/:itemId',
-    authentication(),
     cartController.removeItem,
 );
 
 rootRouter.put(
     '/v2/cart/:userId/:itemId',
-    authentication(),
     cartController.updateItem,
 );
 

@@ -9,6 +9,7 @@ import logErrors from './utils/logErrors.js';
 import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
 import mongoSanitize from 'express-mongo-sanitize'
+import subscriberRoute from './utils/subscribe.js'
 const app = express();
 
 loadEnvVariables();
@@ -45,6 +46,7 @@ app.use(logger('combined'))
 
 app.use(cors());
 app.use('/clientApis', cors(), router);
+app.use('/ondc/onboarding/', subscriberRoute)
 app.use(logErrors)
 // app.use(logger('dev'));
 

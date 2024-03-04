@@ -8,50 +8,50 @@ const searchController = new SearchController();
 
 // search
 router.get(
-    '/v2/search', authentication(), searchController.search,
+    '/v2/search',  searchController.search,
 );
 
 // get item details
 router.get(
-    '/v2/items/:id', authentication(), searchController.getItem,
+    '/v2/items/:id',searchController.getItem,
 );
 
 // get item details
 router.get(
-    '/v2/providers/:itemId', authentication(), searchController.getProvider,
+    '/v2/providers/:itemId',  searchController.getProvider,
 );
 
 // get item details
 router.get(
-    '/v2/locations/:id', authentication(), searchController.getLocation,
+    '/v2/locations/:id',  searchController.getLocation,
 );
 
 
 router.get(
-    '/v2/attributes', authentication(), searchController.getAttributes,
+    '/v2/attributes',  searchController.getAttributes,
 );
 
 router.get(
-    '/v2/items', authentication(), searchController.getItems,
+    '/v2/items',  searchController.getItems,
 );
 
 router.get(
-    '/v2/locations', authentication(), searchController.getLocations,
+    '/v2/locations', searchController.getLocations,
 );
 
 // get item attributes values
 router.get(
-    '/v2/attributeValues', authentication(), searchController.getAttributesValues,
+    '/v2/attributeValues',  searchController.getAttributesValues,
 );
 
 // get providers
 router.get(
-    '/v2/providers', authentication(), searchController.getProviders,
+    '/v2/providers',  searchController.getProviders,
 );
 
 // get custom menus
 router.get(
-    '/v2/custom-menus', authentication(), searchController.getCustomMenus,
+    '/v2/custom-menus',  searchController.getCustomMenus,
 );
 
 // // get custom menus
