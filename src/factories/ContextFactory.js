@@ -61,9 +61,9 @@ class ContextFactory {
                 let cityData = MappedCity(parseInt(pincode));
                 console.log("city-- cityData--", cityData)
                 if(cityData.length>0){
-                    return `STD:${cityData[0]?.STDCode}`
+                    return `std:${cityData[0]?.STDCode}`
                 }else{
-                    return 'STD:080'
+                    return 'std:080'
                 }
 
             }else{
