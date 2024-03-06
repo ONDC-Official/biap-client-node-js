@@ -9,6 +9,7 @@ const ON_TRACK = "protocol/response/v1/on_track";
 const ON_UPDATE = "protocol/response/v1/on_update";
 
 const CONFIRM = "protocol/confirm";
+const DUMP = "protocol/request-dump";
 const CANCEL = "protocol/cancel";
 const INIT = "protocol/init";
 const SEARCH = "protocol/search";
@@ -55,7 +56,8 @@ const PROTOCOL_API_URLS = {
     PROVIDERS,
     LOCATIONS,
     CUSTOM_MENU,
-    RESPONSE
+    RESPONSE,
+    DUMP
 };
 
 export default PROTOCOL_API_URLS;

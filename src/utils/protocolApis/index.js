@@ -23,6 +23,21 @@ const protocolConfirm = async (data) => {
     return result.data;
 }
 
+const protocolGetDumps = async (data) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.DUMP,
+        "GET",
+        {
+            ...data
+        }
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+}
+
 /**
  * on confirm order
  * @param {String} messageId 
@@ -551,5 +566,6 @@ export {
     protocolGetLocation,
     protocolGetItemList,
     protocolGetLocations,
-    protocolGetLocationDetails
+    protocolGetLocationDetails,
+    protocolGetDumps
 };
