@@ -2,6 +2,7 @@ import _ from "lodash";
 import { ORDER_STATUS } from "../../../utils/constants.js";
 
 import OrderMongooseModel from '../../v1/db/order.js';
+import {protocolGetLocations,protocolGetLocationDetails} from "../../../utils/protocolApis/index.js";
 
 class OrderHistoryService {
 
@@ -62,7 +63,7 @@ class OrderHistoryService {
                     break;
             }
             
-            orders = await OrderMongooseModel.find({ ...clonedFilterObj }).sort({createdAt: -1}).limit(limit).skip(skip);
+            orders = await OrderMongooseModel.find({ ...clonedFilterObj }).sort({createdAt: -1}).limit(limit).skip(skip).lean();
             totalCount = await OrderMongooseModel.countDocuments({ ...clonedFilterObj });
 
             return { orders, totalCount };
@@ -79,7 +80,7 @@ class OrderHistoryService {
     */
     async getOrdersList(user, params = {}) {
         try {
-            const { orders, totalCount } = await this.findOrders(user, params);
+            let { orders, totalCount } = await this.findOrders(user, params);
             if (!orders.length) {
                 return {
                     totalCount: 0,
@@ -87,9 +88,26 @@ class OrderHistoryService {
                 };
             }
             else {
+                // orders = orders.toJSON();
+                let locations = []
+                let orderList = []
+                for(let order of orders){
+
+                    //construct id
+                    //bppid:domain_providerid_location_id
+                    if(order.provider.locations.length>0){
+                        let id = `${order.bppId}_${order.domain}_${order.provider.id}_${order.provider.locations[0].id}`
+                        const response = await protocolGetLocationDetails({id:id})                    // locations.push(response)
+                        order.locations = response//.data?response.data[0]:[]
+                    }
+                    orderList.push({...order})
+
+
+                }
+
                 return {
                     totalCount: totalCount,
-                    orders: [...orders],
+                    orders: [...orderList],
                 }
             }
         }

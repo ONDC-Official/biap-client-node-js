@@ -183,11 +183,7 @@ class InitOrderService {
 
             orderSchema.provider = {
                 id: orderSchema?.provider?.id,
-                locations: orderSchema?.provider_location ?
-                    orderSchema?.provider_location :
-                    dbResponse?.provider?.locations ?
-                        dbResponse?.provider?.locations :
-                        [],
+                locations: orderSchema?.provider?.locations ?? [],
                 descriptor: dbResponse?.provider?.descriptor
             };
 
@@ -256,7 +252,8 @@ class InitOrderService {
                 city:requestContext.city,
                 state:requestContext.state,
                 transactionId: requestContext?.transaction_id,
-                domain:requestContext?.domain
+                domain:requestContext?.domain,
+                pincode:requestContext?.pincode,
                 // ...(!isMultiSellerRequest && { transactionId: requestContext?.transaction_id })
             });
 

@@ -206,7 +206,8 @@ class OrderStatusService {
                                     // if(fulfillment.type==='Delivery'){
                                         let existingFulfillment  =await FulfillmentHistory.findOne({
                                             id:fulfillment.id,
-                                            state:fulfillment.state.descriptor.code
+                                            state:fulfillment.state.descriptor.code,
+                                            orderId:onOrderStatusResponse.message.order.id
                                         })
                                         if(!existingFulfillment){
                                             await FulfillmentHistory.create({

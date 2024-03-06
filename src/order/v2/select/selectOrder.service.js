@@ -65,6 +65,7 @@ class SelectOrderService {
                 bppId: cart?.items[0]?.bpp_id,
                 bpp_uri: cart?.items[0]?.bpp_uri,
                 city:requestContext?.city,
+                pincode:requestContext?.pincode,
                 state:requestContext?.state,
                 domain:requestContext?.domain
             });

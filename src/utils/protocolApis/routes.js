@@ -9,6 +9,7 @@ const ON_TRACK = "protocol/response/v1/on_track";
 const ON_UPDATE = "protocol/response/v1/on_update";
 
 const CONFIRM = "protocol/confirm";
+const DUMP = "protocol/request-dump";
 const CANCEL = "protocol/cancel";
 const INIT = "protocol/init";
 const SEARCH = "protocol/search";
@@ -26,9 +27,11 @@ const SEARCH_ATTRIBUTE_VALUE = "protocol/attribute-values";
 const PROVIDERS = "protocol/providers";
 const CUSTOM_MENU = "protocol/custom-menus";
 const LOCATIONS = "protocol/locations";
+const LOCATIONS_DETAILS = "protocol/location-details";
 // const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
+    LOCATIONS_DETAILS,
     CONFIRM,
     CANCEL,
     INIT,
@@ -53,7 +56,8 @@ const PROTOCOL_API_URLS = {
     PROVIDERS,
     LOCATIONS,
     CUSTOM_MENU,
-    RESPONSE
+    RESPONSE,
+    DUMP
 };
 
 export default PROTOCOL_API_URLS;

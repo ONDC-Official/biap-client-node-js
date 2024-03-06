@@ -11,6 +11,7 @@ import ContextFactory from "../../../factories/ContextFactory.js";
 import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../../payment/juspay.service.js";
 import CartService from "../cart/v2/cart.service.js";
+import FulfillmentHistory from "../db/fulfillmentHistory.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
@@ -105,7 +106,8 @@ class ConfirmOrderService {
                 bpp_uri: dbResponse.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state,
-                domain:requestContext.domain
+                domain:requestContext.domain,
+                pincode:requestContext?.pincode,
             });
 
             if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
@@ -198,6 +200,28 @@ class ConfirmOrderService {
                     delete orderSchema.fulfillment;
                 }
 
+
+                for(let fulfillment of orderSchema.fulfillments){
+                    console.log("fulfillment--->",fulfillment)
+                    // if(fulfillment.type==='Delivery'){
+                    let existingFulfillment  =await FulfillmentHistory.findOne({
+                        id:fulfillment.id,
+                        state:fulfillment.state.descriptor.code,
+                        orderId:orderSchema.id
+                    })
+                    if(!existingFulfillment){
+                        await FulfillmentHistory.create({
+                            orderId:orderSchema.id,
+                            type:fulfillment.type,
+                            id:fulfillment.id,
+                            state:fulfillment.state.descriptor.code,
+                            updatedAt:orderSchema.toString()
+                        })
+                    }
+                    console.log("existingFulfillment--->",existingFulfillment);
+                    // }
+                }
+
                 console.log("processOnConfirmResponse----------------dbResponse.items-------------->",dbResponse)
                 console.log("processOnConfirmResponse----------------dbResponse.orderSchema-------------->",orderSchema)
 
@@ -255,6 +279,8 @@ class ConfirmOrderService {
                     response.context.transaction_id,dbResponse.provider.id,
                     { ...orderSchema }
                 );
+
+
 
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
                 //clear cart
