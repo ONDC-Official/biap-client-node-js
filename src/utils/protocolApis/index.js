@@ -8,7 +8,8 @@ import PROTOCOL_API_URLS from "./routes.js";
  * @param {Object} data 
  * @returns 
  */
-const protocolConfirm = async (data) => {
+const 
+protocolConfirm = async (data) => {
 
     const apiCall = new HttpRequest(
         process.env.PROTOCOL_BASE_URL,
