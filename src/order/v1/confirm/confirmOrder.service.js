@@ -243,7 +243,7 @@ class ConfirmOrderService {
     async confirmOrder(orderRequest) {
         try {
             const { context: requestContext, message: order = {} } = orderRequest || {};
-
+           console.log("246",order)
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,

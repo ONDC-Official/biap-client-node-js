@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { authentication } from '../../../../middlewares/index.js';
+ import { cartTranslator } from '../../../../middlewares/bhashiniTranslator/cart.js';
 
 import CartController from './cart.controller.js';
 
@@ -14,7 +14,7 @@ rootRouter.post(
 
 rootRouter.get(
     '/v2/cart/:userId',
-    cartController.getCartItem,
+    cartController.getCartItem,cartTranslator
 );
 
 rootRouter.delete(

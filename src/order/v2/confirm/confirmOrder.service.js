@@ -71,6 +71,7 @@ class ConfirmOrderService {
         if (paymentType === PAYMENT_TYPES["ON-ORDER"])
             orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
 
+
         await addOrUpdateOrderWithTransactionIdAndProvider(
             confirmResponse?.context?.transaction_id,dbResponse.provider.id,
             { ...orderSchema }
@@ -335,7 +336,6 @@ class ConfirmOrderService {
      * @param {Array} orders 
      */
     async confirmMultipleOrder(orders) {
-
         let total = 0;
         orders.forEach(order => {
             total += order?.message?.payment?.paid_amount;
