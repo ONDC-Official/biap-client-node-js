@@ -1,5 +1,6 @@
 import {Router} from 'express';
-import { authentication } from '../../middlewares/index.js';
+import {bhashiniTranslator} from '../../middlewares/bhashiniTranslator/search.js';
+import {providerTranslator} from '../../middlewares/bhashiniTranslator/provider.js';
 
 import SearchController from './search.controller.js';
 
@@ -8,12 +9,15 @@ const searchController = new SearchController();
 
 // search
 router.get(
-    '/v2/search',  searchController.search,
+    '/v2/search',  
+    searchController.search,bhashiniTranslator
+    
 );
+
 
 // get item details
 router.get(
-    '/v2/items/:id',searchController.getItem,
+    '/v2/items/:id/:',searchController.getItem
 );
 
 // get item details
@@ -28,11 +32,11 @@ router.get(
 
 
 router.get(
-    '/v2/attributes',  searchController.getAttributes,
+    '/v2/attributes',  searchController.getAttributes,bhashiniTranslator
 );
 
 router.get(
-    '/v2/items',  searchController.getItems,
+    '/v2/items',  searchController.getItems,bhashiniTranslator
 );
 
 router.get(
@@ -46,7 +50,7 @@ router.get(
 
 // get providers
 router.get(
-    '/v2/providers',  searchController.getProviders,
+    '/v2/providers',  searchController.getProviders,providerTranslator
 );
 
 // get custom menus

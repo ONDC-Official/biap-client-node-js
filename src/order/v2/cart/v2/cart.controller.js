@@ -17,8 +17,9 @@ class CartController {
 
     async getCartItem(req, res, next) {
         try {
-
-            return  res.send(await cartService.getCartItem({...req.body,...req.params}));
+            const cartItem=await cartService.getCartItem({...req.body,...req.params})
+            req.body.responseData = cartItem;
+            next()
 
         }
         catch (err) {
