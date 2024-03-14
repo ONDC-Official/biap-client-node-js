@@ -50,7 +50,7 @@ router.get(
 
 // get providers
 router.get(
-    '/v2/providers',  searchController.getProviders,providerTranslator
+    '/v2/providers',  searchController.getProviders
 );
 
 // get custom menus
