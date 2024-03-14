@@ -8,10 +8,10 @@ export const cartTranslator = async (req, res, next) => {
       lang = req.query.lang
     }
     else{
-      res.status(200).json({ data: req.body.responseData });
+      res.status(200).json(req.body.responseData );
     }
     let responseData = req.body.responseData;
-    // console.log("responseData---->", JSON.stringify(responseData));
+    console.log("responseData---->", JSON.stringify(responseData));
     
     const itemsToTranslate = responseData.map((entity) => ({
       itemName: entity.item.product.descriptor.name.replace(/,/g, ''),
