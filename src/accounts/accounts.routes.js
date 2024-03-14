@@ -1,8 +1,8 @@
-import {Router} from 'express';
-import { authentication } from '../middlewares/index.js';
+import { Router } from "express";
+import { authentication } from "../middlewares/index.js";
 
-import BillingController from './billings/billing.controller.js';
-import DeliveryAddressController from './deliveryAddress/deliveryAddress.controller.js';
+import BillingController from "./billings/billing.controller.js";
+import DeliveryAddressController from "./deliveryAddress/deliveryAddress.controller.js";
 import MapController from "./map/map.controller.js";
 
 const rootRouter = new Router();
@@ -14,17 +14,21 @@ const deliveryAddressController = new DeliveryAddressController();
 //#region billing details
 
 rootRouter.post(
-    '/v1/billing_details', 
-    authentication(),
-    billingController.billingAddress,
+  "/v1/billing_details",
+  authentication(),
+  billingController.billingAddress
 );
 
-rootRouter.get('/v1/billing_details', authentication(), billingController.onBillingDetails);
+rootRouter.get(
+  "/v1/billing_details",
+  authentication(),
+  billingController.onBillingDetails
+);
 
 rootRouter.post(
-    '/v1/update_billing_details/:id', 
-    authentication(),
-    billingController.updateBillingAddress,
+  "/v1/update_billing_details/:id",
+  authentication(),
+  billingController.updateBillingAddress
 );
 
 //#endregion
@@ -32,28 +36,26 @@ rootRouter.post(
 //#region delivery address details
 
 rootRouter.post(
-    '/v1/delivery_address', 
-    authentication(),
-    deliveryAddressController.deliveryAddress,
+  "/v1/delivery_address",
+  authentication(),
+  deliveryAddressController.deliveryAddress
 );
 
 rootRouter.get(
-    '/v1/delivery_address', 
-    authentication(), 
-    deliveryAddressController.onDeliveryAddressDetails
+  "/v1/delivery_address",
+  authentication(),
+  deliveryAddressController.onDeliveryAddressDetails
 );
 
 rootRouter.post(
-    '/v1/update_delivery_address/:id', 
-    authentication(),
-    deliveryAddressController.updateDeliveryAddress,
+  "/v1/update_delivery_address/:id",
+  authentication(),
+  deliveryAddressController.updateDeliveryAddress
 );
 
-rootRouter.get(
-    '/v2/map/accesstoken',
-    authentication(),
-    mapController.mmiToken
-);
+rootRouter.get("/v2/map/accesstoken", authentication(), mapController.mmiToken);
+
+rootRouter.get("/v2/map/getCordinates", mapController.getCoordinates);
 
 //#endregion
 export default rootRouter;
