@@ -82,7 +82,7 @@ console.log("72>>>>",translatedValues)
           return entity;
         });
 
-        return res.status(200).json({ data: responseData });
+        return res.status(200).json(responseData);
       })
       .catch((error) => {
         console.error("Error:", error);
