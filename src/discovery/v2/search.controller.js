@@ -222,9 +222,7 @@ class SearchController {
         if (!response || response === null) {
           throw new NoRecordFoundError("No result found");
         } else {
-          const menuData = response.response;
-          req.body.responseData = menuData;
-          next();
+          res.send(response.response)
         }
 
         res.json(response.response);
