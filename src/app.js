@@ -9,11 +9,13 @@ import logErrors from './utils/logErrors.js';
 import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
 import mongoSanitize from 'express-mongo-sanitize'
+import subscriberRoute from './utils/subscribe.js'
+import {schedulerEachDay} from './ritu_rsp_geeks/rsp_service/crons.js'
+
 const app = express();
 
 loadEnvVariables();
 initializeFirebase();
-
 //app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json({limit: '50mb'}));
@@ -45,6 +47,7 @@ app.use(logger('combined'))
 
 app.use(cors());
 app.use('/clientApis', cors(), router);
+app.use('/ondc/onboarding/', subscriberRoute)
 app.use(logErrors)
 // app.use(logger('dev'));
 
@@ -60,7 +63,7 @@ const port = process.env.PORT || 8080;
 dbConnect()
     .then((db) => {
         console.log("Database connection successful");
-        
+        schedulerEachDay()
         app.listen(port, () => {
             console.log(`Listening on port ${port}`);
         });
