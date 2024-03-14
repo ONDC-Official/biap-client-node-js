@@ -65,7 +65,7 @@ export const bhashiniTranslator = async (req, res, next) => {
           item.provider_details.descriptor.name = translatedValues[transIndex+1]
           return item;
         })
-        return res.status(200).json({ data: responseData });
+        return res.status(200).json(responseData);
       })
       .catch((error) => {
         console.error("Error:", error);
