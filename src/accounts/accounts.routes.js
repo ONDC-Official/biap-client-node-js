@@ -53,6 +53,12 @@ rootRouter.post(
   deliveryAddressController.updateDeliveryAddress
 );
 
+rootRouter.delete(
+  "/v1/delete_delivery_address/:id",
+  authentication(),
+  deliveryAddressController.deleteDeliveryAddress
+);
+
 rootRouter.get("/v2/map/accesstoken", authentication(), mapController.mmiToken);
 
 rootRouter.get("/v2/map/getCordinates", mapController.getCoordinates);
