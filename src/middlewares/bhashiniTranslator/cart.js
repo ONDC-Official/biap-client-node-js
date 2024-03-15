@@ -86,7 +86,7 @@ console.log("72>>>>",translatedValues)
       })
       .catch((error) => {
         console.error("Error:", error);
-        throw error;
+        // throw error;
       });
   } catch (error) {
     console.error("Error:", error);
