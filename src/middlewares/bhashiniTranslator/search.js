@@ -71,7 +71,7 @@ export const bhashiniTranslator = async (req, res, next) => {
       })
       .catch((error) => {
         console.error("Error:", error);
-        throw error;
+        // throw error;
       });
   } catch (error) {
     console.error("Error:", error);
