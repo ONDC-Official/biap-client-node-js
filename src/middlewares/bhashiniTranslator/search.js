@@ -8,7 +8,7 @@ export const bhashiniTranslator = async (req, res, next) => {
       lang = req.query.lang
     }
     else{
-      res.status(200).json({ data: req.body.responseData });
+     return res.status(200).json(req.body.responseData);
     }
     let responseData = req.body.responseData;
     // console.log("responseData---->",responseData)
@@ -59,17 +59,19 @@ export const bhashiniTranslator = async (req, res, next) => {
         let translatedValues = response.data.pipelineResponse[0].output[0].target.split(",").map( item => item.split('"')[1] )
         console.log("50>>>>>>>>>",translatedValues)
         // translatedValues = ["ब्राउन ब्रेड बाय डीएम", "sellerV1.2", "चिकन बाय डीएम", "द्वारामनी", "खीरा बाय डीएम", "द्वारामनी", "मैगी", "नोबलनूक", "एप्पल", "नोबलनूक", "टीशर्ट", "नोबलनूक", "मैंगो", "नोबलनूक", "कैडबरी ओरियो", "नोबलनूक", "नोटबुक", "नोबलनूक", "यू. एस. पोलो मेन्स सॉलिड रेगुलर फिट कॉटन पोलो", "नोबलनूक"]
-        responseData = responseData.response.data.map( (item, index) => {
+        let translatedData = responseData.response.data.map( (item, index) => {
           let transIndex = index * 2;
           item.item_details.descriptor.name = translatedValues[transIndex];
           item.provider_details.descriptor.name = translatedValues[transIndex+1]
           return item;
         })
-        return res.status(200).json({ data: responseData });
+        responseData.response.data = translatedData;
+
+        return res.status(200).json(responseData);
       })
       .catch((error) => {
         console.error("Error:", error);
-        throw error;
+        // throw error;
       });
   } catch (error) {
     console.error("Error:", error);

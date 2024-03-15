@@ -32,11 +32,11 @@ router.get(
 
 
 router.get(
-    '/v2/attributes',  searchController.getAttributes,bhashiniTranslator
+    '/v2/attributes',  searchController.getAttributes
 );
 
 router.get(
-    '/v2/items',  searchController.getItems,bhashiniTranslator
+    '/v2/items',  searchController.getItems
 );
 
 router.get(
@@ -50,7 +50,7 @@ router.get(
 
 // get providers
 router.get(
-    '/v2/providers',  searchController.getProviders,providerTranslator
+    '/v2/providers',  searchController.getProviders
 );
 
 // get custom menus

@@ -31,8 +31,10 @@
     "passport-jwt": "^4.0.0",
     "pino": "^8.19.0",
     "pino-http": "^9.0.0",
+    "razorpay": "^2.9.2",
     "redis": "^4.6.13",
     "uuid": "^8.3.2",
+    "uuidv4": "^6.2.13",
     "winston": "^3.8.1"
   },
   "scripts": {
