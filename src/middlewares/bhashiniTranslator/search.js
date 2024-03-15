@@ -8,7 +8,7 @@ export const bhashiniTranslator = async (req, res, next) => {
       lang = req.query.lang
     }
     else{
-      res.status(200).json(req.body.responseData);
+     return res.status(200).json(req.body.responseData);
     }
     let responseData = req.body.responseData;
     // console.log("responseData---->",responseData)
