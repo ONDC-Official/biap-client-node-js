@@ -71,7 +71,7 @@ export const providerTranslator = async (req, res, next) => {
   //   console.error("Error:", error);
   //   return res.status(500).json({ message: "Internal Server Error" });
   // }
-  res.status(200).json({ ...req.body.responseData });
+  return res.status(200).json({ ...req.body.responseData });
 
 };
 
