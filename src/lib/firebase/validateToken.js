@@ -1,22 +1,19 @@
-import admin from 'firebase-admin';
+import admin from "firebase-admin";
 
 /**
- * 
- * @param {String} token 
+ *
+ * @param {String} token
  * @returns {String} decodedToken
  */
 const validateToken = async (token) => {
-    let decodedToken;
-    try
-    {
-        decodedToken = await admin.auth().verifyIdToken(token);
-        return decodedToken;
-    }
-    catch(e)
-    {
-        // Token is invalid.
-        return null;
-    }
-}
+  let decodedToken;
+  try {
+    decodedToken = await admin.auth().verifyIdToken(token);
+    return decodedToken;
+  } catch (e) {
+    // Token is invalid.
+    return null;
+  }
+};
 
 export default validateToken;

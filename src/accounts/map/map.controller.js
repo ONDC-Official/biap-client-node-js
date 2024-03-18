@@ -39,11 +39,18 @@ class MapController {
           },
         }
       );
+      if (result.data.features[0] == undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid pincode",
+        });
+      }
       return res.status(200).json({
         success: true,
         data: {
           longitude: result.data.features[0].properties.lon,
           latitude: result.data.features[0].properties.lat,
+          pincode: req.query.postcode,
         },
       });
     } catch (err) {
