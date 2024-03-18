@@ -1,16 +1,16 @@
-import loadEnvVariables from './utils/envHelper.js';
-import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
+import loadEnvVariables from "./utils/envHelper.js";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
-import logger from 'morgan';
-import initializeFirebase from './lib/firebase/initializeFirebase.js';
-import logErrors from './utils/logErrors.js';
-import router from './utils/router.js';
-import dbConnect from './database/mongooseConnector.js';
-import mongoSanitize from 'express-mongo-sanitize'
-import subscriberRoute from './utils/subscribe.js'
-import {schedulerEachDay} from './ritu_rsp_geeks/rsp_service/crons.js'
+import logger from "morgan";
+import initializeFirebase from "./lib/firebase/initializeFirebase.js";
+import logErrors from "./utils/logErrors.js";
+import router from "./utils/router.js";
+import dbConnect from "./database/mongooseConnector.js";
+import mongoSanitize from "express-mongo-sanitize";
+import subscriberRoute from "./utils/subscribe.js";
+import { schedulerEachDay } from "./ritu_rsp_geeks/rsp_service/crons.js";
 
 const app = express();
 
@@ -18,18 +18,24 @@ loadEnvVariables();
 initializeFirebase();
 //app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(bodyParser.json());
 
 app.use(
-    mongoSanitize({
-        onSanitize: ({ req, key }) => {
-            console.warn(`This request[${key}] is sanitized`, req);
-        },
-    }),
+  mongoSanitize({
+    onSanitize: ({ req, key }) => {
+      console.warn(`This request[${key}] is sanitized`, req);
+    },
+  })
 );
-app.use(logger('combined'))
+app.use(logger("combined"));
+
+const corsOptionsDelegate = function (req, callback) {
+  let corsOptions = { credentials: true };
+  corsOptions["origin"] = true;
+  callback(null, corsOptions);
+};
 
 //
 // // Global exception handler for HTTP/HTTPS requests
@@ -46,29 +52,27 @@ app.use(logger('combined'))
 // });
 
 app.use(cors());
-app.use('/clientApis', cors(), router);
-app.use('/ondc/onboarding/', subscriberRoute)
-app.use(logErrors)
+app.use("/clientApis", cors(corsOptionsDelegate), router);
+app.use("/ondc/onboarding/", subscriberRoute);
+app.use(logErrors);
 // app.use(logger('dev'));
 
 app.get("*", (req, res) => {
-    res.send("API NOT FOUND");
+  res.send("API NOT FOUND");
 });
-
-
 
 const port = process.env.PORT || 8080;
 
 //Setup connection to the database
 dbConnect()
-    .then((db) => {
-        console.log("Database connection successful");
-        schedulerEachDay()
-        app.listen(port, () => {
-            console.log(`Listening on port ${port}`);
-        });
-    })
-    .catch((error) => {
-        console.log("Error connecting to the database", error);
-        return;
+  .then((db) => {
+    console.log("Database connection successful");
+    schedulerEachDay();
+    app.listen(port, () => {
+      console.log(`Listening on port ${port}`);
     });
+  })
+  .catch((error) => {
+    console.log("Error connecting to the database", error);
+    return;
+  });
