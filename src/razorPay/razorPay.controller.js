@@ -38,10 +38,11 @@ class RazorPayController
     verifyPayment(req, res, next) 
     {
       
-        const data = req.body;
-        const signature = req.headers['x-razorpay-signature']
-        razorPayService.verifyPayment(signature,data).then(user => {
-            res.json({data: user});
+        const confirmdata = req.body.confirmRequest;
+        const razorPaydata = req.body.razorPayRequest;
+        const signature = razorPaydata.razorpay_signature
+        razorPayService.verifyPaymentDetails(signature,razorPaydata,confirmdata).then(response => {
+            res.json(response);
         }).catch((err) => {
             next(err);
         });
@@ -52,6 +53,8 @@ class RazorPayController
 
             const data = req.body;
             const signature = req.headers['x-razorpay-signature'];
+
+            console.log("req.headers",req.headers)
             razorPayService.verifyPayment(signature,data).then(user => {
                 res.json({data: user});
             }).catch((err) => {
