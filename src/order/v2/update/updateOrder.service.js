@@ -42,85 +42,88 @@ class UpdateOrderService {
             });
 
             orderRequest.context = {...context}
-            //if(orderRequest.context.message_id){ //if messageId exist then do not save order again
-               const data = {context:context,data:orderRequest}
-           // }
+            const data = {context:context,data:orderRequest}
 
             let fulfilments = []
+            let dbFulfillment = new Fulfillments();
+            let type = '';
+            let code= '';
+            if(orderRequest.message.order.items[0].tags.update_type==="return"){
+                type ='Return';
+                code = 'return_request'
+            }
+
+            let fulfillmentId;
+            let tags = []
             for(let item of orderRequest.message.order.items){
 
-                let type = '';
-                let code= '';
-                if(item.tags.update_type==="return"){
-                    type ='Return';
-                    code = 'return_request'
+                if(!fulfillmentId){
+                   fulfillmentId=dbFulfillment._id;
                 }
-
-                let dbFulfillment = new Fulfillments();
-                console.log("item---->",item);
-                let  fulfilment =
-                    {
-                        "type":type,
-                        "tags":
-                            [
-                                {
-                                    "code":code,
-                                    "list":
-                                        [
-                                            {
-                                                "code":"id",
-                                                "value":dbFulfillment._id
-                                            },
-                                            {
-                                                "code":"item_id",
-                                                "value":item.id
-                                            },
-                                            {
-                                                "code":"parent_item_id",
-                                                "value":item.tags.parent_item_id??""
-                                            },
-                                            {
-                                                "code":"item_quantity",
-                                                "value":`${item.quantity.count}`
-                                            },
-                                            {
-                                                "code":"reason_id",
-                                                "value": `${item.tags.reason_code}`
-                                            },
-                                            {
-                                                "code":"reason_desc",
-                                                "value":"detailed description for return"
-                                            },
-                                            {
-                                                "code":"images",
-                                                "value":`${item.tags.image}`
-                                            },
-                                            {
-                                                "code":"ttl_approval",
-                                                "value":"PT24H"
-                                            },
-                                            {
-                                                "code":"ttl_reverseqc",
-                                                "value":"P3D"
-                                            }
-                                        ]
-                                }
-                            ]
-                    }
+                let returnRequest =                                 {
+                    "code":code,
+                    "list":
+                        [
+                            {
+                                "code":"id",
+                                "value":fulfillmentId
+                            },
+                            {
+                                "code":"item_id",
+                                "value":item.id
+                            },
+                            {
+                                "code":"parent_item_id",
+                                "value":item.tags.parent_item_id??""
+                            },
+                            {
+                                "code":"item_quantity",
+                                "value":`${item.quantity.count}`
+                            },
+                            {
+                                "code":"reason_id",
+                                "value": `${item.tags.reason_code}`
+                            },
+                            {
+                                "code":"reason_desc",
+                                "value":"detailed description for return"
+                            },
+                            {
+                                "code":"images",
+                                "value":`${item.tags.image}`
+                            },
+                            {
+                                "code":"ttl_approval",
+                                "value":"PT24H"
+                            },
+                            {
+                                "code":"ttl_reverseqc",
+                                "value":"P3D"
+                            }
+                        ]
+                }
+                tags.push(returnRequest)
 
                 dbFulfillment.itemId = item.id
                 dbFulfillment.orderId = orderRequest.message.order.id
-                dbFulfillment.parent_item_id = ''
+                dbFulfillment.parent_item_id = item.tags.parent_item_id??""
                 dbFulfillment.item_quantity = item.quantity.count
                 dbFulfillment.reason_id = item.tags.reason_code
                 dbFulfillment.reason_desc = 'detailed description for return'
-                dbFulfillment.images = "url_for_image1,url_for_image2"
+                dbFulfillment.images = item.tags.image
                 dbFulfillment.type =type
-                dbFulfillment.id =dbFulfillment._id
+                dbFulfillment.id =fulfillmentId;
                 await dbFulfillment.save();
-
-                fulfilments.push(fulfilment);
             }
+
+            let  fulfilment =
+                {
+                    "type":type,
+                    "tags":tags
+                }
+
+            fulfilments.push(fulfilment);
+
             //1. create a new fullfillment
 
            let order = {
