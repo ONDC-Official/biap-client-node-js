@@ -1,4 +1,4 @@
-import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
+// import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
 import {uuid} from 'uuidv4';
 import Transaction from './db/transaction.js';
 import Order from '../order/v1/db/order.js';
@@ -6,7 +6,9 @@ import {pad} from '../utils/stringHelper.js';
 import Razorpay from 'razorpay';
 import {RAZORPAY_STATUS} from '../utils/constants.js';
 import crypto from 'crypto';
-
+import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
+import ConfirmOrderService from "../order/v2/confirm/confirmOrder.service.js";
+const confirmOrderService = new ConfirmOrderService();
 class RazorPayService
 {
 
@@ -74,7 +76,7 @@ class RazorPayService
 
             const transaction = {
                 amount: data.amount,
-                status: RAZORPAY_STATUS.COMPLETED,
+                status: RAZORPAY_STATUS.IN_PROGRESS,
                 type: 'ON-ORDER',
                 transactionId: transactionId,
                 orderId:orderDetail.id,
@@ -107,7 +109,7 @@ class RazorPayService
     * @param {Integer} data.amount
     * @param {String} data.receiptNo
     */
-    async verifyPayment(signature,responseData) 
+    async verifyPayment(signature,responseData)
     {
           
         try 
@@ -127,26 +129,31 @@ class RazorPayService
                     if(responseData.event === 'payment.captured' || responseData.event === 'order.paid' || responseData.event === 'payment.authorized')
                     {
 
-                        const data = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_ID);
+                        const data = crypto.createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET);
                         data.update(JSON.stringify(responseData));
 
                         const digest = data.digest('hex');
 
+                        console.log("digest---->",digest)
+                        console.log("signature---->",signature)
                         if (digest === signature)
                         {
+
                             console.log('request is legit');
                             order.status = 'TXN_SUCCESS';
                             await order.save();
                             return order;
+
                         }
                         else
                         {
-                            return 'Invalid Signature';
+                            throw new BadRequestParameterError('Invalid Signature');
                         }
                     }
 
                     if(responseData.event === 'refund.created')
                     {
+
                         order.status = 'TXN_REVERSED';
                         await order.save();
                         return order;
@@ -178,7 +185,7 @@ class RazorPayService
 
                 console.log('response data..........................\n',responseData);
                 console.log('response data json..........................n',JSON.stringify(responseData));
-
+                throw new BadRequestParameterError('Invalid Signature');
             }
             
             return responseData;
@@ -188,6 +195,67 @@ class RazorPayService
             throw err;
         }
        
+    }
+
+    async verifyPaymentDetails(signature,responseData,confirmdata)
+    {
+
+        try
+        {
+
+            if(responseData.razorpay_order_id)
+            {
+                let instance = new Razorpay({
+                    key_id:process.env.RAZORPAY_KEY_ID,
+                    key_secret:process.env.RAZORPAY_KEY_SECRET
+                });
+                console.log('responseData......................',responseData);
+                let order=await Transaction.findOne({order_id:responseData.razorpay_order_id});
+                let previousTransaction = order;
+
+                if(order){
+
+                    const data = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+                    data.update(responseData.razorpay_order_id + "|" + responseData.razorpay_payment_id);
+
+                    const digest = data.digest('hex');
+
+                    if (digest === signature)
+                    {
+                       let orderDetails = await instance.orders.fetch(responseData.razorpay_order_id)
+                        console.log('Razorpay request is legit------->',orderDetails);
+                       if(orderDetails.status==='paid'){
+                           order.status = RAZORPAY_STATUS.COMPLETED;
+                       }else{
+                           order.status = RAZORPAY_STATUS.FAILED;
+                       }
+                        await order.save();
+
+                        return await confirmOrderService.confirmMultipleOrder(confirmdata,responseData)
+                    }
+                    else
+                    {
+                        throw new BadRequestParameterError('Invalid Signature');
+                    }
+
+                    //TODO: if txn type changes from pending success and make confirm request
+
+                }
+            }
+            else{
+
+                console.log('response data..........................\n',responseData);
+                console.log('response data json..........................n',JSON.stringify(responseData));
+
+            }
+
+            return responseData;
+        }
+        catch (err)
+        {
+            throw err;
+        }
+
     }
 
   
