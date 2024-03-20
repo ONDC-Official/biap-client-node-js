@@ -15,7 +15,8 @@ class SseController {
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    async onEvent(req, res, next) {
+    async 
+    onEvent(req, res, next) {
 
         try {
             const { query = {} } = req;
