@@ -20,7 +20,8 @@ class OrderHistoryController {
         if(pageNumber > 0) {
             orderHistoryService.getOrdersList(user, query).then(response => {
                 if(!response.error) {
-                    res.json({ ...response });
+                    req.body.responseData = response;
+                    next();
                 }
                 else
                     res.status(404).json(

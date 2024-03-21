@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import { authentication } from '../../middlewares/index.js';
-
+import { bhashiniTranslator } from '../../middlewares/bhashiniTranslator/order.js';
 import CancelOrderController from './cancel/cancelOrder.controller.js';
 import ConfirmOrderController from './confirm/confirmOrder.controller.js';
 import InitOrderController from './init/initOrder.controller.js';
@@ -59,7 +59,7 @@ rootRouter.get('/v2/on_cancel_order', authentication(), cancelOrderController.on
 //#endregion
 
 //#region order history
-rootRouter.get('/v2/orders', authentication(), orderHistoryController.getOrdersList);
+rootRouter.get('/v2/orders', authentication(), orderHistoryController.getOrdersList, bhashiniTranslator);
 //#endregion
 
 //#region Initialize order
