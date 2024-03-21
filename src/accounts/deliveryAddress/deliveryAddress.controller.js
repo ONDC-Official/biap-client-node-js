@@ -37,7 +37,8 @@ class DeliveryAddressController {
     deliveryAddressService
       .onDeliveryAddressDetails(user)
       .then((order) => {
-        res.json(order);
+        req.body.responseData = order;
+        next();
       })
       .catch((err) => {
         next(err);
