@@ -45,7 +45,7 @@ app.use(logger("combined"));
 // });
 
 // app.use(cors());
-app.use("/clientApis", router);+
+app.use("/clientApis", router);
 app.use("/ondc/onboarding/", subscriberRoute);
 app.use(logErrors);
 // app.use(logger('dev'));

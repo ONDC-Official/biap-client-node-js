@@ -66,8 +66,7 @@ export const bhashiniTranslator = async (req, res, next) => {
 
         // console.log('translatedValues',translatedValues)
 
-        responseData = responseData.orders.map((item,index) => {
-        //   console.log('item, before',index,item)
+        responseData.orders.forEach((item, index) => {
             let transIndex = (index * 7);
 
             item.provider.descriptor.name = translatedValues[transIndex]
@@ -77,10 +76,7 @@ export const bhashiniTranslator = async (req, res, next) => {
             item.billing.address.country = translatedValues[++transIndex]
             item.billing.address.building = translatedValues[++transIndex]
             item.items[0].product.descriptor.name = translatedValues[++transIndex]
-            return item
-
-
-        })
+      });
         return res.status(200).json(responseData);
       })
       .catch((error) => {
