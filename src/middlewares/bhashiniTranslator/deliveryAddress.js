@@ -10,13 +10,13 @@ export const bhashiniTranslator = async (req, res, next) => {
     }
     let responseData = req.body.responseData;
     const valuesToTranslate = responseData.map((item) => [
-        item.descriptor.name,
-        item.address.door,
-        item.address.street,
-        item.address.city,
-        item.address.state,
-        item.address.country,
-        item.address.tag
+        item?.descriptor?.name,
+        item?.address?.door,
+        item?.address?.street,
+        item?.address?.city,
+        item?.address?.state,
+        item?.address?.country,
+        item?.address?.tag
       ]);
     // console.error("valuesToTranslate",valuesToTranslate)
 
