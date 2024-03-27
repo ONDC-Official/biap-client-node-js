@@ -367,10 +367,16 @@ class ConfirmOrderService {
             total += order?.message?.payment?.paid_amount;
         });
 
+        console.log(orders)
         const confirmOrderResponse = await Promise.all(
             orders.map(async orderRequest => {
                 try {
-                    return await this.confirmAndUpdateOrder(orderRequest, total, true,paymentData);
+                    if(paymentData){
+                        return await this.confirmAndUpdateOrder(orderRequest, total, true,paymentData);
+                    }else{
+                        return await this.confirmAndUpdateOrder(orderRequest, total, false,paymentData);
+                    }
+
                 }
                 catch (err) {
                     return err.response.data;
