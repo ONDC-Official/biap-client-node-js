@@ -6,6 +6,8 @@ import ContextFactory from "../../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
 import {CITY_CODE} from "../../utils/cityCode.js"
 import createPeriod from "date-period";
+import translateObject from "../../utils/bhashini/translate.js";
+import {OBJECT_TYPE} from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
@@ -23,13 +25,17 @@ class SearchService {
      * search
      * @param {Object} searchRequest
      */
-    async search(searchRequest = {}) {
+    async search(searchRequest = {},targetLanguage) {
         try {
 
-            return await bppSearchService.search(
-                searchRequest
+            let searchResponses = await bppSearchService.search(
+                searchRequest,'ITEM',targetLanguage
             );
-
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.ITEM,targetLanguage)
+            }else{
+                return searchResponses
+            }
         } catch (err) {
             throw err;
         }
@@ -137,12 +143,17 @@ class SearchService {
      * get providers
      * @param {Object} searchRequest
      */
-    async getProviders(searchRequest) {
+    async getProviders(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getProviders(
+            let searchResponses = await bppSearchService.getProviders(
                 searchRequest
             );
+            if(targetLanguage){ //translate data
+              return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;

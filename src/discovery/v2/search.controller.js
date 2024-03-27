@@ -18,8 +18,15 @@ class SearchController {
         const searchRequest = req.query;
 
         console.log({searchRequest})
+        const headers = req.headers;
 
-        searchService.search(searchRequest).then(response => {
+        let targetLanguage = headers['targetlanguage'];
+
+        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
+        {
+            targetLanguage = undefined
+        }
+        searchService.search(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
@@ -166,9 +173,15 @@ class SearchController {
     */
     getProviders(req, res, next) {
         const searchRequest = req.query;
+        const headers = req.headers;
 
+        let targetLanguage = headers['targetlanguage'];
 
-        searchService.getProviders(searchRequest).then(response => {
+        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
+        {
+            targetLanguage = undefined
+        }
+        searchService.getProviders(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else

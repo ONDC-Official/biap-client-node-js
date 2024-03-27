@@ -10,6 +10,9 @@ import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
 import mongoSanitize from 'express-mongo-sanitize'
 const app = express();
+import Redis from 'ioredis';
+global.redisCache = new Redis(process.env.BHASHINI_REDIS_PORT,process.env.BHASHINI_REDIS_HOST);
+
 
 loadEnvVariables();
 initializeFirebase();
@@ -60,7 +63,8 @@ const port = process.env.PORT || 8080;
 dbConnect()
     .then((db) => {
         console.log("Database connection successful");
-        
+
+
         app.listen(port, () => {
             console.log(`Listening on port ${port}`);
         });
