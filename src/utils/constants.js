@@ -120,3 +120,8 @@ export const CHANGE_TYPES = {
     STATUS_UPDATE: 'STATUS_UPDATE',
     INTENT_UPDATE: 'INTENT_UPDATE',
 };
+
+export const OBJECT_TYPE = {
+    ITEM: 'ITEM',
+    PROVIDER: 'PROVIDER',
+};
