@@ -41,6 +41,54 @@ class SearchService {
         }
     }
 
+    async getProvideDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getProvideDetails(
+                searchRequest
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getLocationDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getLocationDetails(
+                searchRequest
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.LOCATION_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getItemDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getItemDetails(
+                searchRequest
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.ITEM_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
     /**
      * getItem
      * @param {Object} searchRequest
@@ -99,24 +147,35 @@ class SearchService {
         }
     }
 
-    async getItems(searchRequest) {
+    async getItems(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getItems(
+            let searchResponses = await bppSearchService.getItems(
                 searchRequest
             );
+
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.CUSTOMMENU_ITEMS,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;
         }
     }
 
-    async getLocations(searchRequest) {
+    async getLocations(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getLocations(
+            let searchResponses = await bppSearchService.getLocations(
                 searchRequest
             );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.LOCATIONS,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;
