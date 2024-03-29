@@ -46,7 +46,7 @@ router.get(
 );
 
 router.get(
-    '/v2/items', authentication(), searchController.getItems,
+    '/v2/items', searchController.getItems,
 );
 
 router.get(

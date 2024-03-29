@@ -184,7 +184,19 @@ class SearchController {
 
         console.log({searchRequest})
 
-        searchService.getItems(searchRequest).then(response => {
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+        console.log({targetLanguage})
+        console.log({headers})
+        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
+        {
+            targetLanguage = undefined
+        }
+        console.log({targetLanguage})
+
+        searchService.getItems(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else

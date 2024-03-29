@@ -147,12 +147,18 @@ class SearchService {
         }
     }
 
-    async getItems(searchRequest) {
+    async getItems(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getItems(
+            let searchResponses = await bppSearchService.getItems(
                 searchRequest
             );
+
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.CUSTOMMENU_ITEMS,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;

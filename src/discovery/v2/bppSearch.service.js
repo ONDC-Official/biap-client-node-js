@@ -132,6 +132,7 @@ class BppSearchService {
 
             const response = await protocolGetItemList(searchRequest);
 
+            console.log({response})
             return { response };
         }
         catch (err) {

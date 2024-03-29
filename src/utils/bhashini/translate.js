@@ -22,7 +22,7 @@ import {OBJECT_TYPE} from "../constants.js";
                 }
             }
             return {response:{data:translatedItems,count:objectData.response.count,pages:objectData.response.count}};
-        }else if(type===OBJECT_TYPE.ITEM){
+        }else if(type===OBJECT_TYPE.ITEM || type===OBJECT_TYPE.CUSTOMMENU_ITEMS){
             let data = objectData.response.data;
             console.log(data)
             if(data.length>0){
