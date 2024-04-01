@@ -12,6 +12,7 @@ import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../../payment/juspay.service.js";
 import CartService from "../cart/v2/cart.service.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
+import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
@@ -280,7 +281,9 @@ class ConfirmOrderService {
                     { ...orderSchema }
                 );
 
-
+                let billingContactPerson = orderSchema.billing.phone
+                let provider = orderSchema.provider.descriptor.name
+                await sendAirtelSingleSms(billingContactPerson, [provider], 'ORDER_PLACED', false)
 
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
                 //clear cart

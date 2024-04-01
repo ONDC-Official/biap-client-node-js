@@ -15,6 +15,7 @@ import BppUpdateService from "../update/bppUpdate.service.js";
 import Fulfillments from "../db/fulfillments.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
 import OrderHistory from "../db/orderHistory.js";
+import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 const bppOrderStatusService = new BppOrderStatusService();
 const bppUpdateService = new BppUpdateService();
 
@@ -130,7 +131,16 @@ class OrderStatusService {
 
                             if ((dbResponse && dbResponse.length)) {
                                 const orderSchema = dbResponse?.[0].toJSON();
+
+                                if(orderSchema.state!==onOrderStatusResponse?.message?.order?.state && onOrderStatusResponse?.message?.order?.state ==='Completed'){
+                                    let billingContactPerson = orderSchema.billing.phone
+                                    let provider = orderSchema.provider.descriptor.name
+                                    await sendAirtelSingleSms(billingContactPerson, [provider,'delivered'], 'ORDER_DELIVERED', false)
+                                }
                                 orderSchema.state = onOrderStatusResponse?.message?.order?.state;
+
+
+
                                 orderSchema.fulfillments = onOrderStatusResponse?.message?.order?.fulfillments;
                                 if (onOrderStatusResponse?.message?.order?.quote) {
 
