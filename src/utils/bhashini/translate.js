@@ -65,7 +65,7 @@ import {OBJECT_TYPE} from "../constants.js";
 
                 }
 
-            return items
+            return {response:items}
         } else if(type===OBJECT_TYPE.LOCATION_DETAILS){
             let items = objectData.response;
             if(items){
@@ -76,7 +76,7 @@ import {OBJECT_TYPE} from "../constants.js";
 
                 }
 
-            return items
+            return {response:items}
         } else if(type===OBJECT_TYPE.ITEM_DETAILS){
             let items = objectData.response;
             if(items){
@@ -91,7 +91,7 @@ import {OBJECT_TYPE} from "../constants.js";
 
                 }
 
-            return items
+            return {response:items}
         }
 
     } catch (err) {
