@@ -6,6 +6,8 @@ import ContextFactory from "../../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
 import {CITY_CODE} from "../../utils/cityCode.js"
 import createPeriod from "date-period";
+import translateObject from "../../utils/bhashini/translate.js";
+import {OBJECT_TYPE} from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
@@ -23,13 +25,65 @@ class SearchService {
      * search
      * @param {Object} searchRequest
      */
-    async search(searchRequest = {}) {
+    async search(searchRequest = {},targetLanguage) {
         try {
 
-            return await bppSearchService.search(
+            let searchResponses = await bppSearchService.search(
+                searchRequest,'ITEM',targetLanguage
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.ITEM,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getProvideDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getProvideDetails(
                 searchRequest
             );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
 
+    async getLocationDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getLocationDetails(
+                searchRequest
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.LOCATION_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getItemDetails(searchRequest = {},targetLanguage) {
+        try {
+
+            let searchResponses = await bppSearchService.getItemDetails(
+                searchRequest
+            );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.ITEM_DETAILS,targetLanguage)
+            }else{
+                return searchResponses
+            }
         } catch (err) {
             throw err;
         }
@@ -93,24 +147,35 @@ class SearchService {
         }
     }
 
-    async getItems(searchRequest) {
+    async getItems(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getItems(
+            let searchResponses = await bppSearchService.getItems(
                 searchRequest
             );
+
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.CUSTOMMENU_ITEMS,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;
         }
     }
 
-    async getLocations(searchRequest) {
+    async getLocations(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getLocations(
+            let searchResponses = await bppSearchService.getLocations(
                 searchRequest
             );
+            if(targetLanguage){ //translate data
+                return await translateObject(searchResponses,OBJECT_TYPE.LOCATIONS,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;
@@ -137,12 +202,17 @@ class SearchService {
      * get providers
      * @param {Object} searchRequest
      */
-    async getProviders(searchRequest) {
+    async getProviders(searchRequest,targetLanguage) {
         try {
 
-            return await bppSearchService.getProviders(
+            let searchResponses = await bppSearchService.getProviders(
                 searchRequest
             );
+            if(targetLanguage){ //translate data
+              return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER,targetLanguage)
+            }else{
+                return searchResponses
+            }
 
         } catch (err) {
             throw err;

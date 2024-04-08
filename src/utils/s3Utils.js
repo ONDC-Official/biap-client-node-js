@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
      const signedUrlExpireSeconds = 60 * 60;
 
-     const myBucket = bucket;
+     let myBucket = bucket;
 
      console.log(process.env.PROTOCOL_BASE_URL)
     console.log("s3------>",s3)
@@ -40,7 +40,14 @@ import { v4 as uuidv4 } from 'uuid';
                     console.log('Error getting presigned url from AWS S3', err);
                     reject({success: false, message: 'Pre-Signed URL error', urls: url});
                 } else {
-                    const publicUrl = 'https://'+bucket+'.'+`s3.${region}.amazonaws.com`+'/'+myKey
+                    //const publicUrl = 'https://'+bucket+'.'+`s3.${region}.amazonaws.com`+'/'+myKey
+
+                    const regionString = '-' + region;
+                    myBucket = myBucket.replace('/public-assets','');
+
+                    let publicUrl = `https://${myBucket}.s3${regionString}.amazonaws.com/public-assets/${myKey}`;
+
+                    //let publicUrl = `https://${myBucket}.s3${region}.amazonaws.com/public-assets/${myKey}`;
 
                     resolve({
                         success: true,

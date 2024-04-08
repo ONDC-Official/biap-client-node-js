@@ -255,7 +255,7 @@ class BppConfirmService {
                         }),
                         payment: {
                             uri:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
-                                "https://juspay.in/":
+                                "https://razorpay.com/":
                                 undefined, //In case of pre-paid collection by the buyer app, the payment link is rendered after the buyer app sends ACK for /on_init but before calling /confirm;
                             tl_method:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
                                 "http/get":
@@ -264,7 +264,7 @@ class BppConfirmService {
                                 amount: order?.payment?.paid_amount?.toFixed(2)?.toString(),
                                 currency: "INR",
                                 transaction_id:order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
-                                    uuidv4():
+                                    order.jusPayTransactionId??uuidv4():
                                     undefined//payment transaction id
                             },
                             status: order?.payment?.type === PAYMENT_TYPES["ON-ORDER"] ?
@@ -295,6 +295,8 @@ class BppConfirmService {
                 }
             };
 
+
+            console.log({confirmRequest})
             let confirmResponse = await this.confirm(confirmRequest);
 
             if(confirmResponse.error){

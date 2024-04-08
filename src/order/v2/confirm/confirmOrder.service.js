@@ -12,6 +12,7 @@ import BppConfirmService from "./bppConfirm.service.js";
 import JuspayService from "../../../payment/juspay.service.js";
 import CartService from "../cart/v2/cart.service.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
+import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
@@ -84,7 +85,7 @@ class ConfirmOrderService {
      * @param {Number} total
      * @param {Boolean} confirmPayment
      */
-    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true) {
+    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true,paymentData) {
         const {
             context: requestContext,
             message: order = {}
@@ -110,32 +111,32 @@ class ConfirmOrderService {
                 pincode:requestContext?.pincode,
             });
 
-            if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
-                if (await this.arePaymentsPending(
-                    order?.payment,
-                    orderRequest?.context?.parent_order_id,
-                    total,
-                    confirmPayment,
-                )) {
-                    return {
-                        context,
-                        error: {
-                            message: "BAP hasn't received payment yet",
-                            status: "BAP_015",
-                            name: "PAYMENT_PENDING"
-                        }
-                    };
-                }
-
-                paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
-
-            }else{
+            // if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
+            //     if (await this.arePaymentsPending(
+            //         order?.payment,
+            //         orderRequest?.context?.parent_order_id,
+            //         total,
+            //         confirmPayment,
+            //     )) {
+            //         return {
+            //             context,
+            //             error: {
+            //                 message: "BAP hasn't received payment yet",
+            //                 status: "BAP_015",
+            //                 name: "PAYMENT_PENDING"
+            //             }
+            //         };
+            //     }
+            //
+            //     paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+            //
+            // }else{
                 paymentStatus = {txn_id:requestContext?.transaction_id}
-            }
+            // }
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                {...order,jusPayTransactionId:paymentStatus.txn_id},
+                {...order,jusPayTransactionId:paymentData.razorpay_order_id},
                 dbResponse
             );
 
@@ -280,7 +281,9 @@ class ConfirmOrderService {
                     { ...orderSchema }
                 );
 
-
+                let billingContactPerson = orderSchema.billing.phone
+                let provider = orderSchema.provider.descriptor.name
+                await sendAirtelSingleSms(billingContactPerson, [provider], 'ORDER_PLACED', false)
 
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
                 //clear cart
@@ -360,17 +363,23 @@ class ConfirmOrderService {
      * confirm multiple orders
      * @param {Array} orders 
      */
-    async confirmMultipleOrder(orders) {
+    async confirmMultipleOrder(orders,paymentData) {
 
         let total = 0;
         orders.forEach(order => {
             total += order?.message?.payment?.paid_amount;
         });
 
+        console.log(orders)
         const confirmOrderResponse = await Promise.all(
             orders.map(async orderRequest => {
                 try {
-                    return await this.confirmAndUpdateOrder(orderRequest, total, true);
+                    if(paymentData){
+                        return await this.confirmAndUpdateOrder(orderRequest, total, true,paymentData);
+                    }else{
+                        return await this.confirmAndUpdateOrder(orderRequest, total, false,paymentData);
+                    }
+
                 }
                 catch (err) {
                     return err.response.data;

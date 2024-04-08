@@ -33,7 +33,7 @@ class ConfirmOrderController {
 
         if (orderRequests && orderRequests.length) {
 
-            confirmOrderService.confirmMultipleOrder(orderRequests).then(response => {
+            confirmOrderService.confirmMultipleOrder(orderRequests,{}).then(response => {
                 res.json(response);
             }).catch((err) => {
                 next(err);

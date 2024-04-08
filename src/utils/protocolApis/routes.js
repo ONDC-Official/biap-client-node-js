@@ -19,7 +19,7 @@ const SUPPORT = "protocol/support";
 const TRACK = "protocol/track";
 const UPDATE = "protocol/update";
 const SEARCH_ITEM = "protocol/items";
-const SEARCH_ITEM_DETAILS = "protocol/items-details";
+const SEARCH_ITEM_DETAILS = "protocol/item-details";
 const RESPONSE = "protocol/response";
 
 const SEARCH_ATTRIBUTE = "protocol/attributes";
@@ -28,6 +28,7 @@ const PROVIDERS = "protocol/providers";
 const CUSTOM_MENU = "protocol/custom-menus";
 const LOCATIONS = "protocol/locations";
 const LOCATIONS_DETAILS = "protocol/location-details";
+const PROVIDER_DETAILS = "protocol/provider-details";
 // const ON_UPDATE = "protocol/on_update";
 
 const PROTOCOL_API_URLS = {
@@ -54,10 +55,12 @@ const PROTOCOL_API_URLS = {
     SEARCH_ATTRIBUTE,
     SEARCH_ATTRIBUTE_VALUE,
     PROVIDERS,
+    PROVIDER_DETAILS,
     LOCATIONS,
     CUSTOM_MENU,
     RESPONSE,
-    DUMP
+    DUMP,
+    SEARCH_ITEM_DETAILS
 };
 
 export default PROTOCOL_API_URLS;

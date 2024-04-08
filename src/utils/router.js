@@ -16,6 +16,7 @@ import supportRoutesv2 from "../support/v2/support.routes.js";
 import trackRoutesv2 from "../fulfillment/v2/track.routes.js";
 import cartRoutesv2 from "../order/v2/cart/v2/cart.routes.js";
 import sseRoutesv2 from "../sse/v2/sse.routes.js";
+import razorPayv2 from "../razorPay/razorpay.routes.js";
 
 const router = new Router();
 //v1
@@ -35,6 +36,7 @@ router.use(supportRoutesv2);
 router.use(trackRoutesv2);
 router.use(cartRoutesv2);
 router.use(sseRoutesv2);
+router.use(razorPayv2);
 
 
 export default router;
