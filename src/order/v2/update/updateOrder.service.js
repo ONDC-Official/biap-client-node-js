@@ -15,7 +15,12 @@ import Fulfillments from "../db/fulfillments.js";
 import Settlements from "../db/settlement.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
 import {v4 as uuidv4} from "uuid";
+import Transaction from "../../../razorPay/db/transaction.js";
+import RazorPayService from "../../../razorPay/razorPay.service.js";
+//import {Payment} from "../models";
 
+
+const razorPayService = new RazorPayService();
 const bppUpdateService = new BppUpdateService();
 
 class UpdateOrderService {
@@ -463,6 +468,15 @@ class UpdateOrderService {
 
                                 console.log("amount",refundAmount*-1);
 
+                                //refund details
+                                let settlement_type = "upi"
+                                let txnDetails=await Transaction.findOne({transactionId:protocolUpdateResponse.context.transaction_id});
+
+                                console.log("txn details --->",txnDetails)
+                                if(txnDetails){
+                                    settlement_type = txnDetails?.payment?.method??'upi'
+                                }
+
                                 let oldSettlement = await Settlements.findOne({orderId:dbFl.orderId,fulfillmentId:dbFl.id})
                                 if(!oldSettlement){
                                     let settlementContext =  protocolUpdateResponse.context;
@@ -504,7 +518,7 @@ class UpdateOrderService {
                                                                         {
                                                                             "settlement_counterparty":"buyer",
                                                                             "settlement_phase":"refund",
-                                                                            "settlement_type":"upi",
+                                                                            "settlement_type":settlement_type,
                                                                             "settlement_amount":`${refundAmount*-1}`, //TODO; fix this post qoute calculation
                                                                             "settlement_timestamp":settlementTimeStamp
                                                                         }
@@ -520,6 +534,7 @@ class UpdateOrderService {
                                     newSettlement.fulfillmentId = dbFl.id;
                                     await newSettlement.save();
 
+                                    await razorPayService.refundAmount(protocolUpdateResponse.context.transaction_id,refundAmount)
                                     await bppUpdateService.update(
                                         updateRequest.context,
                                         updateRequest.message,
