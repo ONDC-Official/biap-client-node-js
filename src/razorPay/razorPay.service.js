@@ -66,7 +66,7 @@ class RazorPayService
             }
 
             let options = {
-                amount: parseInt(data.amount) * 100,
+                amount: parseFloat(data.amount) * 100,
                 currency: 'INR',
                 receipt: humanReadableID
             };

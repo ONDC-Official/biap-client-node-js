@@ -19,19 +19,11 @@ async function translate(data) {
             let pipelinedata = JSON.stringify({
                 "pipelineTasks": [
                     {
-                        "taskType": "translation",
+                        "taskType": "transliteration",
                         "config": {
                             "language": {
                                 "sourceLanguage": `${data.source_language}`,
                                 "targetLanguage": `${data.target_language}`
-                            }
-                        }
-                    },
-                    {
-                        "taskType": "tts",
-                        "config": {
-                            "language": {
-                                "sourceLanguage": `${data.target_language}`
                             }
                         }
                     }
@@ -58,25 +50,22 @@ async function translate(data) {
             var jsonRes=pipeline.data
 
             /********************prepare object for translation***************************/
+
             const callback_url = jsonRes.pipelineInferenceAPIEndPoint.callbackUrl;
             const callback_url_feedback = jsonRes.feedbackUrl;
             const compute_call_authorization_key = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.name;
             const compute_call_authorization_value = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.value;
             let asr_service_id ='';
             let nmt_service_id ='';
-            let tts_service_id ='';
+            let trans_service_id ='';
 
             const pipelineResponseConfig=jsonRes.pipelineResponseConfig;
             for(let eachResp of pipelineResponseConfig){
-                if(eachResp.taskType=='asr'){
-                    asr_service_id = eachResp.config[0].serviceId;
-                }
-                else if(eachResp.taskType=='translation'){
-                    nmt_service_id= eachResp.config[0].serviceId;
-
-                }
-                else if(eachResp.taskType=='tts'){
-                    tts_service_id=eachResp.config[0].serviceId;
+                let allConfig=eachResp.config;
+                for(let eachConfig of allConfig){
+                    if(eachConfig.language.sourceLanguage===data.source_language && eachConfig.language.targetLanguage===data.target_language){
+                        trans_service_id =eachConfig.serviceId;
+                    }
                 }
             }
 
@@ -89,7 +78,8 @@ async function translate(data) {
                                 "sourceLanguage": `${data.source_language}`,
                                 "targetLanguage": `${data.target_language}`
                             },
-                            "serviceId": nmt_service_id
+                            "serviceId": trans_service_id,
+                            "isSentence": true,
                         }
                     }
                 ],
@@ -124,7 +114,7 @@ async function translate(data) {
                 if(translation.data.pipelineResponse.length > 0){
                     console.log(translation.data.pipelineResponse.length)
                     if(translation.data.pipelineResponse[0].output.length > 0){
-                        translatedText = translation.data.pipelineResponse[0].output[0].target
+                        translatedText = translation.data.pipelineResponse[0].output[0].target[0]
                     }
                 }
             }
