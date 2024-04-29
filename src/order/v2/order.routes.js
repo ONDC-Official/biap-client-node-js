@@ -144,6 +144,8 @@ rootRouter.post('/v2/getSignUrlForUpload/:orderId', authentication(), uploadCont
 
 rootRouter.get('/v2/orders/:orderId', authentication(), confirmOrderController.orderDetails);
 
+rootRouter.post('/v2/orders/push/oms', confirmOrderController.orderPushToOMS);
+
 //#endregion
 
 export default rootRouter;

@@ -97,6 +97,15 @@ class ConfirmOrderController {
                 next(err);
             });
     }
+    orderPushToOMS(req, res, next) {
+
+            confirmOrderService.orderPushToOMS(req.body).then(orders => {
+                res.json(orders);
+            }).catch((err) => {
+                console.log(err)
+                next(err);
+            });
+    }
 }
 
 export default ConfirmOrderController;

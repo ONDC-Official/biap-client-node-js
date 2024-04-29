@@ -13,6 +13,9 @@ import JuspayService from "../../../payment/juspay.service.js";
 import CartService from "../cart/v2/cart.service.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
 import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
+import OrderMongooseModel from "../../v1/db/order.js";
+import axios from "axios";
+import Fulfillments from "../db/fulfillments.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
@@ -394,6 +397,97 @@ class ConfirmOrderService {
 
         const dbResponse = await getOrderById(orderId);
         return dbResponse
+    }
+
+    async orderPushToOMS(data){
+
+        try{
+            let orders = await OrderMongooseModel.find({
+            }).sort({createdAt: -1}).limit(100).lean();
+
+
+            for(let order of orders){
+                // console.log({order})
+                if(order.id){//only confirm orders needs to be pushed to OMS
+
+                    let bppterms = order?.tags?.find((data)=>{
+                        return data?.code ==='bpp_terms'
+                    });
+
+
+                    let gstNumber = bppterms?.list?.find((data)=>{
+                        return data?.code ==='tax_number'
+                    })?.value??'NA'
+
+                    let provider_tax_number = bppterms?.list?.find((data)=>{
+                        return data?.code ==='provider_tax_number'
+                    })?.value??'NA'
+
+
+                    // let Fl = await Fulfillments.find({orderId:order.id,type:'Return'});
+                    //
+                    let returns = [];
+                    //
+                    // for(let returns of Fl){
+                    //   returns.push({
+                    //       returnId: returns.id,
+                    //       amount: 'NA',
+                    //       reason: returns.reason_desc})
+                    // }
+                    //
+
+
+                    let orderObject = {
+                        order: {
+                            orderId: order.id,
+                            currency: order.quote?.currency ?? 'INR',
+                            value: order.quote?.value ?? '0',
+                            bff: order["@ondc/org/buyer_app_finder_fee_amount"] ?? 'NA',
+                            collectedBy: order?.settlementDetails?.collected_by ?? 'NA',
+                            paymentType: order?.settlementDetails?.type ?? 'NA',
+                            state: order.state ?? 'NA',
+                        },
+                        seller:{
+                            gst: gstNumber,
+                            pan: provider_tax_number,
+                            bpp_id: order.bppId,
+                            name: order.bppId,
+                        },
+                        settlementDetails:{//TODO: need custom implementation
+
+                        },
+                        returns:returns,
+                        createSellers:data.createSellers,
+                        createOrders:data.createOrders
+                    }
+
+                    console.log({orderObject})
+                    let config = {
+                        method: 'post',
+                        maxBodyLength: Infinity,
+                        url: 'http://localhost:3000/rest/orders',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        data : orderObject
+                    };
+
+                    console.log({orderObject})
+                    axios.request(config)
+                        .then((response) => {
+                            console.log(JSON.stringify(response.data));
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+
+                }
+            }
+            return true
+        }catch (e) {
+            console.log(e)
+        }
+
     }
 
     /**
