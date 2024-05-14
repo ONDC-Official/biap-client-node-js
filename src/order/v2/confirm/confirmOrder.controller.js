@@ -88,10 +88,10 @@ class ConfirmOrderController {
     }
 
     orderDetails(req, res, next) {
-        const { params } = req;
+        const { params , user} = req;
         const { orderId } = params;
 
-            confirmOrderService.getOrderDetails(orderId).then(orders => {
+            confirmOrderService.getOrderDetails(orderId,user).then(orders => {
                 res.json(orders);
             }).catch((err) => {
                 next(err);

@@ -29,11 +29,15 @@ class UpdateOrderService {
     * cancel order
     * @param {Object} orderRequest
     */
-    async update(orderRequest) {
+    async update(orderRequest,user) {
         try {
 
 
             const orderDetails = await getOrderById(orderRequest.message.order.id);
+
+            if(orderDetails[0].userId !==user.decodedToken.uid){
+                return []
+            }
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({

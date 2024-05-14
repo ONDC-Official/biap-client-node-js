@@ -12,7 +12,7 @@ import mongoSanitize from 'express-mongo-sanitize'
 const app = express();
 import Redis from 'ioredis';
 global.redisCache = new Redis(process.env.BHASHINI_REDIS_PORT,process.env.BHASHINI_REDIS_HOST);
-
+import helmet from 'helmet'
 
 loadEnvVariables();
 initializeFirebase();
@@ -22,6 +22,7 @@ app.use(cookieParser());
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(bodyParser.json());
+app.use(helmet.xssFilter());
 
 app.use(
     mongoSanitize({

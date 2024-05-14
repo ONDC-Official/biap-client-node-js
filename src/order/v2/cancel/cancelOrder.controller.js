@@ -13,8 +13,9 @@ class CancelOrderController {
     */
     cancelOrder(req, res, next) {
         const orderRequest = req.body;
+        const user = req.user
 
-        cancelOrderService.cancelOrder(orderRequest).then(response => {
+        cancelOrderService.cancelOrder(orderRequest,user).then(response => {
             res.json(response);
         }).catch((err) => {
             next(err);

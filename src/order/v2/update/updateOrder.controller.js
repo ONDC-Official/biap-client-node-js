@@ -12,7 +12,7 @@ class UpdateOrderController {
     * @return {callback}
     */
     async update(req, res, next) {
-        const {body: orders} = req;
+        const {body: orders,user} = req;
 
         // console.log("orderStatus-------------------->",orders)
         const onUpdateOrderResponse = await Promise.all(
@@ -20,7 +20,7 @@ class UpdateOrderController {
                 try {
 
                     console.log("update orders--------------->",order);
-                    return await cancelOrderService.update(order);
+                    return await cancelOrderService.update(order,user);
                 } catch (err) {
 
                     console.log("update orders---------err------>",err);

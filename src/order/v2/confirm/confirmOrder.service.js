@@ -385,6 +385,7 @@ class ConfirmOrderService {
 
                 }
                 catch (err) {
+                    console.log(err)
                     return err.response.data;
                 }
             })
@@ -393,10 +394,15 @@ class ConfirmOrderService {
         return confirmOrderResponse;
     }
 
-    async getOrderDetails(orderId){
+    async getOrderDetails(orderId,user){
 
         const dbResponse = await getOrderById(orderId);
-        return dbResponse
+        if(dbResponse[0].userId !==user.decodedToken.uid){
+            return []
+        }else{
+            return dbResponse
+        }
+
     }
 
     async orderPushToOMS(data){

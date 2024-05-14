@@ -21,14 +21,16 @@ class CancelOrderService {
     * cancel order
     * @param {Object} orderRequest
     */
-    async cancelOrder(orderRequest) {
+    async cancelOrder(orderRequest,user) {
         try {
 
 
             console.log("cancel order-------------->",orderRequest);
 
             const orderDetails = await getOrderById(orderRequest.message.order_id);
-
+            if(orderDetails[0].userId !==user.decodedToken.uid){
+                return []
+            }
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CANCEL,
@@ -135,6 +137,7 @@ class CancelOrderService {
                         const orderSchema = dbResponse?.[0].toJSON();
                         orderSchema.state = protocolCancelResponse?.message?.order?.state;
 
+                        //TODO: refund amount in full cancellation
                         await addOrUpdateOrderWithTransactionIdAndOrderId(
                             protocolCancelResponse.context.transaction_id,protocolCancelResponse.message.order.id,
                             { ...orderSchema }

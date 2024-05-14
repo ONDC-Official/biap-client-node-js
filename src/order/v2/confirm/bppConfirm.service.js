@@ -149,17 +149,9 @@ class BppConfirmService {
 
             let tax_number = bpp_term?.list?.find(x => x.code === 'tax_number')
 
+            console.log(bpp_term)
             let bpp_terms =[
-                {
-                    code:"bpp_terms",
-                    list:
-                        [
-                            {
-                                "code":"tax_number",
-                                "value":tax_number?.value
-                            }
-                        ]
-                },
+                bpp_term,
                 {
                     code:"bap_terms",
                     list:
