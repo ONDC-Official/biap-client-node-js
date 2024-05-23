@@ -13,6 +13,9 @@ const app = express();
 import Redis from 'ioredis';
 global.redisCache = new Redis(process.env.BHASHINI_REDIS_PORT,process.env.BHASHINI_REDIS_HOST);
 import helmet from 'helmet'
+import DOMPurify from 'dompurify';
+import {JSDOM} from 'jsdom';
+import validator from 'validator';
 
 loadEnvVariables();
 initializeFirebase();
@@ -23,6 +26,37 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(bodyParser.json());
 app.use(helmet.xssFilter());
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
+
+// Middleware to sanitize input
+app.use((req, res, next) => {
+    const sanitize = (value) => {
+        if (typeof value === 'string') {
+            value = validator.trim(value); // Remove whitespace
+            //value = validator.escape(value); // Escape special characters
+            return purify.sanitize(value); // Sanitize HTML
+        } else if (typeof value === 'object' && value !== null) {
+            // Recursively sanitize each value in the object
+            for (let key in value) {
+                if (value.hasOwnProperty(key)) {
+                    value[key] = sanitize(value[key]);
+                }
+            }
+            return value;
+        } else {
+            // Convert non-string values to strings
+            return String(value)
+        }
+    };
+
+    for (let key in req.body) {
+        if (req.body.hasOwnProperty(key)) {
+            req.body[key] = sanitize(req.body[key]);
+        }
+    }
+    next();
+});
 
 app.use(
     mongoSanitize({
