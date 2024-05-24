@@ -67,7 +67,7 @@ function sanitize(input) {
 app.use((req, res, next) => {
     req.body = sanitize(req.body);
 
-    console.log("--->",JSON.stringify(req.body))
+    // console.log("--->",JSON.stringify(req.body))
     next();
 });
 app.use(
@@ -93,8 +93,20 @@ app.use(logger('combined'))
 //     res.status(500).json({ error: 'Something went wrong. Please try again' });
 // });
 
-app.use(cors());
-app.use('/clientApis', cors(), router);
+const whitelist = process.env.CORS_WHITELIST_URLS.split(",");
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions = {credentials: true};
+    console.log('req url ', req.originalUrl)
+    console.log("req.header ",JSON.stringify(req.headers), whitelist);
+    corsOptions['origin'] = (whitelist.indexOf(req.header('Origin')) !== -1);
+    // corsOptions['exposedHeaders'] = 'set-cookie';
+    console.log('corsOptions ',corsOptions)
+    callback(null, corsOptions) // callback expects two parameters: error and optionsns
+};
+
+// app.use('/api', cors(corsOptionsDelegate))
+// app.use(cors());
+app.use('/clientApis',cors(corsOptionsDelegate), router);
 app.use(logErrors)
 // app.use(logger('dev'));
 
