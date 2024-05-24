@@ -4,7 +4,8 @@ import {RetailsErrorCode} from "../../../utils/retailsErrorCode.js";
 
 import ContextFactory from "../../../factories/ContextFactory.js";
 import BppSelectService from "./bppSelect.service.js";
-
+import BppSearchService from "../../../discovery/v2/bppSearch.service.js";
+const bppSearchService = new BppSearchService();
 const bppSelectService = new BppSelectService();
 
 class SelectOrderService {
@@ -58,12 +59,33 @@ class SelectOrderService {
             const { context: requestContext, message = {} } = orderRequest || {};
             const { cart = {}, fulfillments = [] } = message;
 
+            //get bpp_url and check if item is available
+            let itemContext={}
+            let itemPresent=true
+            for(let [index,item] of cart.items.entries()){
+                let items =  await bppSearchService.getItemDetails(
+                    {id:item.id}
+                );
+                if(!items.response){
+                    itemPresent = false
+                }else{
+                    itemContext =items.response.context
+                }
+
+            }
+
+            if(!itemPresent){
+                return {
+                    error: { message: "Invalid request" }
+                }
+            }
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.SELECT,
                 transactionId: requestContext?.transaction_id,
-                bppId: cart?.items[0]?.bpp_id,
-                bpp_uri: cart?.items[0]?.bpp_uri,
+                bppId: itemContext?.bpp_id,
+                bpp_uri: itemContext?.bpp_uri,
                 city:requestContext?.city,
                 pincode:requestContext?.pincode,
                 state:requestContext?.state,
@@ -104,6 +126,7 @@ class SelectOrderService {
      */
     async selectMultipleOrder(requests) {
 
+        console.log("requests--->",JSON.stringify(requests))
         const selectOrderResponse = await Promise.all(
             requests.map(async request => {
                 try {

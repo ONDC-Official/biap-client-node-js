@@ -29,35 +29,47 @@ app.use(helmet.xssFilter());
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
 
-// Middleware to sanitize input
-app.use((req, res, next) => {
-    const sanitize = (value) => {
-        if (typeof value === 'string') {
-            value = validator.trim(value); // Remove whitespace
-            //value = validator.escape(value); // Escape special characters
-            return purify.sanitize(value); // Sanitize HTML
-        } else if (typeof value === 'object' && value !== null) {
-            // Recursively sanitize each value in the object
-            for (let key in value) {
-                if (value.hasOwnProperty(key)) {
-                    value[key] = sanitize(value[key]);
+// Custom function to escape special characters except for URLs
+function customEscape(value) {
+    if (typeof value === 'string') {
+        // Check if the string is a valid URL
+        if (validator.isURL(value, { require_protocol: true })) {
+            return value; // Return the URL as is
+        }
+        return value
+    }
+    return value;
+}
+
+// Recursive function to sanitize nested objects and arrays
+function sanitize(input) {
+    if (typeof input === 'string') {
+        input = validator.trim(input); // Remove whitespace
+        input = customEscape(input); // Escape special characters, but not URLs
+        return purify.sanitize(input); // Sanitize HTML
+    } else if (typeof input === 'object' && input !== null) {
+        if (Array.isArray(input)) {
+            return input.map(sanitize); // Recursively sanitize each item in the array
+        } else {
+            for (let key in input) {
+                if (input.hasOwnProperty(key)) {
+                    input[key] = sanitize(input[key]); // Recursively sanitize each property in the object
                 }
             }
-            return value;
-        } else {
-            // Convert non-string values to strings
-            return String(value)
+            return input;
         }
-    };
-
-    for (let key in req.body) {
-        if (req.body.hasOwnProperty(key)) {
-            req.body[key] = sanitize(req.body[key]);
-        }
+    } else {
+         return input
     }
+}
+
+// Middleware to sanitize input
+app.use((req, res, next) => {
+    req.body = sanitize(req.body);
+
+    console.log("--->",JSON.stringify(req.body))
     next();
 });
-
 app.use(
     mongoSanitize({
         onSanitize: ({ req, key }) => {

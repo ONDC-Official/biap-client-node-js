@@ -408,85 +408,40 @@ class ConfirmOrderService {
     async orderPushToOMS(data){
 
         try{
+            let orderCount = await OrderMongooseModel.count()
+
+
             let orders = await OrderMongooseModel.find({
-            }).sort({createdAt: -1}).limit(100).lean();
+            }).sort({createdAt: -1}).limit(1000).lean();
 
-
+            let index = 0
             for(let order of orders){
                 // console.log({order})
                 if(order.id){//only confirm orders needs to be pushed to OMS
+                    index= index+1;
 
-                    let bppterms = order?.tags?.find((data)=>{
-                        return data?.code ==='bpp_terms'
-                    });
+                    setTimeout(() => {
+                        let config = {
+                            method: 'post',
+                            maxBodyLength: Infinity,
+                            url: 'http://localhost:3000/api/loaddata',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            data : [order]
+                        };
 
+                        // console.log({order})
+                        axios.request(config)
+                            .then((response) => {
+                                // console.log(JSON.stringify(response.data));
+                            })
+                            .catch((error) => {
+                                // console.log(error);
+                            });
 
-                    let gstNumber = bppterms?.list?.find((data)=>{
-                        return data?.code ==='tax_number'
-                    })?.value??'NA'
-
-                    let provider_tax_number = bppterms?.list?.find((data)=>{
-                        return data?.code ==='provider_tax_number'
-                    })?.value??'NA'
-
-
-                    // let Fl = await Fulfillments.find({orderId:order.id,type:'Return'});
-                    //
-                    let returns = [];
-                    //
-                    // for(let returns of Fl){
-                    //   returns.push({
-                    //       returnId: returns.id,
-                    //       amount: 'NA',
-                    //       reason: returns.reason_desc})
-                    // }
-                    //
-
-
-                    let orderObject = {
-                        order: {
-                            orderId: order.id,
-                            currency: order.quote?.currency ?? 'INR',
-                            value: order.quote?.value ?? '0',
-                            bff: order["@ondc/org/buyer_app_finder_fee_amount"] ?? 'NA',
-                            collectedBy: order?.settlementDetails?.collected_by ?? 'NA',
-                            paymentType: order?.settlementDetails?.type ?? 'NA',
-                            state: order.state ?? 'NA',
-                        },
-                        seller:{
-                            gst: gstNumber,
-                            pan: provider_tax_number,
-                            bpp_id: order.bppId,
-                            name: order.bppId,
-                        },
-                        settlementDetails:{//TODO: need custom implementation
-
-                        },
-                        returns:returns,
-                        createSellers:data.createSellers,
-                        createOrders:data.createOrders
-                    }
-
-                    console.log({orderObject})
-                    let config = {
-                        method: 'post',
-                        maxBodyLength: Infinity,
-                        url: 'http://localhost:3000/rest/orders',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        data : orderObject
-                    };
-
-                    console.log({orderObject})
-                    axios.request(config)
-                        .then((response) => {
-                            console.log(JSON.stringify(response.data));
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
-
+                        console.log(new Date())
+                    }, 3000*index);
                 }
             }
             return true

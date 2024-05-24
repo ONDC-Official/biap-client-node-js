@@ -78,7 +78,7 @@ class HttpRequest {
                 console.log('Error message',err,'\n', err.message);
             }
 
-            throw err;
+            return  err;
         }
     };
 }
