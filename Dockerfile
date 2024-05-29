@@ -1,5 +1,5 @@
 # Name the node stage "builder"
-FROM node:16 AS builder
+FROM node:18 AS builder
 
 ARG PORT
 # NODE_ENV = dev, prod
