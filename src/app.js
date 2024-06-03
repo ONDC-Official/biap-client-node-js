@@ -26,7 +26,7 @@ initializeFirebase();
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.use(helmet.xssFilter());
+
 app.use(logger('combined'));
 
 if (!process.env.CORS_WHITELIST_URLS) {
@@ -70,6 +70,7 @@ app.use((req, res, next) => {
 // Apply CORS with the dynamic options to routes starting with /clientApis
 app.use('/clientApis', router);
 
+app.use(helmet.xssFilter());
 // Custom function to escape special characters except for URLs
 function customEscape(value) {
     if (typeof value === 'string') {
