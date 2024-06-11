@@ -22,10 +22,10 @@ class SearchController {
 
         let targetLanguage = headers['targetlanguage'];
 
-        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
-        {
-            targetLanguage = undefined
-        }
+        // if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
+        // {
+        //     targetLanguage = undefined
+        // }
         searchService.search(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");

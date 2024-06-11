@@ -11,6 +11,13 @@ import {OBJECT_TYPE} from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
+
+import { Client } from '@elastic/elasticsearch';
+const client = new Client({
+    node: 'http://localhost:9200'
+});
+
+
 class SearchService {
 
     /**
@@ -28,14 +35,59 @@ class SearchService {
     async search(searchRequest = {},targetLanguage) {
         try {
 
-            let searchResponses = await bppSearchService.search(
-                searchRequest,'ITEM',targetLanguage
-            );
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.ITEM,targetLanguage)
-            }else{
-                return searchResponses
-            }
+
+            // def search_items(lat, lng, search_str=None):
+           let query_obj = {
+                    "bool": {
+                        "must": {
+                            "match": {
+                                "item_details.descriptor.name": 'apple'
+                            }
+                        },
+                        // "should": [
+                        //     {
+                        //         "match": {
+                        //             "location_details.type.keyword": "pan"
+                        //         }
+                        //     },
+                        //     {
+                        //         "geo_shape": {
+                        //             "location_details.polygons": {
+                        //                 "shape": {
+                        //                     "type": "point",
+                        //                     "coordinates": [lat, lng]
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // ]
+                    }
+                }
+
+
+            // Calculate the starting point for the search
+            let size=10;
+            let page=1;
+            const from = (page - 1) * size;
+
+            // Perform the search with pagination parameters
+            let queryResults = await client.search({
+                query: query_obj,
+                from: from,
+                size: size
+            });
+
+            // Extract the _source field from each hit
+            let sources = queryResults.hits.hits.map(hit => hit._source);
+
+            // Get the total count of results
+            let totalCount = queryResults.hits.total.value;
+
+            // Return the total count and the sources
+            return {
+                count: totalCount,
+                data: sources
+            };
         } catch (err) {
             throw err;
         }

@@ -8,7 +8,7 @@ const searchController = new SearchController();
 
 // search
 router.get(
-    '/v2/search', authentication(), searchController.search,
+    '/v2/search',  searchController.search,
 );
 
 // get item details
