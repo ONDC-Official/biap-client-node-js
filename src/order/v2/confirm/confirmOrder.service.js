@@ -16,10 +16,11 @@ import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 import OrderMongooseModel from "../../v1/db/order.js";
 import axios from "axios";
 import Fulfillments from "../db/fulfillments.js";
+import dbConnect from "../../../database/mongooseConnector.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
-
+import mongoose from 'mongoose';
 class ConfirmOrderService {
 
     /**
@@ -410,21 +411,41 @@ class ConfirmOrderService {
         try{
             let orderCount = await OrderMongooseModel.count()
 
+            // Calculate the date two days ago
+            const twoDaysAgo = new Date();
+            twoDaysAgo.setDate(twoDaysAgo.getDate() - 7);
 
-            let orders = await OrderMongooseModel.find({
-            }).sort({createdAt: -1}).limit(1000).lean();
+            let orders = await OrderMongooseModel.find({id: { "$ne": null },
+                updatedAt: { $gte: twoDaysAgo }
+            }).sort({createdAt: -1}).lean();
 
             let index = 0
             for(let order of orders){
+
+                //get issues for order id
+
+                //get issues
+                // await dbConnect();
+                const db = mongoose.connection;
+                const collection = db.collection("issues");
+
+                const issues = await collection.find({"order_details.id":order.id}).toArray();
+
+                // console.log("------->",issues);
+                order.issues = issues;
+
+                console.log("order",order)
+
                 // console.log({order})
                 if(order.id){//only confirm orders needs to be pushed to OMS
                     index= index+1;
+
 
                     setTimeout(() => {
                         let config = {
                             method: 'post',
                             maxBodyLength: Infinity,
-                            url: 'http://localhost:3000/api/loaddata',
+                            url: 'http://localhost:3030/api/loaddata',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
