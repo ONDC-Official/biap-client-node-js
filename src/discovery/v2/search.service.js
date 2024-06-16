@@ -1,22 +1,18 @@
 import _ from "lodash";
-
-import {onSearch} from "../../utils/protocolApis/index.js";
-
+import { onSearch } from "../../utils/protocolApis/index.js";
 import ContextFactory from "../../factories/ContextFactory.js";
 import BppSearchService from "./bppSearch.service.js";
-import {CITY_CODE} from "../../utils/cityCode.js"
+import { CITY_CODE } from "../../utils/cityCode.js";
 import createPeriod from "date-period";
 import translateObject from "../../utils/bhashini/translate.js";
-import {OBJECT_TYPE} from "../../utils/constants.js";
+import { OBJECT_TYPE } from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 
-
 import { Client } from '@elastic/elasticsearch';
 const client = new Client({
-    node: 'http://localhost:9200'
+    node: 'http://localhost:9200' //TODO: move to ENV
 });
-
 
 class SearchService {
 
@@ -29,45 +25,78 @@ class SearchService {
     }
 
     /**
-     * search
+     * item search
      * @param {Object} searchRequest
      */
-    async search(searchRequest = {},targetLanguage) {
+    async search(searchRequest = {}, targetLanguage = 'en') {
         try {
+            // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
+            let matchQuery = []
 
-
-            // def search_items(lat, lng, search_str=None):
-           let query_obj = {
-                    "bool": {
-                        "must": {
-                            "match": {
-                                "item_details.descriptor.name": 'apple'
-                            }
-                        },
-                        // "should": [
-                        //     {
-                        //         "match": {
-                        //             "location_details.type.keyword": "pan"
-                        //         }
-                        //     },
-                        //     {
-                        //         "geo_shape": {
-                        //             "location_details.polygons": {
-                        //                 "shape": {
-                        //                     "type": "point",
-                        //                     "coordinates": [lat, lng]
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // ]
+            // bhashini translated data
+            matchQuery.push(
+                {
+                    "match": {
+                        "language": targetLanguage
                     }
                 }
+            );
 
+            if (searchRequest.name) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "item_details.descriptor.name": searchRequest.name
+                        }
+                    }
+                );
+            }
+
+            if (searchRequest.providerIds) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "provider_details.id": searchRequest.providerIds
+                        }
+                    }
+                );
+            }
+
+            // for variants we set is_first = true
+            matchQuery.push(
+                {
+                    "match": {
+                        "is_first": true
+                    }
+                }
+            );
+
+            let query_obj = {
+                "bool": {
+                    "must": matchQuery
+                },
+                // "should": [ //TODO: enable this once UI apis have been changed
+                //     {
+                //         "match": {
+                //             "location_details.type.keyword": "pan"
+                //         }
+                //     },
+                //     {
+                //         "geo_shape": {
+                //             "location_details.polygons": {
+                //                 "shape": {
+                //                     "type": "point",
+                //                     "coordinates": [lat, lng]
+                //                 }
+                //             }
+                //         }
+                //     }
+                // ]
+            };
 
             // Calculate the starting point for the search
-            let size=10;
-            let page=1;
+            let size = parseInt(searchRequest.limit);
+            let page = parseInt(searchRequest.pageNumber);
             const from = (page - 1) * size;
 
             // Perform the search with pagination parameters
@@ -93,462 +122,404 @@ class SearchService {
         }
     }
 
-    async getProvideDetails(searchRequest = {},targetLanguage) {
+    async getProvideDetails(searchRequest = {}, targetLanguage = 'en') {
         try {
+            // id=pramaan.ondc.org/alpha/mock-server_ONDC:RET12_pramaan.ondc.org/alpha/mock-server
+            let matchQuery = [];
 
-            let searchResponses = await bppSearchService.getProvideDetails(
-                searchRequest
-            );
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER_DETAILS,targetLanguage)
-            }else{
-                return searchResponses
-            }
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getLocationDetails(searchRequest = {},targetLanguage) {
-        try {
-
-            let searchResponses = await bppSearchService.getLocationDetails(
-                searchRequest
-            );
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.LOCATION_DETAILS,targetLanguage)
-            }else{
-                return searchResponses
-            }
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getItemDetails(searchRequest = {},targetLanguage) {
-        try {
-
-            let searchResponses = await bppSearchService.getItemDetails(
-                searchRequest
-            );
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.ITEM_DETAILS,targetLanguage)
-            }else{
-                return searchResponses
-            }
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /**
-     * getItem
-     * @param {Object} searchRequest
-     */
-    async getItem(searchRequest,itemId) {
-        try {
-
-            return await bppSearchService.getItem(
-                searchRequest,
-                itemId
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-    async getProvider(searchRequest,brandId) {
-        try {
-
-            return await bppSearchService.getProvider(
-                searchRequest,
-                brandId
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getLocation(searchRequest,id) {
-        try {
-
-            return await bppSearchService.getLocation(
-                searchRequest,
-                id
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /**
-     * getItem
-     * @param {Object} searchRequest
-     */
-    async getAttributes(searchRequest) {
-        try {
-
-            return await bppSearchService.getAttributes(
-                searchRequest
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getItems(searchRequest,targetLanguage) {
-        try {
-
-            let searchResponses = await bppSearchService.getItems(
-                searchRequest
-            );
-
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.CUSTOMMENU_ITEMS,targetLanguage)
-            }else{
-                return searchResponses
-            }
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getLocations(searchRequest,targetLanguage) {
-        try {
-
-            let searchResponses = await bppSearchService.getLocations(
-                searchRequest
-            );
-            if(targetLanguage){ //translate data
-                return await translateObject(searchResponses,OBJECT_TYPE.LOCATIONS,targetLanguage)
-            }else{
-                return searchResponses
-            }
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /**
-     * getItem
-     * @param {Object} searchRequest
-     */
-    async getAttributesValues(searchRequest) {
-        try {
-
-            return await bppSearchService.getAttributesValues(
-                searchRequest
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /**
-     * get providers
-     * @param {Object} searchRequest
-     */
-    async getProviders(searchRequest,targetLanguage) {
-        try {
-
-            let searchResponses = await bppSearchService.getProviders(
-                searchRequest
-            );
-            if(targetLanguage){ //translate data
-              return await translateObject(searchResponses,OBJECT_TYPE.PROVIDER,targetLanguage)
-            }else{
-                return searchResponses
-            }
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    /**
-     * get custom menus
-     * @param {Object} searchRequest
-     */
-    async getCustomMenus(searchRequest) {
-        try {
-
-            return await bppSearchService.getCustomMenus(
-                searchRequest
-            );
-
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    convertHourMinuteToDate(storeOpenTillDate){
-
-        let hours = storeOpenTillDate.substring(0, 2)
-        let minutes= storeOpenTillDate.substring(2)
-
-        //get hours and minutes from end
-        let newDate = new Date().setHours(parseInt(hours),parseInt(minutes),0)
-
-        return newDate
-    }
-
-    validateSchedule(searchObj) {
-        console.log("location_id------>", searchObj.id);
-
-
-          //  console.log(searchObj.location_details);
-          //  console.log(searchObj.location_details.time);
-
-            let nowDate = new Date();
-            let todayTimeStamp = nowDate.getTime();
-            let day = nowDate.getDay();
-
-            if(day===0){
-                day=7 //new date.getDate() gives 0 for sunday
-            }
-            let date = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1) + '-' + nowDate.getDate();
-
-            if (searchObj.location_details.time) {
-
-                //check for days
-                if (searchObj.location_details.time.days) {
-
-                    let opendays = searchObj.location_details.time.days.split(",").map( Number );
-
-                    console.log("day---->",day)
-                    if (opendays.indexOf(day) !== -1) {
-                        //allowed response
-                        console.log("result is valid for the period", opendays)
-                    } else {
-                        console.log("invalid days---->", opendays)
-                        return {status: false}
+            matchQuery.push(
+                {
+                    "match": {
+                        "language": targetLanguage
                     }
-                } else {
-                    //store is all day open
-                    console.log("store is all day open")
                 }
+            );
 
-                //TODO: remove false and add searchObj.location_details.time.range
-                if (searchObj.location_details.time.range) {  //check for range
-
-                    let storeOpenTillDate = searchObj.location_details.time.range.end
-
-                    //get hours and minutes from end
-
-                    let newDate = this.convertHourMinuteToDate(storeOpenTillDate);
-
-                    storeOpenTillDate = new Date(newDate);
-
-                    searchObj.storeOpenTillDate = storeOpenTillDate
-
-                    if(todayTimeStamp < storeOpenTillDate.getTime()){
-                        console.log("[Range] store is open")
-                        return {status: true, data:searchObj}
-                    }else{
-                        console.log("[Range] store is closed")
-                        return {status: false}//TODO: return false
-                    }
-
-                }else if (searchObj.location_details.time.schedule) {
-                    if (searchObj.location_details.time.schedule.holidays) {
-                        if (date in searchObj.location_details.time.schedule.holidays) {
-                            console.log("[Holiday]store is closed today")
-                            return {status: false}
-                        }else{
-                            //allow response
-                            console.log("[Holiday]store is open today")
-                        }
-                    } else {
-                        //allow response
-                        console.log("[Holiday]store is open today")
-                    }
-
-
-                    if(searchObj.location_details.time.schedule.frequency){
-
-                        const timeOpen =searchObj.location_details.time.schedule.times
-                        let storeOpenTime =null ;
-                        const  firstTime = this.convertHourMinuteToDate(timeOpen[0]);
-                        const  secondTime = this.convertHourMinuteToDate(timeOpen[1]);
-
-                        if(todayTimeStamp>firstTime || todayTimeStamp<secondTime)
-                        {
-                            //take first timeStamp
-                            storeOpenTime =new Date(firstTime)
-                        }else{
-                            //take second timestamp
-                            storeOpenTime =new Date(secondTime)
-                        }
-
-                        let period =  createPeriod({start:storeOpenTime, duration:searchObj.location_details.time.schedule.frequency, recurrence: 1})
-
-                        let storeOpenTillDate = new Date(period[1]);
-
-                        searchObj.storeOpenTillDate = storeOpenTillDate
-
-                        if(todayTimeStamp < storeOpenTillDate.getTime()){
-                            console.log("[Range] store is open")
-                            return {status: true, data:searchObj}
-                        }else{
-                            console.log("[Range] store is closed")
-                            return {status: false}//TODO: return false
+            if (searchRequest.id) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "provider_details.id": searchRequest.id
                         }
                     }
+                );
+            }
 
+console.log(matchQuery)
+            let query_obj = {
+                "bool": {
+                    "must": matchQuery
                 }
+            };
 
-            }
-
-
-
-        return {status: true, data: searchObj}
-
-    }
-
-    validateQty(searchObj) {
-      console.log("location_id------>",searchObj);
-
-        if(!searchObj.quantity){
-            searchObj.quantity =  { available: { count: 0 }, maximum: { count: 0 } }
-        }
-
-        return { data: searchObj}
-
-    }
-
-    /**
-     * transform search results
-     * @param {Array} searchResults
-     */
-    transform(searchResults = []) {
-        let data = [];
-
-        console.log("searchResults---",searchResults)
-
-        searchResults && searchResults.length && searchResults.forEach(result => {
-            let searchObj = {...result};
-            // delete searchObj?.["context"];
-
-            let validatedSearchObject = this.validateSchedule(searchObj);
-
-
-            console.log("validated search object---->",validatedSearchObject)
-            if (validatedSearchObject.status === true) {
-                let validatedQty = this.validateQty(validatedSearchObject.data)
-                data.push({
-                    ...validatedSearchObject.data
-                });
-            }
-
-        });
-
-        return data;
-    }
-
-    /**
-     * return filtering items
-     * @param {Array} searchResults
-     */
-    getFilter(searchResults = []) {
-        let providerList = new Map();
-        let categoryList = new Map();
-        let fulfillmentList = new Map();
-        let minPrice = Infinity;
-        let maxPrice = -Infinity;
-
-        searchResults && searchResults.length && searchResults.forEach(result => {
-
-            if (!_.isEmpty(result?.["provider_details"]))
-                providerList.set(
-                    result?.["provider_details"]?.id,
-                    result?.["provider_details"]?.descriptor?.name
-                );
-
-            if (!_.isEmpty(result?.["category_details"]))
-                categoryList.set(
-                    result?.["category_details"]?.id,
-                    result?.["category_details"]?.descriptor?.name
-                );
-
-            if (!_.isEmpty(result?.["fulfillment_details"]))
-                fulfillmentList.set(
-                    result?.["fulfillment_details"]?.id,
-                    result?.["fulfillment_details"]
-                );
-
-            const value = parseFloat(result?.price?.value);
-            if (maxPrice < value)
-                maxPrice = value;
-
-            if (minPrice > value)
-                minPrice = value;
-        });
-
-        return {categoryList, fulfillmentList, minPrice, maxPrice, providerList};
-    }
-
-    /**
-     * on search
-     * @param {Object} queryParams
-     */
-    async onSearch(queryParams) {
-        try {
-            const {messageId} = queryParams;
-
-            const protocolSearchResponse = await onSearch(queryParams);
-            const searchResult = this.transform(protocolSearchResponse?.data);
-
-            //console.log("protocolSearchResponse--------------------->",protocolSearchResponse.data[0].context)
-            const contextFactory = new ContextFactory();
-            const context = contextFactory.create({
-                messageId: messageId
+            let queryResults = await client.search({
+                query: query_obj,
             });
 
-            return {
-                context,
-                message: {
-                    catalogs: [...searchResult],
-                    count: protocolSearchResponse?.count
-                },
+            console.log(queryResults)
+
+           let provider_details = null
+           if (queryResults.hits.hits.length > 0) {
+             let details = queryResults.hits.hits[0]._source; // Return the source of the first hit
+             provider_details = {domain:details.context.domain,...details.provider_details}
+           }
+
+           return provider_details
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getLocationDetails(searchRequest = {}, targetLanguage = 'en') {
+        try {
+            // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
+            let matchQuery = [];
+
+            matchQuery.push(
+                {
+                    "match": {
+                        "language": targetLanguage
+                    }
+                }
+            );
+
+            if (searchRequest.id) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "location_details.id": searchRequest.id
+                        }
+                    }
+                );
+            }
+
+            let query_obj = {
+                "bool": {
+                    "must": matchQuery
+                }
             };
+
+            let queryResults = await client.search({
+                query: query_obj,
+            });
+
+           let location_details = null
+           if (queryResults.hits.hits.length > 0) {
+             let details = queryResults.hits.hits[0]._source; // Return the source of the first hit
+             location_details = {domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,...details.location_details}
+           }
+
+           return location_details
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getItemDetails(searchRequest = {}, targetLanguage = 'en') {
+        try {
+            // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
+            let matchQuery = [];
+
+            matchQuery.push(
+                {
+                    "match": {
+                        "language": targetLanguage
+                    }
+                }
+            );
+
+            if (searchRequest.id) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "id": searchRequest.id
+                        }
+                    }
+                );
+            }
+
+            let query_obj = {
+                "bool": {
+                    "must": matchQuery
+                }
+            };
+
+            let queryResults = await client.search({
+                query: query_obj,
+            });
+
+            let item_details = null;
+            if (queryResults.hits.hits.length > 0) {
+                item_details = queryResults.hits.hits[0]._source; // Return the source of the first hit
+
+                // add variant details if available
+                if (item_details.item_details.parent_item_id) {
+                    // hit db to find all related items
+                    let matchQuery = [];
+
+                    matchQuery.push(
+                        {
+                            "match": {
+                                "language": targetLanguage
+                            }
+                        }
+                    );
+
+                    matchQuery.push(
+                        {
+                            "match": {
+                                "item_details.parent_item_id": item_details.item_details.parent_item_id
+                            }
+                        }
+                    );
+
+                    // match provider id
+                    matchQuery.push(
+                        {
+                            "match": {
+                                "provider_details.id": item_details.provider_details.id
+                            }
+                        }
+                    );
+
+                    // match location id
+                    matchQuery.push(
+                        {
+                            "match": {
+                                "location_details.id": item_details.location_details.id
+                            }
+                        }
+                    );
+
+                    let query_obj = {
+                        "bool": {
+                            "must": matchQuery
+                        }
+                    };
+
+                    let queryResults = await client.search({
+                        query: query_obj,
+                    });
+
+                    item_details.related_items = queryResults.hits.hits.map(hit => hit._source);
+                }
+            }
+
+            return item_details;
+
+            // TODO: attach related items
+            // TODO: attach customisations
+        } catch (err) {
+            throw err;
+        }
+    }
+
+//    async getItem(searchRequest, itemId) {
+//        try {
+//            return await bppSearchService.getItem(searchRequest, itemId);
+//        } catch (err) {
+//            throw err;
+//        }
+//    }
+//
+//    async getProvider(searchRequest, brandId) {
+//        try {
+//            return await bppSearchService.getProvider(searchRequest, brandId);
+//        } catch (err) {
+//            throw err;
+//        }
+//    }
+//
+//    async getLocation(searchRequest, id) {
+//        try {
+//            return await bppSearchService.getLocation(searchRequest, id);
+//        } catch (err) {
+//            throw err;
+//        }
+//    }
+
+    async getAttributes(searchRequest) {
+        try {
+            return await bppSearchService.getAttributes(searchRequest);
+        } catch (err) {
+            throw err;
+        }
+    }
+
+//    async getItems(searchRequest, targetLanguage = 'en') {
+//        try {
+//            let searchResponses = await bppSearchService.getItems(searchRequest);
+//
+//            if (targetLanguage) { // translate data
+//                return await translateObject(searchResponses, OBJECT_TYPE.CUSTOMMENU_ITEMS, targetLanguage);
+//            } else {
+//                return searchResponses;
+//            }
+//        } catch (err) {
+//            throw err;
+//        }
+//    }
+
+    async getLocations(searchRequest, targetLanguage = 'en') {
+        try {
+            let query_obj = {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "context.domain": searchRequest.domain
+                            }
+                        }
+                    ],
+                    "should": [ //TODO: enable this once UI apis have been changed
+                        {
+                            "match": {
+                                "location_details.type.keyword": "pan"
+                            }
+                        },
+                        {
+                            "geo_shape": {
+                                "location_details.polygons": {
+                                    "shape": {
+                                        "type": "point",
+                                        "coordinates": [parseFloat(searchRequest.latitude), parseFloat(searchRequest.longitude)]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+
+            let aggr_query = {
+                "unique_locations": {
+                    "terms": {
+                        "field": "location_details.id",
+                    },
+                    "aggs": {
+                        "products": {
+                            "top_hits": {
+                                "size": 1
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Calculate the starting point for the search
+            let size = parseInt(searchRequest.limit);
+            let page = parseInt(searchRequest.pageNumber);
+            const from = (page - 1) * size;
+
+            // Perform the search with pagination parameters
+            let queryResults = await client.search({
+                query: query_obj,
+                aggs: aggr_query
+            });
+
+            console.log("queryResults--->", queryResults);
+
+            let unique_locations = [];
+            // for bucket in resp['aggregations']['unique_providers']['buckets']:
+            // provider_details = [i["_source"]['provider_details'] for i in bucket['products']['hits']['hits']][0]
+            // unique_providers.append(provider_details)
+
+            for (const bucket of queryResults.aggregations.unique_locations.buckets) {
+                const details = bucket.products.hits.hits.map(hit => hit._source)[0];
+                unique_locations.push({provider_descriptor:details.provider_details.descriptor,...details.location_details});
+            }
+
+            // return unique_providers
+            return unique_locations;
+
         } catch (err) {
             throw err;
         }
     }
 
     /**
-     * get filter params
-     * @param {String} query
+     * getProvider
+     * @param {Object} searchRequest
      */
-    async getFilterParams(query) {
+    async getProviders(searchRequest, targetLanguage = 'en') {
         try {
-            const protocolSearchResponse = await onSearch(query);
-
-            const {
-                categoryList = {},
-                fulfillmentList = {},
-                minPrice,
-                maxPrice,
-                providerList = {}
-            } = this.getFilter(protocolSearchResponse?.data);
-
-            return {
-                categories: Array.from(categoryList, ([id, name]) => ({id, name})),
-                fulfillment: Array.from(fulfillmentList, ([id, value]) => ({id, value})),
-                minPrice: minPrice,
-                maxPrice: maxPrice,
-                providers: Array.from(providerList, ([id, name]) => ({id, name})),
+            let query_obj = {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "context.domain": searchRequest.domain
+                            }
+                        }
+                    ],
+                    "should": [ //TODO: enable this once UI apis have been changed
+                        {
+                            "match": {
+                                "location_details.type.keyword": "pan"
+                            }
+                        },
+                        {
+                            "geo_shape": {
+                                "location_details.polygons": {
+                                    "shape": {
+                                        "type": "point",
+                                        "coordinates": [parseFloat(searchRequest.latitude), parseFloat(searchRequest.longitude)]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
             };
+
+            let aggr_query = {
+                "unique_providers": {
+                    "terms": {
+                        "field": "provider_details.id",
+                    },
+                    "aggs": {
+                        "products": {
+                            "top_hits": {
+                                "size": 1
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Calculate the starting point for the search
+            let size = parseInt(searchRequest.limit);
+            let page = parseInt(searchRequest.pageNumber);
+            const from = (page - 1) * size;
+
+            // Perform the search with pagination parameters
+            let queryResults = await client.search({
+                query: query_obj,
+                aggs: aggr_query
+            });
+
+            console.log("queryResults--->", queryResults);
+
+            let unique_providers = [];
+            // for bucket in resp['aggregations']['unique_providers']['buckets']:
+            // provider_details = [i["_source"]['provider_details'] for i in bucket['products']['hits']['hits']][0]
+            // unique_providers.append(provider_details)
+
+            for (const bucket of queryResults.aggregations.unique_providers.buckets) {
+                const providerDetails = bucket.products.hits.hits.map(hit => hit._source.provider_details)[0];
+                unique_providers.push(providerDetails);
+            }
+
+            // return unique_providers
+            return unique_providers;
+
         } catch (err) {
             throw err;
         }
     }
+
 }
 
 export default SearchService;

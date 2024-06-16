@@ -66,10 +66,6 @@ class SearchController {
 
         let targetLanguage = headers['targetlanguage'];
 
-        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
-        {
-            targetLanguage = undefined
-        }
         searchService.getLocationDetails(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
@@ -213,18 +209,12 @@ class SearchController {
         const headers = req.headers;
 
         let targetLanguage = headers['targetlanguage'];
-        console.log({targetLanguage})
-        console.log({headers})
-        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
-        {
-            targetLanguage = undefined
-        }
-        console.log({targetLanguage})
+
         searchService.getLocations(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response.response);
+                res.json(response);
         }).catch((err) => {
             next(err);
         });
