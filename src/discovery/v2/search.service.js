@@ -443,30 +443,30 @@ console.log(matchQuery)
         try {
             let query_obj = {
                 "bool": {
-                    "must": [
-                        {
-                            "match": {
-                                "context.domain": searchRequest.domain
-                            }
-                        }
-                    ],
-                    "should": [ //TODO: enable this once UI apis have been changed
-                        {
-                            "match": {
-                                "location_details.type.keyword": "pan"
-                            }
-                        },
-                        {
-                            "geo_shape": {
-                                "location_details.polygons": {
-                                    "shape": {
-                                        "type": "point",
-                                        "coordinates": [parseFloat(searchRequest.latitude), parseFloat(searchRequest.longitude)]
-                                    }
-                                }
-                            }
-                        }
-                    ]
+//                    "must": [
+//                        {
+//                            "match": {
+//                                "context.domain": searchRequest.domain
+//                            }
+//                        }
+//                    ],
+//                    "should": [ //TODO: enable this once UI apis have been changed
+//                        {
+//                            "match": {
+//                                "location_details.type.keyword": "pan"
+//                            }
+//                        },
+//                        {
+//                            "geo_shape": {
+//                                "location_details.polygons": {
+//                                    "shape": {
+//                                        "type": "point",
+//                                        "coordinates": [parseFloat(searchRequest.latitude), parseFloat(searchRequest.longitude)]
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    ]
                 }
             };
 
