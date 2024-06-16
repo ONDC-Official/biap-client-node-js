@@ -8,11 +8,7 @@ import translateObject from "../../utils/bhashini/translate.js";
 import { OBJECT_TYPE } from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
-
-import { Client } from '@elastic/elasticsearch';
-const client = new Client({
-    node: 'http://localhost:9200' //TODO: move to ENV
-});
+import client from '../../database/elasticSearch.js'
 
 class SearchService {
 
