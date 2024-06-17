@@ -58,6 +58,16 @@ class SearchService {
                 );
             }
 
+            if (searchRequest.categoryIds) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "item_details.category_id": searchRequest.categoryIds
+                        }
+                    }
+                );
+            }
+
             // for variants we set is_first = true
             matchQuery.push(
                 {
@@ -340,32 +350,64 @@ console.log(matchQuery)
     async getAttributes(searchRequest) {
         try {
 
-                const response = await client.search({
-                    query: {
-                      bool: {
-                        must: [
-                          { term: { 'provider_details.id': searchRequest.provider } }
-                        ]
-                      }
-                    },
-//                    aggs: {
-//                      unique_attribute_codes: {
-//                        nested: { path: 'item_details.tags' },
-//                        aggs: {
-//                          attribute_codes: {
-//                            terms: { field: 'item_details.tags.code.keyword' }
-//                          }
-//                        }
-//                      }
-//                    }
-                });
+ let matchQuery = []
 
-                console.log(response)
-                // Process and output the aggregation result
-                const attributeAggregations = response.aggregations.unique_attribute_codes.attribute_codes.buckets;
-                const uniqueAttributeCodes = attributeAggregations.map(bucket => bucket.key);
+             if (searchRequest.category) {
+                 matchQuery.push(
+                     {
+                                    match: {
+                                      'item_details.category_id': searchRequest.category
+                                    }
+                     }
+                 );
+             }
 
-                return uniqueAttributeCodes
+             if (searchRequest.provider) {
+                 matchQuery.push(
+                     {
+                                    match: {
+                                      'provider_details.id': searchRequest.provider
+                                    }
+                     }
+                 );
+             }
+
+  const response = await client.search({
+    size: 0, // We don't need the actual documents, just the aggregation results
+    body: {
+          query: {
+          bool: {
+                             must: matchQuery
+                         },
+          },
+      aggs: {
+        unique_keys: {
+          scripted_metric: {
+            init_script: "state.keys = new HashSet();",
+            map_script: `
+              for (entry in params._source.attributes.entrySet()) {
+                state.keys.add(entry.getKey());
+              }
+            `,
+            combine_script: "return state.keys;",
+            reduce_script: `
+              Set uniqueKeys = new HashSet();
+              for (state in states) {
+                uniqueKeys.addAll(state);
+              }
+              return uniqueKeys;
+            `
+          }
+        }
+      }
+    }
+  });
+
+  // Extract the unique keys from the aggregation results
+  const uniqueKeys = Array.from(response.aggregations.unique_keys.value);
+
+  const keyObjects = uniqueKeys.map(key => ({ code: key }));
+  return {response:{data:keyObjects,count:1,pages:1}};
 
         } catch (err) {
             throw err;
