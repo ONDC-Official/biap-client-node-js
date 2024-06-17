@@ -12,18 +12,10 @@ import client from '../../database/elasticSearch.js'
 
 class SearchService {
 
-    /**
-     *
-     * @param {Object} context
-     */
     isBppFilterSpecified(context = {}) {
         return typeof context.bpp_id !== "undefined";
     }
 
-    /**
-     * item search
-     * @param {Object} searchRequest
-     */
     async search(searchRequest = {}, targetLanguage = 'en') {
         try {
             // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
@@ -152,7 +144,6 @@ class SearchService {
                 );
             }
 
-console.log(matchQuery)
             let query_obj = {
                 "bool": {
                     "must": matchQuery
@@ -312,13 +303,49 @@ console.log(matchQuery)
 
                     item_details.related_items = queryResults.hits.hits.map(hit => hit._source);
 
+                }else if(item_details.customisation_groups.length>0){
+
+                    //fetch all customisation items - customisation_group_id
+                    let customisationQuery = []
+                    let groupIds = item_details.customisation_groups.map((data)=>{return data.id})
+
+                    console.log("groupids---->",groupIds)
+                    customisationQuery.push(
+                      {
+                        "terms": {
+                          "customisation_group_id": groupIds
+                        }
+                      }
+                    );
+
+                    // Add the match query for type
+                    customisationQuery.push(
+                      {
+                        "match": {
+                          "type": 'customization'
+                        }
+                      }
+                    );
+                    // Create the query object
+                    let query_obj = {
+                      "bool": {
+                        "must": customisationQuery
+                      }
+                    };
+
+
+                                        let queryResults = await client.search({
+                                            query: query_obj,
+                                        });
+
+                                        console.log(queryResults)
+                                        item_details.customisation_items = queryResults.hits.hits.map(hit => hit._source);
+
+
                 }
             }
 
-            console.log("itemdetails--->",item_details)
-            //object key mapping
-            item_details.customisation_menus = item_details.custom_menus
-            item_details.customisation_items = []//item_details.customisation_items
+//            console.log("itemdetails--->",item_details)
             return item_details;
 
             // TODO: attach related items
@@ -327,30 +354,6 @@ console.log(matchQuery)
             throw err;
         }
     }
-
-//    async getItem(searchRequest, itemId) {
-//        try {
-//            return await bppSearchService.getItem(searchRequest, itemId);
-//        } catch (err) {
-//            throw err;
-//        }
-//    }
-//
-//    async getProvider(searchRequest, brandId) {
-//        try {
-//            return await bppSearchService.getProvider(searchRequest, brandId);
-//        } catch (err) {
-//            throw err;
-//        }
-//    }
-//
-//    async getLocation(searchRequest, id) {
-//        try {
-//            return await bppSearchService.getLocation(searchRequest, id);
-//        } catch (err) {
-//            throw err;
-//        }
-//    }
 
     async getAttributes(searchRequest) {
         try {
@@ -474,20 +477,6 @@ const uniqueValues = response.aggregations.unique_values.buckets.map(bucket => b
         }
     }
 
-//    async getItems(searchRequest, targetLanguage = 'en') {
-//        try {
-//            let searchResponses = await bppSearchService.getItems(searchRequest);
-//
-//            if (targetLanguage) { // translate data
-//                return await translateObject(searchResponses, OBJECT_TYPE.CUSTOMMENU_ITEMS, targetLanguage);
-//            } else {
-//                return searchResponses;
-//            }
-//        } catch (err) {
-//            throw err;
-//        }
-//    }
-
     async getLocations(searchRequest, targetLanguage = 'en') {
         try {
             let query_obj = {
@@ -576,10 +565,6 @@ const uniqueValues = response.aggregations.unique_values.buckets.map(bucket => b
         }
     }
 
-    /**
-     * getProvider
-     * @param {Object} searchRequest
-     */
     async getProviders(searchRequest, targetLanguage = 'en') {
         try {
             let query_obj = {
@@ -663,6 +648,73 @@ const uniqueValues = response.aggregations.unique_values.buckets.map(bucket => b
 //            // return unique_providers
 //            return unique_providers;
 
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getCustomMenu(searchRequest, targetLanguage = 'en') {
+        try {
+
+
+            let matchQuery = [];
+
+            matchQuery.push(
+                {
+                    "match": {
+                        "language": targetLanguage
+                    }
+                }
+            );
+
+            if (searchRequest.provider) {
+                matchQuery.push(
+                    {
+                        "match": {
+                            "provider_details.id": searchRequest.provider
+                        }
+                    }
+                );
+            }
+
+            let query_obj = {
+                "bool": {
+                    "must": matchQuery
+                }
+            };
+
+            let queryResults = await client.search({
+            body: {
+                query: query_obj,
+                aggs: {
+                    unique_ids: {
+                        nested: {
+                            path: 'customisation_menus'
+                        },
+                        aggs: {
+                            unique_id_terms: {
+                                terms: {
+                                    field: 'customisation_menus.id',  // Aggregating on the 'id' field
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+            });
+
+            return queryResults
+
+         // Extracting unique ids and corresponding documents
+         const uniqueIdsWithDocuments = queryResults.aggregations.unique_ids.unique_id_terms.buckets.map(bucket => {
+             return {
+                 id: bucket,
+                 count: bucket.doc_count
+             };
+         });
+
+         console.log('Unique IDs with documents:', uniqueIdsWithDocuments);
+         return uniqueIdsWithDocuments;
         } catch (err) {
             throw err;
         }

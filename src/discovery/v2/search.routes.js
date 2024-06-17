@@ -65,7 +65,7 @@ router.get(
 
 // get custom menus
 router.get(
-    '/v2/custom-menus',  searchController.getCustomMenus,
+    '/v2/custom-menus',  searchController.getCustomMenu,
 );
 
 // // get custom menus

@@ -276,16 +276,16 @@ class SearchController {
     * @param {*} next   Callback argument to the middleware function
     * @return {callback}
     */
-    getCustomMenus(req, res, next) {
+    getCustomMenu(req, res, next) {
         const searchRequest = req.query;
 
         console.log({searchRequest})
 
-        searchService.getCustomMenus(searchRequest).then(response => {
+        searchService.getCustomMenu(searchRequest).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
-                res.json(response.response);
+                res.json(response);
         }).catch((err) => {
             next(err);
         });
