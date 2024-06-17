@@ -677,44 +677,52 @@ const uniqueValues = response.aggregations.unique_values.buckets.map(bucket => b
                 );
             }
 
-            let query_obj = {
-                "bool": {
-                    "must": matchQuery
-                }
-            };
-
             let queryResults = await client.search({
-            body: {
-                query: query_obj,
-                aggs: {
-                    unique_ids: {
-                        nested: {
-                            path: 'customisation_menus'
-                        },
-                        aggs: {
-                            unique_id_terms: {
-                                terms: {
-                                    field: 'customisation_menus.id',  // Aggregating on the 'id' field
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "term": {
+                                        "provider_details.id": searchRequest.provider
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                            "aggs": {
+                                "unique_menus": {
+                                    "nested": {
+                                        "path": "customisation_menus"
+                                    },
+                                    "aggs": {
+                                        "filtered_menus": {
+                                            "terms": {
+                                                "field": "customisation_menus.id",
+                                            },
+                                            "aggs": {
+                                                "menu_details": {
+                                                    "top_hits": {
+                                                        "size": 1
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                },
-            }
+
             });
 
-            return queryResults
 
-         // Extracting unique ids and corresponding documents
-         const uniqueIdsWithDocuments = queryResults.aggregations.unique_ids.unique_id_terms.buckets.map(bucket => {
-             return {
-                 id: bucket,
-                 count: bucket.doc_count
-             };
-         });
+let customisationMenus = [];
+const buckets = queryResults.aggregations.unique_menus.filtered_menus.buckets;
 
-         console.log('Unique IDs with documents:', uniqueIdsWithDocuments);
-         return uniqueIdsWithDocuments;
+buckets.forEach(bucket => {
+    const menuDetails = bucket.menu_details.hits.hits.map(hit => hit._source)[0];
+    customisationMenus.push(menuDetails);
+});
+         console.log('Unique IDs with documents:', customisationMenus);
+         return {data:customisationMenus, count:customisationMenus.length,pages:customisationMenus.length};
         } catch (err) {
             throw err;
         }
