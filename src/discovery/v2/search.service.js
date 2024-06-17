@@ -317,6 +317,7 @@ let matchQuery = [];
             let item_details = null;
             if (queryResults.hits.hits.length > 0) {
                 item_details = queryResults.hits.hits[0]._source; // Return the source of the first hit
+                item_details.customisation_items=[]
 
                 // add variant details if available
                 if (item_details.item_details.parent_item_id) {
