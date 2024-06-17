@@ -311,9 +311,13 @@ console.log(matchQuery)
                     });
 
                     item_details.related_items = queryResults.hits.hits.map(hit => hit._source);
+
                 }
             }
 
+            //object key mapping
+            item_details.customisation_menus = item_details.custom_menus
+            item_details.customisation_items = []//item_details.customisation_items
             return item_details;
 
             // TODO: attach related items
@@ -439,29 +443,30 @@ console.log(matchQuery)
                  );
              }
 
-    const { body } = await client.search({
-      index: 'your_index_name', // Replace with your Elasticsearch index name
-      body: {
-        query: {
-          nested: {
-            path: 'attributes',
+    const response = await client.search({
+  body: {
             query: {
-              bool: {
-                must: [
-                  { term: { 'attributes.key': 'occasion' } },
-//                  { term: { 'attributes.value': 'Black' } }
-                ]
-              }
-            }
-          }
+            bool: {
+                               must: matchQuery
+                           },
+            },
+    size: 0,
+    aggs: {
+      unique_values: {
+        terms: {
+          field: `attributes.${searchRequest.attribute_code}.keyword`, // Aggregation by 'Color' attribute
+//          size: 10 // Adjust 'size' based on how many unique values you expect
         }
       }
+    }
+  }
     });
         console.log(response)
 
+const uniqueValues = response.aggregations.unique_values.buckets.map(bucket => bucket.key);
 //    console.log(body.hits.hits); // Print the matching documents
               // Extract and return the hits (documents)
-              return response//.body.hits.hits;
+              return {response:{data:uniqueValues,count:uniqueValues.length}} //.body.hits.hits;
 
         } catch (err) {
             throw err;
