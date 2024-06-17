@@ -258,7 +258,7 @@ class InitOrderService {
                 if(!items){
                     itemPresent = false
                 }else{
-                    itemContext =items.response.context
+                    itemContext =items.context
                 }
 
             }
