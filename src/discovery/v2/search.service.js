@@ -109,10 +109,11 @@ class SearchService {
             let totalCount = queryResults.hits.total.value;
 
             // Return the total count and the sources
-            return {
+            return {response:{
                 count: totalCount,
-                data: sources
-            };
+                data: sources,
+                pages:parseInt(totalCount/size)
+            }};
         } catch (err) {
             throw err;
         }
@@ -338,7 +339,34 @@ console.log(matchQuery)
 
     async getAttributes(searchRequest) {
         try {
-            return await bppSearchService.getAttributes(searchRequest);
+
+                const response = await client.search({
+                    query: {
+                      bool: {
+                        must: [
+                          { term: { 'provider_details.id': searchRequest.provider } }
+                        ]
+                      }
+                    },
+//                    aggs: {
+//                      unique_attribute_codes: {
+//                        nested: { path: 'item_details.tags' },
+//                        aggs: {
+//                          attribute_codes: {
+//                            terms: { field: 'item_details.tags.code.keyword' }
+//                          }
+//                        }
+//                      }
+//                    }
+                });
+
+                console.log(response)
+                // Process and output the aggregation result
+                const attributeAggregations = response.aggregations.unique_attribute_codes.attribute_codes.buckets;
+                const uniqueAttributeCodes = attributeAggregations.map(bucket => bucket.key);
+
+                return uniqueAttributeCodes
+
         } catch (err) {
             throw err;
         }
@@ -427,8 +455,18 @@ console.log(matchQuery)
                 unique_locations.push({provider_descriptor:details.provider_details.descriptor,...details.location_details});
             }
 
+            // Get the total count of results
+            let totalCount = queryResults.hits.total.value;
+
+            // Return the total count and the sources
+            return {response:{
+                count: totalCount,
+                data: unique_locations,
+                pages:parseInt(totalCount/1)
+            }};
+
             // return unique_providers
-            return unique_locations;
+//            return unique_locations;
 
         } catch (err) {
             throw err;
@@ -508,8 +546,19 @@ console.log(matchQuery)
                 unique_providers.push(providerDetails);
             }
 
-            // return unique_providers
-            return unique_providers;
+            // Get the total count of results
+            let totalCount = queryResults.hits.total.value;
+
+            // Return the total count and the sources
+            return {response:{
+                count: totalCount,
+                data: unique_providers,
+                pages:parseInt(totalCount/1)
+            }};
+
+//
+//            // return unique_providers
+//            return unique_providers;
 
         } catch (err) {
             throw err;
