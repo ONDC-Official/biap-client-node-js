@@ -452,7 +452,7 @@ console.log(matchQuery)
 
             for (const bucket of queryResults.aggregations.unique_locations.buckets) {
                 const details = bucket.products.hits.hits.map(hit => hit._source)[0];
-                unique_locations.push({provider_descriptor:details.provider_details.descriptor,...details.location_details});
+                unique_locations.push({domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,...details.location_details});
             }
 
             // Get the total count of results
