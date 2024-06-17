@@ -414,6 +414,60 @@ console.log(matchQuery)
         }
     }
 
+    async getAttributesValues(searchRequest) {
+        try {
+
+ let matchQuery = []
+
+             if (searchRequest.category) {
+                 matchQuery.push(
+                     {
+                                    match: {
+                                      'item_details.category_id': searchRequest.category
+                                    }
+                     }
+                 );
+             }
+
+             if (searchRequest.provider) {
+                 matchQuery.push(
+                     {
+                                    match: {
+                                      'provider_details.id': searchRequest.provider
+                                    }
+                     }
+                 );
+             }
+
+    const { body } = await client.search({
+      index: 'your_index_name', // Replace with your Elasticsearch index name
+      body: {
+        query: {
+          nested: {
+            path: 'attributes',
+            query: {
+              bool: {
+                must: [
+                  { term: { 'attributes.key': 'occasion' } },
+//                  { term: { 'attributes.value': 'Black' } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    });
+        console.log(response)
+
+//    console.log(body.hits.hits); // Print the matching documents
+              // Extract and return the hits (documents)
+              return response//.body.hits.hits;
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
 //    async getItems(searchRequest, targetLanguage = 'en') {
 //        try {
 //            let searchResponses = await bppSearchService.getItems(searchRequest);
@@ -494,18 +548,19 @@ console.log(matchQuery)
 
             for (const bucket of queryResults.aggregations.unique_locations.buckets) {
                 const details = bucket.products.hits.hits.map(hit => hit._source)[0];
-                unique_locations.push({domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,...details.location_details});
+//                unique_locations.push({domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,...details.location_details});
+            unique_locations.push({domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,provider:details.provider_details.id,...details.location_details});
             }
 
             // Get the total count of results
             let totalCount = queryResults.hits.total.value;
 
             // Return the total count and the sources
-            return {response:{
+            return {
                 count: totalCount,
                 data: unique_locations,
                 pages:parseInt(totalCount/1)
-            }};
+            };
 
             // return unique_providers
 //            return unique_locations;
