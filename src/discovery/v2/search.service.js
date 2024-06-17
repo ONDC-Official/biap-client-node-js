@@ -315,6 +315,7 @@ console.log(matchQuery)
                 }
             }
 
+            console.log("itemdetails--->",item_details)
             //object key mapping
             item_details.customisation_menus = item_details.custom_menus
             item_details.customisation_items = []//item_details.customisation_items

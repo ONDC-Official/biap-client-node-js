@@ -4,8 +4,8 @@ import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderByTr
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../../factories/ContextFactory.js";
-import BppSearchService from "../../../discovery/v2/bppSearch.service.js";
-const bppSearchService = new BppSearchService();
+import SearchService from "../../../discovery/v2/search.service.js";
+const bppSearchService = new SearchService();
 const bppInitService = new BppInitService();
 
 class InitOrderService {
@@ -255,7 +255,7 @@ class InitOrderService {
                 let items =  await bppSearchService.getItemDetails(
                     {id:item.id}
                 );
-                if(!items.response){
+                if(!items){
                     itemPresent = false
                 }else{
                     itemContext =items.response.context
