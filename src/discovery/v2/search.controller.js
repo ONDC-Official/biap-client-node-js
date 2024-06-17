@@ -184,13 +184,6 @@ class SearchController {
         const headers = req.headers;
 
         let targetLanguage = headers['targetlanguage'];
-        console.log({targetLanguage})
-        console.log({headers})
-        if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
-        {
-            targetLanguage = undefined
-        }
-        console.log({targetLanguage})
 
         searchService.getItems(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)

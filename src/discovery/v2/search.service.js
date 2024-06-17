@@ -121,6 +121,72 @@ class SearchService {
         }
     }
 
+    async getItems(searchRequest = {}, targetLanguage = 'en') {
+        try {
+let matchQuery = [];
+
+  // bhashini translated data
+  matchQuery.push(
+    {
+      "match": {
+        "language": targetLanguage
+      }
+    }
+  );
+
+  if (searchRequest.customMenu) {
+    matchQuery.push(
+      {
+        "nested": {
+          "path": "customisation_menus",
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "customisation_menus.id": searchRequest.customMenu
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    );
+  }
+
+
+  let query_obj = {
+    "bool": {
+      "must": matchQuery
+    }
+  };
+
+    // Perform the search with pagination parameters
+    let queryResults = await client.search({
+      body: {
+        query: query_obj
+      }
+    });
+
+
+            // Extract the _source field from each hit
+            let sources = queryResults.hits.hits.map(hit => hit._source);
+
+            // Get the total count of results
+            let totalCount = queryResults.hits.total.value;
+
+            // Return the total count and the sources
+            return {response:{
+                count: totalCount,
+                data: sources,
+                pages:totalCount
+            }};
+        } catch (err) {
+            throw err;
+        }
+    }
+
     async getProvideDetails(searchRequest = {}, targetLanguage = 'en') {
         try {
             // id=pramaan.ondc.org/alpha/mock-server_ONDC:RET12_pramaan.ondc.org/alpha/mock-server
