@@ -1,12 +1,22 @@
 import Cart from '../../db/cart.js'
 import CartItem from '../../db/items.js'
-
+import BppSearchService from "../../../../discovery/v2/bppSearch.service.js";
+const bppSearchService = new BppSearchService();
 class CartService {
 
     async addItem(data) {
         try {
 
-            console.log("data----",data);
+            //get bpp_url and check if item is available
+            let itemPresent=true
+                let items =  await bppSearchService.getItemDetails(
+                    {id:data.id}
+                );
+                if(!items.response){
+                    return {
+                        error: { message: "Request is invalid" }
+                    }
+                }
            let cart = await Cart.findOne({userId:data.userId});
             console.log("data----",data);
            if(cart){
@@ -33,6 +43,14 @@ class CartService {
 
     async updateItem(data) {
         try {
+            let items =  await bppSearchService.getItemDetails(
+                {id:data.id}
+            );
+            if(!items.response){
+                return {
+                    error: { message: "Request is invalid" }
+                }
+            }
 
                 let cartItem = await CartItem.findOne({_id:data.itemId});
                 cartItem.item =data;

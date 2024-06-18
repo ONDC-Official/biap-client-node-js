@@ -352,18 +352,22 @@ const protocolGetLocationDetails = async (searchRequest) => {
 
 const protocolGetItemDetails = async (searchRequest) => {
 
-    const apiCall = new HttpRequest(
-        process.env.PROTOCOL_BASE_URL,
-        PROTOCOL_API_URLS.SEARCH_ITEM_DETAILS,
-        "GET",
-        {
-            ...searchRequest
-        }
-    );
+    try{
+        const apiCall = new HttpRequest(
+            process.env.PROTOCOL_BASE_URL,
+            PROTOCOL_API_URLS.SEARCH_ITEM_DETAILS,
+            "GET",
+            {
+                ...searchRequest
+            }
+        );
 
-    const result = await apiCall.send();
+        const result = await apiCall.send();
 
-    return result.data;
+        return result.data;
+    }catch (e) {
+            return {}
+    }
 }
 
 /**

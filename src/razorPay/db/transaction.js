@@ -31,6 +31,9 @@ const transactionSchema = new mongoose.Schema({
     },
     depositDate: {
         type: Number,
+    },
+    payment: {
+        type: Object,
     }
 },{
     strict: true,

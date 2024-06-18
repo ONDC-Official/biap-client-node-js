@@ -8,62 +8,127 @@ import initializeFirebase from './lib/firebase/initializeFirebase.js';
 import logErrors from './utils/logErrors.js';
 import router from './utils/router.js';
 import dbConnect from './database/mongooseConnector.js';
-import mongoSanitize from 'express-mongo-sanitize'
-const app = express();
+import mongoSanitize from 'express-mongo-sanitize';
 import Redis from 'ioredis';
-global.redisCache = new Redis(process.env.BHASHINI_REDIS_PORT,process.env.BHASHINI_REDIS_HOST);
+import helmet from 'helmet';
+import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+import validator from 'validator';
 
+const app = express();
+global.redisCache = new Redis(process.env.BHASHINI_REDIS_PORT, process.env.BHASHINI_REDIS_HOST);
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
 
 loadEnvVariables();
 initializeFirebase();
 
-//app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-app.use(
-    mongoSanitize({
-        onSanitize: ({ req, key }) => {
-            console.warn(`This request[${key}] is sanitized`, req);
-        },
-    }),
-);
-app.use(logger('combined'))
+app.use(logger('combined'));
 
-//
-// // Global exception handler for HTTP/HTTPS requests
-// app.use(function (err, req, res, next) {
-//
-//     console.log('err.status==============>',err.status);
-//     console.log('err.status==============>',err?.message);
-//     console.log('err.status==============>',err?.stack);
-//     // Send response status based on custom error code
-//     if (err.status) {
-//         return res.status(err.status).json({error: err.message});
-//     }
-//     res.status(500).json({ error: 'Something went wrong. Please try again' });
-// });
+if (!process.env.CORS_WHITELIST_URLS) {
+    throw new Error('CORS_WHITELIST_URLS environment variable is not set');
+}
 
-app.use(cors());
-app.use('/clientApis', cors(), router);
-app.use(logErrors)
-// app.use(logger('dev'));
+const whitelist = process.env.CORS_WHITELIST_URLS.split(",").map(url => url.trim());
+console.log("CORS Whitelist: ", whitelist);
 
-app.get("*", (req, res) => {
-    res.send("API NOT FOUND");
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions = { credentials: true };
+    const origin = req.header('Origin');
+
+    console.log('Request URL:', req.originalUrl);
+    console.log('Request Headers:', JSON.stringify(req.headers));
+    console.log('Request Origin:', origin);
+    console.log('Whitelist:', whitelist);
+
+    if (whitelist.includes(origin)) {
+        corsOptions['origin'] = true;
+    } else {
+        corsOptions['origin'] = false;
+    }
+
+    console.log('CORS Options:', corsOptions);
+    callback(null, corsOptions);
+};
+
+// Apply CORS middleware to all routes
+app.use(cors(corsOptionsDelegate));
+
+// Explicitly block disallowed origins
+app.use((req, res, next) => {
+    const origin = req.header('Origin');
+    if (origin && !whitelist.includes(origin)) {
+        return res.status(403).json({ error: 'CORS policy does not allow access from this origin.' });
+    }
+    next();
 });
 
+// Apply CORS with the dynamic options to routes starting with /clientApis
+app.use('/clientApis', router);
 
+app.use(helmet.xssFilter());
+// Custom function to escape special characters except for URLs
+function customEscape(value) {
+    if (typeof value === 'string') {
+        if (validator.isURL(value, { require_protocol: true })) {
+            return value;
+        }
+        return value;
+    }
+    return value;
+}
+
+// Recursive function to sanitize nested objects and arrays
+function sanitize(input) {
+    if (typeof input === 'string') {
+        input = validator.trim(input);
+        input = customEscape(input);
+        return purify.sanitize(input);
+    } else if (typeof input === 'object' && input !== null) {
+        if (Array.isArray(input)) {
+            return input.map(sanitize);
+        } else {
+            for (let key in input) {
+                if (input.hasOwnProperty(key)) {
+                    input[key] = sanitize(input[key]);
+                }
+            }
+            return input;
+        }
+    } else {
+        return input;
+    }
+}
+
+// Middleware to sanitize input
+app.use((req, res, next) => {
+    req.body = sanitize(req.body);
+    next();
+});
+
+app.use(mongoSanitize({
+    onSanitize: ({ req, key }) => {
+        console.warn(`This request[${key}] is sanitized`, req);
+    },
+}));
+
+// Error handling middleware
+app.use(logErrors);
+
+// Route not found handler
+app.get("*", (req, res) => {
+    res.status(404).send("API NOT FOUND");
+});
 
 const port = process.env.PORT || 8080;
 
-//Setup connection to the database
 dbConnect()
     .then((db) => {
         console.log("Database connection successful");
-
 
         app.listen(port, () => {
             console.log(`Listening on port ${port}`);

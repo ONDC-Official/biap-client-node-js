@@ -4,7 +4,8 @@ import { addOrUpdateOrderWithTransactionId, getOrderByTransactionId,getOrderByTr
 
 import BppInitService from "./bppInit.service.js";
 import ContextFactory from "../../../factories/ContextFactory.js";
-
+import BppSearchService from "../../../discovery/v2/bppSearch.service.js";
+const bppSearchService = new BppSearchService();
 const bppInitService = new BppInitService();
 
 class InitOrderService {
@@ -244,11 +245,36 @@ class InitOrderService {
             const parentOrderId = requestContext?.transaction_id; //FIXME: verify usage
 
             console.log("order--->",orderRequest)
+
+
+
+            //get bpp_url and check if item is available
+            let itemContext={}
+            let itemPresent=true
+            for(let [index,item] of order.items.entries()){
+                let items =  await bppSearchService.getItemDetails(
+                    {id:item.id}
+                );
+                if(!items.response){
+                    itemPresent = false
+                }else{
+                    itemContext =items.response.context
+                }
+
+            }
+
+            if(!itemPresent){
+                return {
+                    error: { message: "Request is invalid" }
+                }
+            }
+
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.INIT,
-                bppId: order?.items[0]?.bpp_id,
-                bpp_uri: order?.items[0]?.bpp_uri,
+                bppId: itemContext?.bpp_id,
+                bpp_uri: itemContext?.bpp_uri,
                 city:requestContext.city,
                 state:requestContext.state,
                 transactionId: requestContext?.transaction_id,
