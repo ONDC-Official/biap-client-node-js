@@ -11,6 +11,11 @@ router.get(
     '/v2/search',  searchController.search,
 );
 
+// search
+router.get(
+    '/v2/search/global/items',  searchController.globalSearchItems,
+);
+
 // get item details
 router.get(
     '/v2/items/:id', searchController.getItem,
@@ -61,6 +66,11 @@ router.get(
 // get providers
 router.get(
     '/v2/providers',  searchController.getProviders,
+);
+
+// get providers
+router.get(
+    '/v2/search/global/providers',  searchController.getGlobalProviders,
 );
 
 // get custom menus

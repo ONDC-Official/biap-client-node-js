@@ -36,6 +36,28 @@ class SearchController {
         });
     }
 
+    globalSearchItems(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+
+        // if(targetLanguage==='en' || !targetLanguage) //default catalog is in english hence not considering this for translation
+        // {
+        //     targetLanguage = undefined
+        // }
+        searchService.globalSearchItems(searchRequest,targetLanguage).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
     getProvideDetails(req, res, next) {
         const searchRequest = req.query;
 
@@ -204,6 +226,24 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getLocations(searchRequest,targetLanguage).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
+    getGlobalProviders(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+
+        searchService.getGlobalProviders(searchRequest,targetLanguage).then(response => {
             if(!response || response === null)
                 throw new NoRecordFoundError("No result found");
             else
