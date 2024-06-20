@@ -630,15 +630,19 @@ class SearchService {
 
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
+
+     let matchQuery = []
+
+     if(searchRequest.domain){
+      matchQuery.push(            {
+                                    match: {
+                                      "context.domain": searchRequest.domain,
+                                    },
+                                  },)
+     }
       let query_obj = {
         bool: {
-          must: [
-            {
-              match: {
-                "context.domain": searchRequest.domain,
-              },
-            },
-          ],
+          must: matchQuery,
           should: [
             //TODO: enable this once UI apis have been changed
             {
