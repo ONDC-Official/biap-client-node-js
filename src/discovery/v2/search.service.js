@@ -227,11 +227,9 @@ class SearchService {
 
       // Return the total count and the sources
       return {
-        response: {
           count: totalCount,
           data: sources,
-          pages: parseInt(totalCount / size),
-        },
+          pages: parseInt(Math.round(totalCount / size)),
       };
     } catch (err) {
       throw err;
@@ -730,33 +728,35 @@ class SearchService {
     try {
       let query_obj = {
         bool: {
-          must: [
-            {
-              match: {
-                "item_details.descriptor.name": searchRequest.name,
-              },
-            },
-          ],
           should: [
-            //TODO: enable this once UI apis have been changed
-            {
-              match: {
-                "location_details.type.keyword": "pan",
-              },
-            },
-            {
-              geo_shape: {
-                "location_details.polygons": {
-                  shape: {
-                    type: "point",
-                    coordinates: [
-                      parseFloat(searchRequest.latitude),
-                      parseFloat(searchRequest.longitude),
-                    ],
-                  },
-                },
-              },
-            },
+                      {
+                        match: {
+                          "item_details.descriptor.name": searchRequest.name,
+                        },
+                      },
+                                  {
+                                    match: {
+                                      "provider_details.descriptor.name": searchRequest.name,
+                                    },
+                                  },
+//            {
+//              match: {
+//                "location_details.type.keyword": "pan",
+//              },
+//            },
+//            {
+//              geo_shape: {
+//                "location_details.polygons": {
+//                  shape: {
+//                    type: "point",
+//                    coordinates: [
+//                      parseFloat(searchRequest.latitude),
+//                      parseFloat(searchRequest.longitude),
+//                    ],
+//                  },
+//                },
+//              },
+//            },
           ],
         },
       };
@@ -769,7 +769,7 @@ class SearchService {
           aggs: {
             products: {
               top_hits: {
-                size: 1,
+                size: 5,
               },
             },
           },
@@ -785,55 +785,28 @@ class SearchService {
       let queryResults = await client.search({
         query: query_obj,
         aggs: aggr_query,
+                sort: [
+                  {
+                    _score: {
+                      order: "desc",
+                    },
+                  },
+                ],
+                size:20
       });
 
       console.log("queryResults--->", queryResults);
 
       let unique_locations = [];
-      // for bucket in resp['aggregations']['unique_providers']['buckets']:
-      // provider_details = [i["_source"]['provider_details'] for i in bucket['products']['hits']['hits']][0]
-      // unique_providers.append(provider_details)
 
       for (const bucket of queryResults.aggregations.unique_locations.buckets) {
         const details = bucket.products.hits.hits.map((hit) => hit._source)[0];
-
-        //                unique_locations.push({domain:details.context.domain,provider_descriptor:details.provider_details.descriptor,...details.location_details});
-
-        //get related items
-
-        let queryResults = await client.search({
-          query: {
-            bool: {
-              must: [
-                {
-                  match: {
-                    "item_details.descriptor.name": searchRequest.name,
-                  },
-                },
-                {
-                  match: {
-                    "provider_details.id": details.provider_details.id,
-                  },
-                },
-              ],
-            },
-          },
-          sort: [
-            {
-              _score: {
-                order: "desc",
-              },
-            },
-          ],
-          size: 10,
-        });
-
         const items = queryResults.hits.hits.map((hit) => hit._source);
         unique_locations.push({
           domain: details.context.domain,
           provider_descriptor: details.provider_details.descriptor,
           provider: details.provider_details.id,
-          items: items,
+          items:bucket.products.hits.hits.map((hit) => hit._source),
           ...details.location_details,
         });
       }
