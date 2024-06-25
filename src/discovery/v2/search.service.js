@@ -1326,7 +1326,19 @@ class SearchService {
         size:20
       });
 
-      return queryResults;
+      // Extract the _source field from each hit
+      let sources = queryResults.hits.hits.map((hit) => hit._source);
+
+      // Get the total count of results
+      let totalCount = queryResults.hits.total.value;
+
+      // Return the total count and the sources
+      return {
+        response: {
+          count: totalCount,
+          data: sources,
+        },
+      };
 
 
     } catch (err) {
