@@ -890,12 +890,10 @@ class SearchService {
   
       // Return the response with count, data, afterKey, and pages
       return {
-        response: {
           count: totalCount,
           data: unique_location,
           afterKey: afterKey,
           pages: totalPages,
-        }
       };
   
     } catch (err) {
