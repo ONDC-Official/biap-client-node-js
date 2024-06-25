@@ -628,7 +628,7 @@ class SearchService {
     }
   }
 
-  async getLocations(searchRequest, targetLanguage = "en") {
+  async getLocations1(searchRequest, targetLanguage = "en") {
     try {
 
      let matchQuery = []
@@ -724,109 +724,369 @@ class SearchService {
     }
   }
 
-  async getGlobalProviders(searchRequest, targetLanguage = "en") {
+
+  async getLocations(searchRequest, targetLanguage = "en") {
     try {
+
+     let matchQuery = []
+
+     if(searchRequest.domain){
+      matchQuery.push(            {
+                                    match: {
+                                      "context.domain": searchRequest.domain,
+                                    },
+                                  },)
+     }
       let query_obj = {
         bool: {
-          must: [
-                      
-            //must = AND
+          must: matchQuery,
+          should: [
+            //TODO: enable this once UI apis have been changed
             {
-                        match: {
-                          "item_details.descriptor.name": searchRequest.name,
-                        },
-                      },
-                                  {
-                                    match: {
-                                      "provider_details.descriptor.name": searchRequest.name,
-                                    },
-                                  },
-
-            //should = OR
-           {
-             match: {
-               "location_details.type.keyword": "pan",
-             },
-           },
-           {
-             geo_shape: {
-               "location_details.polygons": {
-                 shape: {
-                   type: "point",
-                   coordinates: [
-                     parseFloat(searchRequest.latitude),
-                     parseFloat(searchRequest.longitude),
-                   ],
-                 },
-               },
-             },
-           },
+              match: {
+                "location_details.type.keyword": "pan",
+              },
+            },
+            {
+              geo_shape: {
+                "location_details.polygons": {
+                  shape: {
+                    type: "point",
+                    coordinates: [
+                      parseFloat(searchRequest.latitude),
+                      parseFloat(searchRequest.longitude),
+                    ],
+                  },
+                },
+              },
+            },
           ],
         },
       };
 
+      //   bool: {
+      //     must: [
+      //       {
+      //         bool: {
+      //           should: [
+      //             {
+      //               match: {
+      //                 "item_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   fuzziness: "AUTO",
+      //                   operator: "or", // Match any words in the query
+      //                   boost: 2 // Boosting relevance score for name matches
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match: {
+      //                 "provider_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   fuzziness: "AUTO",
+      //                   operator: "or",
+      //                   boost: 2
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match_phrase_prefix: { // Match prefix for better relevance
+      //                 "item_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   max_expansions: 10,
+      //                   boost: 1.5
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match_phrase_prefix: {
+      //                 "provider_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   max_expansions: 10,
+      //                   boost: 1.5
+      //                 }
+      //               }
+      //             }
+      //           ]
+      //         }
+      //       },
+      //       {
+      //         match: {
+      //           "location_details.type.keyword": "pan",
+      //         },
+      //       },
+      //       {
+      //         geo_shape: {
+      //           "location_details.polygons": {
+      //             shape: {
+      //               type: "point",
+      //               coordinates: [
+      //                 parseFloat(searchRequest.latitude),
+      //                 parseFloat(searchRequest.longitude),
+      //               ],
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // };
+  
+      // let query_obj = {bool:{}}
+      // Define the aggregation query
       let aggr_query = {
-        unique_locations: {
-          terms: {
-            field: "location_details.id",
+        unique_location: {
+          composite: {
+            size: searchRequest.limit,
+            sources: [
+              { location_id: { terms: { field: "location_details.id" } } }
+            ],
+            after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
           },
           aggs: {
             products: {
               top_hits: {
-                size: 5,
-              },
-            },
-          },
+                size: 1,
+              }
+            }
+          }
         },
+        unique_location_count: {
+          cardinality: {
+            field: "location_details.id"
+          }
+        }
       };
-
-      // Calculate the starting point for the search
-      let size = parseInt(searchRequest.limit);
-      let page = parseInt(searchRequest.pageNumber);
-      const from = (page - 1) * size;
-
-      // Perform the search with pagination parameters
+  
+      // Perform the search query with the defined query and aggregation
       let queryResults = await client.search({
-        query: query_obj,
-        aggs: aggr_query,
-                sort: [
-                  {
-                    _score: {
-                      order: "desc",
-                    },
-                  },
-                ],
-                size:20
+        body: {
+          query: query_obj,
+          aggs: aggr_query,
+          size: 0
+        }
       });
+  
+      // Extract unique providers from the aggregation results
+      let unique_location = queryResults.aggregations.unique_location.buckets.map(bucket => {
 
-      console.log("queryResults--->", queryResults);
-
-      let unique_locations = [];
-
-      for (const bucket of queryResults.aggregations.unique_locations.buckets) {
         const details = bucket.products.hits.hits.map((hit) => hit._source)[0];
-        const items = queryResults.hits.hits.map((hit) => hit._source);
-        unique_locations.push({
+        return ({
           domain: details.context.domain,
           provider_descriptor: details.provider_details.descriptor,
           provider: details.provider_details.id,
-          items:bucket.products.hits.hits.map((hit) => hit._source),
           ...details.location_details,
         });
-      }
 
-      // Get the total count of results
-      let totalCount = queryResults.hits.total.value;
-
-      // Return the total count and the sources
+        // return {...bucket.products.hits.hits[0]._source.location_details};
+      });
+  
+      // Get the unique provider count
+      let totalCount = queryResults.aggregations.unique_location_count.value;
+      let totalPages = Math.ceil(totalCount / searchRequest.limit);
+  
+      // Get the after key for pagination
+      let afterKey = queryResults.aggregations.unique_location.after_key;
+  
+      // Return the response with count, data, afterKey, and pages
       return {
-        count: totalCount,
-        data: unique_locations,
-        pages: parseInt(totalCount / 1),
+        response: {
+          count: totalCount,
+          data: unique_location,
+          afterKey: afterKey,
+          pages: totalPages,
+        }
       };
+  
+    } catch (err) {
+      throw err;
+    }
+  }
 
-      // return unique_providers
-      //            return unique_locations;
+  async getGlobalProviders(searchRequest, targetLanguage = "en") {
+    try {
+      console.log("searchRequest", searchRequest);
+  
+      // Define the query object with additional filters on names
+      let query_obj = {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    regexp: {
+                      "item_details.descriptor.name": {
+                        value: `.*${searchRequest.name}.*`,
+                        case_insensitive: true,
+                      },
+                    },
+                  },
+                  {
+                    regexp: {
+                      "provider_details.descriptor.name": {
+                        value: `.*${searchRequest.name}.*`,
+                        case_insensitive: true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      "location_details.type.keyword": "pan",
+                    },
+                  },
+                  {
+                    geo_shape: {
+                      "location_details.polygons": {
+                        shape: {
+                          type: "point",
+                          coordinates: [
+                            parseFloat(searchRequest.latitude),
+                            parseFloat(searchRequest.longitude),
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+      
+      // let query_obj = {
+      //   bool: {
+      //     must: [
+      //       {
+      //         bool: {
+      //           should: [
+      //             {
+      //               match: {
+      //                 "item_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   fuzziness: "AUTO",
+      //                   operator: "or", // Match any words in the query
+      //                   boost: 2 // Boosting relevance score for name matches
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match: {
+      //                 "provider_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   fuzziness: "AUTO",
+      //                   operator: "or",
+      //                   boost: 2
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match_phrase_prefix: { // Match prefix for better relevance
+      //                 "item_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   max_expansions: 10,
+      //                   boost: 1.5
+      //                 }
+      //               }
+      //             },
+      //             {
+      //               match_phrase_prefix: {
+      //                 "provider_details.descriptor.name": {
+      //                   query: searchRequest.name,
+      //                   max_expansions: 10,
+      //                   boost: 1.5
+      //                 }
+      //               }
+      //             }
+      //           ]
+      //         }
+      //       },
+      //       {
+      //         match: {
+      //           "location_details.type.keyword": "pan",
+      //         },
+      //       },
+      //       {
+      //         geo_shape: {
+      //           "location_details.polygons": {
+      //             shape: {
+      //               type: "point",
+      //               coordinates: [
+      //                 parseFloat(searchRequest.latitude),
+      //                 parseFloat(searchRequest.longitude),
+      //               ],
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // };
+  
+      // let query_obj = {bool:{}}
+      // Define the aggregation query
+      let aggr_query = {
+        unique_providers: {
+          composite: {
+            size: searchRequest.limit,
+            sources: [
+              { provider_id: { terms: { field: "provider_details.id" } } }
+            ],
+            after: searchRequest.afterKey ? { provider_id: searchRequest.afterKey } : undefined
+          },
+          aggs: {
+            products: {
+              top_hits: {
+                size: 1,
+              }
+            }
+          }
+        },
+        unique_provider_count: {
+          cardinality: {
+            field: "provider_details.id"
+          }
+        }
+      };
+  
+      // Perform the search query with the defined query and aggregation
+      let queryResults = await client.search({
+        body: {
+          query: query_obj,
+          aggs: aggr_query,
+          size: 0
+        }
+      });
+  
+      // Extract unique providers from the aggregation results
+      let unique_providers = queryResults.aggregations.unique_providers.buckets.map(bucket => {
+        return {...bucket.products.hits.hits[0]._source.provider_details,items:bucket.products.hits.hits.map((hit) => hit._source)};
+      });
+  
+      // Get the unique provider count
+      let totalCount = queryResults.aggregations.unique_provider_count.value;
+      let totalPages = Math.ceil(totalCount / searchRequest.limit);
+  
+      // Get the after key for pagination
+      let afterKey = queryResults.aggregations.unique_providers.after_key;
+  
+      // Return the response with count, data, afterKey, and pages
+      return {
+        response: {
+          count: totalCount,
+          data: unique_providers,
+          afterKey: afterKey,
+          pages: totalPages,
+        }
+      };
+  
     } catch (err) {
       throw err;
     }
