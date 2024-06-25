@@ -324,6 +324,21 @@ class SearchController {
         });
     }
 
+    
+    getOffers(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+
+        searchService.getOffers(searchRequest).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
     /**
     * on search 
     * @param {*} req    HTTP request object

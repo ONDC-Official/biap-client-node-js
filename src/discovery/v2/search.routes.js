@@ -78,6 +78,12 @@ router.get(
     '/v2/custom-menus',  searchController.getCustomMenu,
 );
 
+// get offers
+router.get(
+    '/v2/offers',  searchController.getOffers,
+);
+
+
 // // get custom menus
 // router.get(
 //     '/v2/custom-menus/:id', authentication(), searchController.getProviderCustomMenus,
