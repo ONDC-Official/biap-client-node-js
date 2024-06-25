@@ -737,6 +737,14 @@ class SearchService {
                                     },
                                   },)
      }
+
+     //default language search
+     matchQuery.push(            {
+      match: {
+        language: targetLanguage,
+      },
+    },)
+
       let query_obj = {
         bool: {
           must: matchQuery,
@@ -931,6 +939,12 @@ class SearchService {
                 ],
               },
             },
+                 //default language search
+       {
+      match: {
+        language: targetLanguage,
+      },
+    },
             {
               bool: {
                 should: [
