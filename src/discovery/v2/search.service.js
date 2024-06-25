@@ -1328,7 +1328,7 @@ class SearchService {
 
       // Extract the _source field from each hit
       let sources = queryResults.hits.hits.map((hit) => {
-        return {...hit._source,provider:hit._source.provider_details.id,location:hit._source.location_details.id,domain:hit._source.context.domain,id:hit._source.local_id};
+        return {...hit._source,provider:hit._source.provider_details.id,provider_descriptor:hit._source.provider_details.descriptor,location:hit._source.location_details.id,domain:hit._source.context.domain,id:hit._source.local_id};
         });
 
       // Get the total count of results
