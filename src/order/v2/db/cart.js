@@ -4,6 +4,9 @@ const  CartSchema = new mongoose.Schema(
     {
         userId: { type: String }
     },
+    {
+        location_id: { type: String }
+    },
     { _id: true, timestamps: true }
 );
 

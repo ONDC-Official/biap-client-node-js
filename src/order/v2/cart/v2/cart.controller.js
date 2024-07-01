@@ -26,6 +26,18 @@ class CartController {
         }
     }
 
+
+    async getAllCartItem(req, res, next) {
+        try {
+
+            return  res.send(await cartService.getAllCartItem({...req.body,...req.params}));
+
+        }
+        catch (err) {
+            next(err);
+        }
+    }
+
     async updateItem(req, res, next) {
         try {
             return  res.send(await cartService.updateItem({...req.body,...req.params}));

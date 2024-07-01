@@ -20,20 +20,22 @@ class CartService {
                         error: { message: "Request is invalid" }
                     }
                 }
-           let cart = await Cart.findOne({userId:data.userId});
-            console.log("data----",data);
+           let cart = await Cart.findOne({userId:data.userId,location_id:data.product.location_id});
+            console.log("datadata.product.location_id----",data.product.location_id);
            if(cart){
                //add items to the cart
 
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
                cartItem.item =data;
+               cartItem.locationId =data.product.location_id;
               return  await cartItem.save();
            }else{
                //create a new cart
                let cart =await new Cart({userId:data.userId}).save()
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
+               cartItem.locationId =data.product.location_id;
                cartItem.item =data;
                return  await cartItem.save();
            }
@@ -86,7 +88,11 @@ class CartService {
 
     async getCartItem(data) {
         try {
-            const cart = await Cart.findOne({userId:data.userId})
+            let query = {userId:data.userId};
+            if(data.locationId){
+                query.locationId=data.locationId
+            }
+            const cart = await Cart.findOne(query);
             if(cart){
                 return  await CartItem.find({cart:cart._id});
             }else{
@@ -98,6 +104,27 @@ class CartService {
             throw err;
         }
     }
+
+    async getAllCartItem(data) {
+        try {
+            let query = {userId:data.userId};
+
+            const cart = await Cart.find(query).lean();
+            for(let cartItem of cart){
+                if(cartItem){
+                    cart.items=  await CartItem.find({cart:cart._id});
+                }else{
+                    cart.items= []
+                }
+            }
+           return cart;
+
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 
 }
 
