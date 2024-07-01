@@ -19,7 +19,7 @@ const SUPPORT = "protocol/support";
 const TRACK = "protocol/track";
 const UPDATE = "protocol/update";
 const SEARCH_ITEM = "protocol/items";
-const SEARCH_ITEM_DETAILS = "protocol/item-details";
+const SEARCH_ITEM_DETAILS = "protocol/ils";
 const RESPONSE = "protocol/response";
 
 const SEARCH_ATTRIBUTE = "protocol/attributes";

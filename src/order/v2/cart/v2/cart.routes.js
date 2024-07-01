@@ -19,6 +19,14 @@ rootRouter.get(
     cartController.getCartItem,
 );
 
+
+rootRouter.get(
+    '/v2/cart/:userId/all',
+    authentication(),
+    cartController.getAllCartItem,
+);
+
+
 rootRouter.delete(
     '/v2/cart/:userId',
     authentication(),
