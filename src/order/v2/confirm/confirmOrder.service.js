@@ -24,8 +24,8 @@ import mongoose from 'mongoose';
 class ConfirmOrderService {
 
     /**
-     * 
-     * @param {Array} items 
+     *
+     * @param {Array} items
      * @returns Boolean
      */
     areMultipleBppItemsSelected(items) {
@@ -33,8 +33,8 @@ class ConfirmOrderService {
     }
 
     /**
-     * 
-     * @param {Array} items 
+     *
+     * @param {Array} items
      * @returns Boolean
      */
     areMultipleProviderItemsSelected(items) {
@@ -42,7 +42,7 @@ class ConfirmOrderService {
     }
 
     /**
-     * 
+     *
      * @param {Object} payment
      * @param {String} orderId
      * @param {Boolean} confirmPayment
@@ -60,15 +60,15 @@ class ConfirmOrderService {
             (
                 confirmPayment &&
                 ((process.env.NODE_ENV === "prod" &&
-                    total !== paymentDetails?.amount) ||
+                        total !== paymentDetails?.amount) ||
                     paymentDetails?.status !== JUSPAY_PAYMENT_STATUS.CHARGED.status)
             );
     }
 
     /**
      * Update order in db
-     * @param {Object} dbResponse 
-     * @param {Object} confirmResponse 
+     * @param {Object} dbResponse
+     * @param {Object} confirmResponse
      */
     async updateOrder(dbResponse, confirmResponse, paymentType) {
         let orderSchema = dbResponse?.toJSON() || {};
@@ -85,7 +85,7 @@ class ConfirmOrderService {
 
     /**
      * confirm and update order in db
-     * @param {Object} orderRequest 
+     * @param {Object} orderRequest
      * @param {Number} total
      * @param {Boolean} confirmPayment
      */
@@ -135,7 +135,7 @@ class ConfirmOrderService {
             //     paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
             //
             // }else{
-                paymentStatus = {txn_id:requestContext?.transaction_id}
+            paymentStatus = {txn_id:requestContext?.transaction_id}
             // }
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
@@ -176,8 +176,8 @@ class ConfirmOrderService {
 
     /**
      * process on confirm response and update db
-     * @param {Object} response 
-     * @returns 
+     * @param {Object} response
+     * @returns
      */
     async processOnConfirmResponse(response = {}) {
         try {
@@ -304,9 +304,9 @@ class ConfirmOrderService {
     }
 
     /**
-    * confirm order
-    * @param {Object} orderRequest
-    */
+     * confirm order
+     * @param {Object} orderRequest
+     */
     async confirmOrder(orderRequest) {
         try {
             const { context: requestContext, message: order = {} } = orderRequest || {};
@@ -365,7 +365,7 @@ class ConfirmOrderService {
 
     /**
      * confirm multiple orders
-     * @param {Array} orders 
+     * @param {Array} orders
      */
     async confirmMultipleOrder(orders,paymentData) {
 
@@ -445,7 +445,7 @@ class ConfirmOrderService {
                         let config = {
                             method: 'post',
                             maxBodyLength: Infinity,
-                            url: 'http://localhost:3030/api/loaddata',
+                            url: 'https://ref-app-buyer-staging-v2.ondc.org/api/loaddata',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
@@ -473,9 +473,9 @@ class ConfirmOrderService {
     }
 
     /**
-    * on confirm order
-    * @param {Object} messageId
-    */
+     * on confirm order
+     * @param {Object} messageId
+     */
     async onConfirmOrder(messageId) {
         try {
             let protocolConfirmResponse = await onOrderConfirm(messageId);
@@ -511,9 +511,9 @@ class ConfirmOrderService {
     }
 
     /**
-    * on confirm multiple order
-    * @param {Object} messageId
-    */
+     * on confirm multiple order
+     * @param {Object} messageId
+     */
     async onConfirmMultipleOrder(messageIds) {
         try {
             const onConfirmOrderResponse = await Promise.all(
