@@ -28,14 +28,14 @@ class CartService {
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
                cartItem.item =data;
-               cartItem.locationId =data.product.location_id;
+               cartItem.location_id =data.product.location_id;
               return  await cartItem.save();
            }else{
                //create a new cart
-               let cart =await new Cart({userId:data.userId}).save()
+               let cart =await new Cart({userId:data.userId,location_id:data.product.location_id}).save()
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
-               cartItem.locationId =data.product.location_id;
+               cartItem.location_id =data.product.location_id;
                cartItem.item =data;
                return  await cartItem.save();
            }
@@ -89,8 +89,8 @@ class CartService {
     async getCartItem(data) {
         try {
             let query = {userId:data.userId};
-            if(data.locationId){
-                query.locationId=data.locationId
+            if(data.location_id){
+                query.location_id=data.location_id
             }
             const cart = await Cart.findOne(query);
             if(cart){
@@ -107,18 +107,20 @@ class CartService {
 
     async getAllCartItem(data) {
         try {
-            let query = {userId:data.userId};
+            let query = { userId: data.userId };
 
             const cart = await Cart.find(query).lean();
-            for(let cartItem of cart){
-                if(cartItem){
-                    cart.items=  await CartItem.find({cart:cart._id});
-                }else{
-                    cart.items= []
+    
+            const cartWithItems = await Promise.all(cart.map(async cartItem => {
+                if (cartItem) {
+                    const items = await CartItem.find({ cart: cartItem._id }).lean();
+                    return { ...cartItem, items };
+                } else {
+                    return { ...cartItem, items: [] };
                 }
-            }
-           return cart;
-
+            }));
+    
+            return cartWithItems;
         }
         catch (err) {
             throw err;
