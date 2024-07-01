@@ -506,6 +506,7 @@ class SearchService {
         }
       }
 
+      item_details.locations = [item_details.location_details]
       //            console.log("itemdetails--->",item_details)
       return item_details;
 
