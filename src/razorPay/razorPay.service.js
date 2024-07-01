@@ -65,9 +65,15 @@ class RazorPayService
             }else{
                 humanReadableID = `transactionId_${pad(1, 4)}`;
             }
+            
+
+            const numberValue = Number(data.amount);
+
+            // Multiply by 100 to remove decimal point and make it an integer
+            const razorpayAmount = Math.round(numberValue * 100);
 
             let options = {
-                amount: parseFloat(data.amount) * 100,
+                amount: razorpayAmount,
                 currency: 'INR',
                 receipt: humanReadableID
             };
