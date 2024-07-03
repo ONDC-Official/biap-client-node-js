@@ -227,9 +227,9 @@ class SearchService {
 
       // Return the total count and the sources
       return {
-          count: totalCount,
-          data: sources,
-          pages: parseInt(Math.round(totalCount / size)),
+        count: totalCount,
+        data: sources,
+        pages: parseInt(Math.round(totalCount / size)),
       };
     } catch (err) {
       throw err;
@@ -463,6 +463,7 @@ class SearchService {
 
           let queryResults = await client.search({
             query: query_obj,
+            size:100
           });
 
           item_details.related_items = queryResults.hits.hits.map(
@@ -497,6 +498,7 @@ class SearchService {
 
           let queryResults = await client.search({
             query: query_obj,
+            size: 100
           });
 
           console.log(queryResults);
@@ -632,15 +634,15 @@ class SearchService {
   async getLocations1(searchRequest, targetLanguage = "en") {
     try {
 
-     let matchQuery = []
+      let matchQuery = []
 
-     if(searchRequest.domain){
-      matchQuery.push(            {
-                                    match: {
-                                      "context.domain": searchRequest.domain,
-                                    },
-                                  },)
-     }
+      if (searchRequest.domain) {
+        matchQuery.push({
+          match: {
+            "context.domain": searchRequest.domain,
+          },
+        },)
+      }
       let query_obj = {
         bool: {
           must: matchQuery,
@@ -729,22 +731,22 @@ class SearchService {
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
 
-     let matchQuery = []
+      let matchQuery = []
 
-     if(searchRequest.domain){
-      matchQuery.push(            {
-                                    match: {
-                                      "context.domain": searchRequest.domain,
-                                    },
-                                  },)
-     }
+      if (searchRequest.domain) {
+        matchQuery.push({
+          match: {
+            "context.domain": searchRequest.domain,
+          },
+        },)
+      }
 
-     //default language search
-     matchQuery.push(            {
-      match: {
-        language: targetLanguage,
-      },
-    },)
+      //default language search
+      matchQuery.push({
+        match: {
+          language: targetLanguage,
+        },
+      },)
 
       let query_obj = {
         bool: {
@@ -840,7 +842,7 @@ class SearchService {
       //     ],
       //   },
       // };
-  
+
       // let query_obj = {bool:{}}
       // Define the aggregation query
       let aggr_query = {
@@ -866,7 +868,7 @@ class SearchService {
           }
         }
       };
-  
+
       // Perform the search query with the defined query and aggregation
       let queryResults = await client.search({
         body: {
@@ -875,7 +877,7 @@ class SearchService {
           size: 0
         }
       });
-  
+
       // Extract unique providers from the aggregation results
       let unique_location = queryResults.aggregations.unique_location.buckets.map(bucket => {
 
@@ -889,22 +891,22 @@ class SearchService {
 
         // return {...bucket.products.hits.hits[0]._source.location_details};
       });
-  
+
       // Get the unique provider count
       let totalCount = queryResults.aggregations.unique_location_count.value;
       let totalPages = Math.ceil(totalCount / searchRequest.limit);
-  
+
       // Get the after key for pagination
       let afterKey = queryResults.aggregations.unique_location.after_key;
-  
+
       // Return the response with count, data, afterKey, and pages
       return {
-          count: totalCount,
-          data: unique_location,
-          afterKey: afterKey,
-          pages: totalPages,
+        count: totalCount,
+        data: unique_location,
+        afterKey: afterKey,
+        pages: totalPages,
       };
-  
+
     } catch (err) {
       throw err;
     }
@@ -913,7 +915,7 @@ class SearchService {
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {
       console.log("searchRequest", searchRequest);
-  
+
       // Define the query object with additional filters on names
       let query_obj = {
         bool: {
@@ -940,12 +942,12 @@ class SearchService {
                 ],
               },
             },
-                 //default language search
-       {
-      match: {
-        language: targetLanguage,
-      },
-    },
+            //default language search
+            {
+              match: {
+                language: targetLanguage,
+              },
+            },
             {
               bool: {
                 should: [
@@ -973,7 +975,7 @@ class SearchService {
           ],
         },
       };
-      
+
       // let query_obj = {
       //   bool: {
       //     must: [
@@ -1042,7 +1044,7 @@ class SearchService {
       //     ],
       //   },
       // };
-  
+
       // let query_obj = {bool:{}}
       // Define the aggregation query
       let aggr_query = {
@@ -1068,7 +1070,7 @@ class SearchService {
           }
         }
       };
-  
+
       // Perform the search query with the defined query and aggregation
       let queryResults = await client.search({
         body: {
@@ -1077,19 +1079,19 @@ class SearchService {
           size: 0
         }
       });
-  
+
       // Extract unique providers from the aggregation results
       let unique_providers = queryResults.aggregations.unique_providers.buckets.map(bucket => {
-        return {...bucket.products.hits.hits[0]._source.provider_details,items:bucket.products.hits.hits.map((hit) => hit._source)};
+        return { ...bucket.products.hits.hits[0]._source.provider_details, items: bucket.products.hits.hits.map((hit) => hit._source) };
       });
-  
+
       // Get the unique provider count
       let totalCount = queryResults.aggregations.unique_provider_count.value;
       let totalPages = Math.ceil(totalCount / searchRequest.limit);
-  
+
       // Get the after key for pagination
       let afterKey = queryResults.aggregations.unique_providers.after_key;
-  
+
       // Return the response with count, data, afterKey, and pages
       return {
         response: {
@@ -1099,7 +1101,7 @@ class SearchService {
           pages: totalPages,
         }
       };
-  
+
     } catch (err) {
       throw err;
     }
@@ -1107,13 +1109,13 @@ class SearchService {
 
   async getProviders(searchRequest, targetLanguage = "en") {
     try {
-      console.log("searchRequest",searchRequest)
+      console.log("searchRequest", searchRequest)
       let query_obj = {
         bool: {
           // Add your actual query conditions here
         }
       };
-  
+
       let aggr_query = {
         unique_providers: {
           composite: {
@@ -1121,7 +1123,7 @@ class SearchService {
             sources: [
               { provider_id: { terms: { field: "provider_details.id" } } }
             ],
-            after: searchRequest.afterKey?{provider_id:searchRequest.afterKey}:undefined
+            after: searchRequest.afterKey ? { provider_id: searchRequest.afterKey } : undefined
           },
           aggs: {
             products: {
@@ -1137,7 +1139,7 @@ class SearchService {
           }
         }
       };
-  
+
       let queryResults = await client.search({
         body: {
           query: query_obj,
@@ -1145,16 +1147,16 @@ class SearchService {
           size: 0
         }
       });
-  
+
       let unique_providers = queryResults.aggregations.unique_providers.buckets.map(bucket => {
         return bucket.products.hits.hits[0]._source.provider_details;
       });
-  
+
       let totalCount = queryResults.aggregations.unique_provider_count.value;
       let totalPages = Math.ceil(totalCount / searchRequest.limit);
-  
+
       let afterKey = queryResults.aggregations.unique_providers.after_key;
-  
+
       return {
         response: {
           count: totalCount,
@@ -1163,7 +1165,7 @@ class SearchService {
           pages: totalPages
         }
       };
-  
+
     } catch (err) {
       throw err;
     }
@@ -1183,16 +1185,16 @@ class SearchService {
         }
       }
     };
-  
+
     // If afterKey is provided, add it to the request body
     if (afterKey) {
       body.aggs.unique_provider_ids.after = afterKey;
     }
-  
+
     const { body: response } = await client.search({
       body
     });
-  
+
     return response.aggregations.unique_provider_ids;
   }
 
@@ -1270,7 +1272,7 @@ class SearchService {
     }
   }
 
-  async  getOffers(searchRequest, targetLanguage = "en") {
+  async getOffers(searchRequest, targetLanguage = "en") {
     try {
       let matchQuery = [];
       let searchQuery = [];
@@ -1317,20 +1319,20 @@ class SearchService {
         });
       }
       let queryResults = await client.search({
-        index:'offers',
+        index: 'offers',
         query: {
           bool: {
-            must:matchQuery,
-            should:searchQuery
+            must: matchQuery,
+            should: searchQuery
           },
         },
-        size:20
+        size: 20
       });
 
       // Extract the _source field from each hit
       let sources = queryResults.hits.hits.map((hit) => {
-        return {...hit._source,provider:hit._source.provider_details.id,provider_descriptor:hit._source.provider_details.descriptor,location:hit._source.location_details.id,domain:hit._source.context.domain,id:hit._source.local_id};
-        });
+        return { ...hit._source, provider: hit._source.provider_details.id, provider_descriptor: hit._source.provider_details.descriptor, location: hit._source.location_details.id, domain: hit._source.context.domain, id: hit._source.local_id };
+      });
 
       // Get the total count of results
       let totalCount = queryResults.hits.total.value;

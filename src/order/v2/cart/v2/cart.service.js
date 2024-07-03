@@ -91,6 +91,8 @@ class CartService {
             let query = {userId:data.userId};
             if(data.location_id){
                 query.location_id=data.location_id
+            }else{
+                query.location_id = { $exists: false };
             }
             const cart = await Cart.findOne(query);
             if(cart){
