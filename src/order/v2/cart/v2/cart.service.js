@@ -20,22 +20,22 @@ class CartService {
                         error: { message: "Request is invalid" }
                     }
                 }
-           let cart = await Cart.findOne({userId:data.userId,location_id:data.location_details.id});
-            console.log("datadata.product.location_id----",data.location_details.id);
+           let cart = await Cart.findOne({userId:data.userId,location_id:data.location_details?.id});
+            console.log("datadata.product.location_id----",data.location_details?.id);
            if(cart){
                //add items to the cart
 
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
                cartItem.item =data;
-               cartItem.location_id =data.location_details.id
+               cartItem.location_id =data.location_details?.id
               return  await cartItem.save();
            }else{
                //create a new cart
-               let cart =await new Cart({userId:data.userId,location_id:data.product.location_id}).save()
+               let cart =await new Cart({userId:data.userId,location_id:data.location_details?.id}).save()
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
-               cartItem.location_id =data.location_details.id
+               cartItem.location_id =data.location_details?.id
                cartItem.item =data;
                return  await cartItem.save();
            }
