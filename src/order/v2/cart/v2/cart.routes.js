@@ -28,7 +28,7 @@ rootRouter.get(
 
 
 rootRouter.delete(
-    '/v2/cart/:userId',
+    '/v2/cart/:userId/:id/clear',
     authentication(),
     cartController.clearCart,
 );
