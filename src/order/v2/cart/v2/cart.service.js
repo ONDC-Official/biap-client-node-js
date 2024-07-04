@@ -79,6 +79,7 @@ class CartService {
     async clearCart(data) {
         try {
             const cart = await Cart.findOne({userId:data.userId,_id:data.id})
+            await Cart.deleteMany({userId:data.userId,_id:data.id})
             return  await CartItem.deleteMany({cart:cart._id});
         }
         catch (err) {
