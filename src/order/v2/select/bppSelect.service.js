@@ -69,7 +69,6 @@ class BppSelectService {
 
             }
 
-            console.log({locationSet})
             const selectRequest = {
                 context: context,
                 message: {
@@ -77,18 +76,21 @@ class BppSelectService {
                         items: items,
                         provider: {
                             id: provider?.local_id,
-                            locations: Array.from(locationSet).map(location => {
-                                return { id: location };
-                            })
+                            locations: Array.from(locationSet).map(location => ({
+                                id: location
+                            }))
                         },
                         fulfillments: fulfillments && fulfillments.length ? 
                             [...fulfillments] : 
-                            [],
-                        offers:offers??undefined    
+                            []
                     }
                 }
             };
-
+            
+            if (offers && offers.length) {
+                selectRequest.message.order.offers = offers;
+            }
+            
             console.log("select request",selectRequest)
             const response = await protocolSelect(selectRequest);
 
