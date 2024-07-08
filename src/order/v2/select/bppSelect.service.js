@@ -10,7 +10,7 @@ class BppSelectService {
     */
     async select(context, order = {}) {
         try {
-            const { cart = {}, fulfillments = [] } = order || {};
+            const { cart = {}, fulfillments = [],offers=undefined } = order || {};
 
             const provider = cart?.items?.[0]?.provider || {};
 
@@ -83,7 +83,8 @@ class BppSelectService {
                         },
                         fulfillments: fulfillments && fulfillments.length ? 
                             [...fulfillments] : 
-                            []
+                            [],
+                        offers:offers??undefined    
                     }
                 }
             };
