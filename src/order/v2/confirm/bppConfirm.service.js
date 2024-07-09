@@ -289,7 +289,7 @@ class BppConfirmService {
 
                         
             if (storedOrder.offers && storedOrder.offers.length) {
-                confirmRequest.message.order.offers = offers;
+                confirmRequest.message.order.offers = storedOrder.offers;
             }
             
 
