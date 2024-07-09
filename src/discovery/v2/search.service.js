@@ -380,6 +380,7 @@ class SearchService {
           domain: details.context.domain,
           provider_descriptor: details.provider_details.descriptor,
           ...details.location_details,
+          time_to_ship: details.item_details["@ondc/org/time_to_ship"]
         };
       }
 
