@@ -145,6 +145,15 @@ class BppInitService {
 
             };
 
+            if (order.offers && order.offers.length) {
+
+                //convert array to array of objects
+
+                initRequest.message.order.offers = order.offers.map(offer => {
+                    return { id: offer };
+                  });
+            }
+
             const response = await protocolInit(initRequest);
 
             // return initRequest

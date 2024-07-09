@@ -348,7 +348,8 @@ const OrderSchema = new mongoose.Schema(
         settlementDetails:{type:Object},
         tags:{type:Object},
         domain:{type:String},
-        documents:{type:Object}
+        documents:{type:Object},
+        offers:{type:Object}
     },
     { _id: true, timestamps: true }
 );

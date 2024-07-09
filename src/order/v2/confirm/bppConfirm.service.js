@@ -287,6 +287,11 @@ class BppConfirmService {
                 }
             };
 
+                        
+            if (storedOrder.offers && storedOrder.offers.length) {
+                confirmRequest.message.order.offers = offers;
+            }
+            
 
             console.log({confirmRequest})
             let confirmResponse = await this.confirm(confirmRequest);

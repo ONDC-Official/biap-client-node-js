@@ -455,6 +455,13 @@ class SearchService {
             },
           });
 
+          matchQuery.push(
+            {
+              match: {
+                language: targetLanguage,
+              },
+            })
+
           let query_obj = {
             bool: {
               must: matchQuery,
@@ -489,6 +496,14 @@ class SearchService {
               type: "customization",
             },
           });
+
+          customisationQuery.push(
+            {
+              match: {
+                language: targetLanguage,
+              },
+            });
+            
           // Create the query object
           let query_obj = {
             bool: {
@@ -1112,8 +1127,12 @@ class SearchService {
       console.log("searchRequest", searchRequest)
       let query_obj = {
         bool: {
-          // Add your actual query conditions here
-        }
+                //default language search
+        match: {
+          language: targetLanguage,
+        },
+      },
+        
       };
 
       let aggr_query = {
