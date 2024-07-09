@@ -1128,12 +1128,14 @@ class SearchService {
       console.log("searchRequest", searchRequest)
       let query_obj = {
         bool: {
-                //default language search
-        match: {
-          language: targetLanguage,
-        },
-      },
-        
+          must: [
+            {
+              match: {
+                language: targetLanguage,
+              }
+            }
+          ]
+        }
       };
 
       let aggr_query = {
