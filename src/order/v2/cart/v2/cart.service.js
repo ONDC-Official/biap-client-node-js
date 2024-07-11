@@ -116,6 +116,11 @@ class CartService {
     
             const cartWithItems = await Promise.all(cart.map(async cartItem => {
                 if (cartItem) {
+                    //get location details
+                    if(cartItem.location_id){
+                        cartItem.location= await bppSearchService.getLocationDetails({id:cartItem.location_id})
+                    }
+                    
                     const items = await CartItem.find({ cart: cartItem._id }).lean();
                     return { ...cartItem, items };
                 } else {
