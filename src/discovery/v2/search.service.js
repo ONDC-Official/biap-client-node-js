@@ -750,89 +750,128 @@ class SearchService {
   }
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
-        let matchQuery = [];
+        // Match queries for filtering
+        let matchQuery = [
+            { match: { language: targetLanguage } },
+            { match: { type: 'item' } }
+        ];
 
         if (searchRequest.domain) {
-            matchQuery.push({
-                match: {
-                    "context.domain": searchRequest.domain,
-                },
-            });
+            matchQuery.push({ match: { "context.domain": searchRequest.domain } });
         }
 
-        // Default language search
-        matchQuery.push({
-            match: {
-                language: targetLanguage,
-            },
-        });
-
-        matchQuery.push({
-            match: {
-                type: 'item',
-            },
-        });
-
         let query_obj = {
-            bool: {
-                must: matchQuery,
-                should: [
-                    // TODO: enable this once UI APIs have been changed
-                    {
-                        match: {
-                            "location_details.type": "pan",
-                        },
-                    },
-                    // Example geo_shape query (adjust as per your mapping)
-                    {
-                        geo_shape: {
-                            "location_details.polygons": {
-                                shape: {
-                                    type: "circle",
-                                    coordinates: [                     parseFloat(searchRequest.latitude),
-                                      parseFloat(searchRequest.longitude),],
-                                    radius: `${searchRequest.radius}km`
-                                },
-                                relation: "within"
-                            }
-                        }
-                    },
-                ],
-            },
-        };
+          bool: {
+              must: matchQuery,
+              should: [
+                  // TODO: enable this once UI APIs have been changed
+                  {
+                      match: {
+                          "location_details.type": "pan",
+                      },
+                  },
+                  {
+                      geo_shape: {
+                          "location_details.polygons": {
+                              shape: {
+                                  type: "point",
+                                  coordinates: [
+                                      parseFloat(searchRequest.latitude),
+                                      parseFloat(searchRequest.longitude),
+                                  ],
+                              },
+                          },
+                      },
+                  },
+              ],
+          },
+      };
 
-        // Perform the search query with the defined query
+        // Aggregation query
+        let aggr_query = {
+          "unique_location": {
+            composite: {
+              size: searchRequest.limit,
+              sources: [
+                  { location_id: { terms: { field: "location_details.id" } } }
+              ],
+              after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
+          },
+            "aggs": {
+              "top_products": {
+                "top_hits": {
+                  "size": 1,
+                  "sort": [
+                    { "location_details.median_time_to_ship": { "order": "asc" } }
+                  ],
+                //  "_source": ["location_details.median_time_to_ship"]
+                }
+              },
+              "location_time_to_ship": {
+                "min": {
+                  "field": "location_details.median_time_to_ship"
+                }
+              },
+              "sorted_buckets": {
+                "bucket_sort": {
+                  "sort": [
+                    { "location_time_to_ship": { "order": "asc" } }
+                  ],
+                 // "size": 10  // Adjust the size as needed
+                }
+              }
+            }
+          },
+          "unique_location_count": {
+            "cardinality": {
+              "field": "location_details.id"
+            }
+          }
+        }
+
+        // Perform the Elasticsearch search
         let queryResults = await client.search({
             index: 'items', // Replace with your index name
             body: {
                 query: query_obj,
-                size: searchRequest.limit,
-                from: searchRequest.afterKey ? searchRequest.afterKey : 0,
-                sort: [
-                    { "location_details.median_time_to_ship": { order: "asc" } }
-                ]
+                aggs: aggr_query,
+                //size: 0 // We don't need hits, just aggregations
             }
         });
 
-        // Extract and format response data
-        let data = queryResults.hits.hits.map(hit => ({
-            domain: hit._source.context.domain,
-            provider_descriptor: hit._source.provider_details.descriptor,
-            provider: hit._source.provider_details.id,
-            ...hit._source.location_details,
-        }));
+       // return queryResults;
 
-        // Return the response with count, data, and potentially pagination info
+        // Extract unique locations from aggregation results
+        let unique_locations = queryResults.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.top_products.hits.hits[0]._source;
+            return {
+                domain: details.context.domain,
+                provider_descriptor: details.provider_details.descriptor,
+                provider: details.provider_details.id,
+                ...details.location_details,
+                // ...details
+            };
+        });
+
+        // Get total count and pagination details
+        let totalCount = queryResults.aggregations.unique_location_count.value;
+        let totalPages = Math.ceil(totalCount / searchRequest.limit);
+        let afterKey = queryResults.aggregations.unique_location.after_key;
+
+        // Return the response with count, data, afterKey, and pages
         return {
-            count: queryResults.hits.total.value,
-            data: data,
-            afterKey: queryResults.hits.hits.length > 0 ? searchRequest.afterKey + queryResults.hits.hits.length : null // Example pagination key
+            count: totalCount,
+            data: unique_locations,
+            afterKey: afterKey,
+            pages: totalPages,
         };
 
     } catch (err) {
         throw err;
     }
 }
+
+
 
 
 
