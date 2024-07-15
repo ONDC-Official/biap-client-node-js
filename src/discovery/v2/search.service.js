@@ -748,197 +748,93 @@ class SearchService {
       throw err;
     }
   }
-
-
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
+        let matchQuery = [];
 
-      let matchQuery = []
-
-      if (searchRequest.domain) {
-        matchQuery.push({
-          match: {
-            "context.domain": searchRequest.domain,
-          },
-        },)
-      }
-
-      //default language search
-      matchQuery.push({
-        match: {
-          language: targetLanguage,
-        },
-      },)
-
-      matchQuery.push({
-        match: {
-          type: 'item',
-        },
-      },)
-
-      let query_obj = {
-        bool: {
-          must: matchQuery,
-          should: [
-            //TODO: enable this once UI apis have been changed
-            {
-              match: {
-                "location_details.type": "pan",
-              },
-            },
-            {
-              geo_shape: {
-                "location_details.polygons": {
-                  shape: {
-                    type: "point",
-                    coordinates: [
-                      parseFloat(searchRequest.latitude),
-                      parseFloat(searchRequest.longitude),
-                    ],
-                  },
+        if (searchRequest.domain) {
+            matchQuery.push({
+                match: {
+                    "context.domain": searchRequest.domain,
                 },
-              },
+            });
+        }
+
+        // Default language search
+        matchQuery.push({
+            match: {
+                language: targetLanguage,
             },
-          ],
-        },
-      };
-
-      //   bool: {
-      //     must: [
-      //       {
-      //         bool: {
-      //           should: [
-      //             {
-      //               match: {
-      //                 "item_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   fuzziness: "AUTO",
-      //                   operator: "or", // Match any words in the query
-      //                   boost: 2 // Boosting relevance score for name matches
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match: {
-      //                 "provider_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   fuzziness: "AUTO",
-      //                   operator: "or",
-      //                   boost: 2
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match_phrase_prefix: { // Match prefix for better relevance
-      //                 "item_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   max_expansions: 10,
-      //                   boost: 1.5
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match_phrase_prefix: {
-      //                 "provider_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   max_expansions: 10,
-      //                   boost: 1.5
-      //                 }
-      //               }
-      //             }
-      //           ]
-      //         }
-      //       },
-      //       {
-      //         match: {
-      //           "location_details.type.keyword": "pan",
-      //         },
-      //       },
-      //       {
-      //         geo_shape: {
-      //           "location_details.polygons": {
-      //             shape: {
-      //               type: "point",
-      //               coordinates: [
-      //                 parseFloat(searchRequest.latitude),
-      //                 parseFloat(searchRequest.longitude),
-      //               ],
-      //             },
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // };
-
-      // let query_obj = {bool:{}}
-      // Define the aggregation query
-      let aggr_query = {
-        unique_location: {
-          composite: {
-            size: searchRequest.limit,
-            sources: [
-              { location_id: { terms: { field: "location_details.id" } } }
-            ],
-            after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
-          },
-          aggs: {
-            products: {
-              top_hits: {
-                size: 1,
-              }
-            }
-          }
-        },
-        unique_location_count: {
-          cardinality: {
-            field: "location_details.id"
-          }
-        }
-      };
-
-      // Perform the search query with the defined query and aggregation
-      let queryResults = await client.search({
-        body: {
-          query: query_obj,
-          aggs: aggr_query,
-          size: 0
-        }
-      });
-
-      // Extract unique providers from the aggregation results
-      let unique_location = queryResults.aggregations.unique_location.buckets.map(bucket => {
-
-        const details = bucket.products.hits.hits.map((hit) => hit._source)[0];
-        return ({
-          domain: details.context.domain,
-          provider_descriptor: details.provider_details.descriptor,
-          provider: details.provider_details.id,
-          ...details.location_details,
         });
 
-        // return {...bucket.products.hits.hits[0]._source.location_details};
-      });
+        matchQuery.push({
+            match: {
+                type: 'item',
+            },
+        });
 
-      // Get the unique provider count
-      let totalCount = queryResults.aggregations.unique_location_count.value;
-      let totalPages = Math.ceil(totalCount / searchRequest.limit);
+        let query_obj = {
+            bool: {
+                must: matchQuery,
+                should: [
+                    // TODO: enable this once UI APIs have been changed
+                    {
+                        match: {
+                            "location_details.type": "pan",
+                        },
+                    },
+                    // Example geo_shape query (adjust as per your mapping)
+                    {
+                        geo_shape: {
+                            "location_details.polygons": {
+                                shape: {
+                                    type: "circle",
+                                    coordinates: [                     parseFloat(searchRequest.latitude),
+                                      parseFloat(searchRequest.longitude),],
+                                    radius: `${searchRequest.radius}km`
+                                },
+                                relation: "within"
+                            }
+                        }
+                    },
+                ],
+            },
+        };
 
-      // Get the after key for pagination
-      let afterKey = queryResults.aggregations.unique_location.after_key;
+        // Perform the search query with the defined query
+        let queryResults = await client.search({
+            index: 'items', // Replace with your index name
+            body: {
+                query: query_obj,
+                size: searchRequest.limit,
+                from: searchRequest.afterKey ? searchRequest.afterKey : 0,
+                sort: [
+                    { "location_details.median_time_to_ship": { order: "asc" } }
+                ]
+            }
+        });
 
-      // Return the response with count, data, afterKey, and pages
-      return {
-        count: totalCount,
-        data: unique_location,
-        afterKey: afterKey,
-        pages: totalPages,
-      };
+        // Extract and format response data
+        let data = queryResults.hits.hits.map(hit => ({
+            domain: hit._source.context.domain,
+            provider_descriptor: hit._source.provider_details.descriptor,
+            provider: hit._source.provider_details.id,
+            ...hit._source.location_details,
+        }));
+
+        // Return the response with count, data, and potentially pagination info
+        return {
+            count: queryResults.hits.total.value,
+            data: data,
+            afterKey: queryResults.hits.hits.length > 0 ? searchRequest.afterKey + queryResults.hits.hits.length : null // Example pagination key
+        };
 
     } catch (err) {
-      throw err;
+        throw err;
     }
-  }
+}
+
+
 
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {
@@ -1104,7 +1000,7 @@ class SearchService {
         body: {
           query: query_obj,
           aggs: aggr_query,
-          size: 0
+          size: 0,
         }
       });
 
