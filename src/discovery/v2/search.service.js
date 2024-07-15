@@ -173,7 +173,7 @@ class SearchService {
 
       searchQuery.push({
         match: {
-          "location_details.type.keyword": "pan",
+          "location_details.type": "pan",
         },
       });
 
@@ -362,6 +362,12 @@ class SearchService {
           },
         });
       }
+
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      });
 
       let query_obj = {
         bool: {
@@ -627,7 +633,7 @@ class SearchService {
           aggs: {
             unique_values: {
               terms: {
-                field: `attributes.${searchRequest.attribute_code}.keyword`, // Aggregation by 'Color' attribute
+                field: `attributes.${searchRequest.attribute_code}`, // Aggregation by 'Color' attribute
                 //          size: 10 // Adjust 'size' based on how many unique values you expect
               },
             },
@@ -666,7 +672,7 @@ class SearchService {
             //TODO: enable this once UI apis have been changed
             {
               match: {
-                "location_details.type.keyword": "pan",
+                "location_details.type": "pan",
               },
             },
             {
@@ -764,6 +770,12 @@ class SearchService {
         },
       },)
 
+      matchQuery.push({
+        match: {
+          type: 'item',
+        },
+      },)
+
       let query_obj = {
         bool: {
           must: matchQuery,
@@ -771,7 +783,7 @@ class SearchService {
             //TODO: enable this once UI apis have been changed
             {
               match: {
-                "location_details.type.keyword": "pan",
+                "location_details.type": "pan",
               },
             },
             {
@@ -969,7 +981,7 @@ class SearchService {
                 should: [
                   {
                     match: {
-                      "location_details.type.keyword": "pan",
+                      "location_details.type": "pan",
                     },
                   },
                   {
@@ -1307,7 +1319,7 @@ class SearchService {
 
       searchQuery.push({
         match: {
-          "location_details.type.keyword": "pan",
+          "location_details.type": "pan",
         },
       });
 
