@@ -1,6 +1,15 @@
 import { protocolSelect } from "../../../utils/protocolApis/index.js";
-
+import crypto from 'crypto'
 class BppSelectService {
+
+
+    async getShortHash(input) {
+        // Create a SHA-256 hash of the input string
+        const hash = crypto.createHash('sha256').update(input).digest('base64');
+      
+        // Take the first 12 characters of the base64 hash
+        return hash.substring(0, 12);
+      }
 
     /**
     * bpp select order
@@ -16,11 +25,16 @@ class BppSelectService {
 
             //check if item has customisation present
 
+            
             let items  = []
             let locationSet = new Set()
             for(let [index,item] of cart.items.entries()){
 
-                let parentItemId = "DI"+index.toString();
+                //create hash of item.id and all customisation.id to prepare 12 char hash ie parent item id
+                let parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+
+                let parentItemId =await this.getShortHash(parentItemKeys);
+
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -91,7 +105,7 @@ class BppSelectService {
                 selectRequest.message.order.offers = offers;
             }
             
-            console.log("select request",selectRequest)
+            console.log("select request",JSON.stringify(selectRequest))
             const response = await protocolSelect(selectRequest);
 
             return { context: context, message: response.message };
