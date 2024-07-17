@@ -7,8 +7,17 @@ import ContextFactory from "../../../factories/ContextFactory.js";
 import SearchService from "../../../discovery/v2/search.service.js";
 const bppSearchService = new SearchService();
 const bppInitService = new BppInitService();
+import crypto from 'crypto'
 
 class InitOrderService {
+
+    async getShortHash(input) {
+        // Create a SHA-256 hash of the input string
+        const hash = crypto.createHash('sha256').update(input).digest('base64');
+      
+        // Take the first 12 characters of the base64 hash
+        return hash.substring(0, 12);
+      }
 
     /**
      * 
@@ -77,7 +86,12 @@ class InitOrderService {
             let itemProducts = []
             for(let item of orderRequest.items){
 
-                let parentItemId = item?.parent_item_id?.toString();
+
+                //create hash of item.id and all customisation.id to prepare 12 char hash ie parent item id
+                let parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+
+                let parentItemId =await this.getShortHash(parentItemKeys);
+
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -92,7 +106,7 @@ class InitOrderService {
                 }
 
                 if(item?.parent_item_id){
-                    let parentItemId = item?.parent_item_id?.toString();
+                    let parentItemId = parentItemId 
                     selectitem.parent_item_id = parentItemId;
                 }
 
