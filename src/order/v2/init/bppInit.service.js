@@ -57,7 +57,13 @@ class BppInitService {
             for(let item of order.items){
 
                 //create hash of item.id and all customisation.id to prepare 12 char hash ie parent item id
-                let parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+                let parentItemKeys
+                if(item.customisations){
+                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+
+                }else{
+                    parentItemKeys = item?.local_id?.toString()
+                }
 
                 let parentItemId =await this.getShortHash(parentItemKeys);
 
