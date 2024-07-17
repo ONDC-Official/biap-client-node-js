@@ -760,6 +760,11 @@ class SearchService {
             matchQuery.push({ match: { "context.domain": searchRequest.domain } });
         }
 
+        if (searchRequest.provider) {
+          matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
+       }
+
+
         let query_obj = {
           bool: {
               must: matchQuery,
