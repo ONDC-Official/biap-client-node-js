@@ -106,7 +106,7 @@ class InitOrderService {
                 }
 
                 if(item?.parent_item_id){
-                    let parentItemId = parentItemId 
+                    //let parentItemId = parentItemId 
                     selectitem.parent_item_id = parentItemId;
                 }
 
