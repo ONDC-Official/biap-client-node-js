@@ -482,7 +482,21 @@ class SearchService {
           });
 
           item_details.related_items = queryResults.hits.hits.map(
-            (hit) => hit._source,
+            (hit) => {
+             let data =  hit._source 
+
+                   //map attribute keys 
+      const flatObject = {};
+      if(data.attribute_key_values && data.attribute_key_values.length>0){
+        data.attribute_key_values.forEach(pair => {
+          flatObject[pair.key] = pair.value;
+      });
+      }
+      data.attributes = flatObject
+
+            return  data;
+            
+            },
           );
         } else if (item_details.customisation_groups.length > 0) {
           //fetch all customisation items - customisation_group_id
