@@ -586,40 +586,24 @@ class SearchService {
       }
   
       const response = await client.search({
-        index: "items",
+        index: 'items',
         size: 0, // We don't need actual documents, only aggregation results
         body: {
           query: {
             bool: {
-              must: [
-                // Add other search criteria if necessary
-              ]
+              // Add other search criteria if necessary
             }
           },
           aggs: {
-            tags_nested: {
+            unique_attribute_keys: {
               nested: {
-                path: "item_details.tags"
+                path: 'attribute_key_values'
               },
               aggs: {
-                attribute_filter: {
-                  filter: {
-                    term: { "item_details.tags.code": "attribute" }
-                  },
-                  aggs: {
-                    list_nested: {
-                      nested: {
-                        path: "item_details.tags.list"
-                      },
-                      aggs: {
-                        unique_attribute_keys: {
-                          terms: {
-                            field: "item_details.tags.list.code.keyword", // Ensure this is correct
-                            size: 1000 // Adjust this size if needed
-                          }
-                        }
-                      }
-                    }
+                unique_keys: {
+                  terms: {
+                    field: 'attribute_key_values.key',
+                    size: 1000  // Adjust the size as needed
                   }
                 }
               }
@@ -627,28 +611,22 @@ class SearchService {
           }
         }
       });
+  
+      const uniqueKeys = response.aggregations.unique_attribute_keys.unique_keys.buckets.map((bucket) =>  { return {code:bucket.key}});
+      console.log(uniqueKeys);
+
+      return { response: { data: uniqueKeys, count: uniqueKeys.length, pages: 1 } };
       
-      // Extract unique keys from the aggregation results
-      const uniqueKeys = response.aggregations.tags_nested.attribute_filter.list_nested.unique_attribute_keys.buckets.map(bucket => bucket.key);
-      
-      // Format the result
-      const keyObjects = uniqueKeys.map(key => ({ code: key }));
-      
-      return { response: { data: keyObjects, count: keyObjects.length, pages: 1 } };
-      
+
     } catch (err) {
       throw err;
     }
   }
   
-  
-  
-  
-
   async getAttributesValues(searchRequest) {
     try {
       let matchQuery = [];
-
+  
       if (searchRequest.category) {
         matchQuery.push({
           match: {
@@ -656,7 +634,7 @@ class SearchService {
           },
         });
       }
-
+  
       if (searchRequest.provider) {
         matchQuery.push({
           match: {
@@ -664,37 +642,74 @@ class SearchService {
           },
         });
       }
-
-      const response = await client.search({
-        body: {
+  
+      // Create the nested query based on the provided attribute key
+      let attributeQuery = {
+        nested: {
+          path: "attribute_key_values",
           query: {
             bool: {
-              must: matchQuery,
-            },
-          },
+              must: [
+                { term: { "attribute_key_values.key": searchRequest.attribute_code} }  // Replace "gender" as needed
+              ]
+            }
+          }
+        }
+      };
+  
+      // Combine all the queries
+      const response = await client.search({
+        index: 'items',
+        body: {
           size: 0,
-          aggs: {
-            unique_values: {
-              terms: {
-                field: `attributes.${searchRequest.attribute_code}`, // Aggregation by 'Color' attribute
-                //          size: 10 // Adjust 'size' based on how many unique values you expect
-              },
-            },
+          query: {
+            bool: {
+              must: [
+                ...matchQuery,
+                attributeQuery
+              ]
+            }
           },
+          aggs: {
+            unique_attribute_values: {
+              nested: {
+                path: "attribute_key_values"
+              },
+              aggs: {
+                filtered_attribute: {
+                  filter: {
+                    term: {
+                      "attribute_key_values.key": searchRequest.attribute_code// Replace "gender" as needed
+                    }
+                  },
+                  aggs: {
+                    unique_values: {
+                      terms: {
+                        field: "attribute_key_values.value",
+                        size: 1000  // Adjust the size as needed
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         },
       });
-      console.log(response);
-
-      const uniqueValues = response.aggregations.unique_values.buckets.map(
+  
+      // Access the aggregation results correctly
+      const uniqueValues = response.aggregations.unique_attribute_values.filtered_attribute.unique_values.buckets.map(
         (bucket) => bucket.key,
       );
-      //    console.log(body.hits.hits); // Print the matching documents
-      // Extract and return the hits (documents)
-      return { response: { data: uniqueValues, count: uniqueValues.length } }; //.body.hits.hits;
+  
+      // Return the result
+      return { response: { data: uniqueValues, count: uniqueValues.length } };
+  
     } catch (err) {
       throw err;
     }
   }
+  
 
   async getLocations1(searchRequest, targetLanguage = "en") {
     try {
