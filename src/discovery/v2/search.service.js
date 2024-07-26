@@ -422,6 +422,7 @@ class SearchService {
       };
 
       let queryResults = await client.search({
+        index: 'items',
         query: query_obj,
       });
 
@@ -529,9 +530,18 @@ class SearchService {
           );
         }
       }
-
+                 console.log("itemdetails--->",item_details)
       item_details.locations = [item_details.location_details]
-      //            console.log("itemdetails--->",item_details)
+
+      //map attribute keys 
+      const flatObject = {};
+      if(item_details.attribute_key_values && item_details.attribute_key_values.length>0){
+        item_details.attribute_key_values.forEach(pair => {
+          flatObject[pair.key] = pair.value;
+      });
+      }
+      item_details.attributes = flatObject
+
       return item_details;
 
       // TODO: attach related items
@@ -544,7 +554,7 @@ class SearchService {
   async getAttributes(searchRequest) {
     try {
       let matchQuery = [];
-
+  
       if (searchRequest.category) {
         matchQuery.push({
           match: {
@@ -552,7 +562,7 @@ class SearchService {
           },
         });
       }
-
+  
       if (searchRequest.provider) {
         matchQuery.push({
           match: {
@@ -560,47 +570,66 @@ class SearchService {
           },
         });
       }
-
+  
       const response = await client.search({
-        size: 0, // We don't need the actual documents, just the aggregation results
+        index: "items",
+        size: 0, // We don't need actual documents, only aggregation results
         body: {
           query: {
             bool: {
-              must: matchQuery,
-            },
+              must: [
+                // Add other search criteria if necessary
+              ]
+            }
           },
           aggs: {
-            unique_keys: {
-              scripted_metric: {
-                init_script: "state.keys = new HashSet();",
-                map_script: `
-              for (entry in params._source.attributes.entrySet()) {
-                state.keys.add(entry.getKey());
-              }
-            `,
-                combine_script: "return state.keys;",
-                reduce_script: `
-              Set uniqueKeys = new HashSet();
-              for (state in states) {
-                uniqueKeys.addAll(state);
-              }
-              return uniqueKeys;
-            `,
+            tags_nested: {
+              nested: {
+                path: "item_details.tags"
               },
-            },
-          },
-        },
+              aggs: {
+                attribute_filter: {
+                  filter: {
+                    term: { "item_details.tags.code": "attribute" }
+                  },
+                  aggs: {
+                    list_nested: {
+                      nested: {
+                        path: "item_details.tags.list"
+                      },
+                      aggs: {
+                        unique_attribute_keys: {
+                          terms: {
+                            field: "item_details.tags.list.code.keyword", // Ensure this is correct
+                            size: 1000 // Adjust this size if needed
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       });
-
-      // Extract the unique keys from the aggregation results
-      const uniqueKeys = Array.from(response.aggregations.unique_keys.value);
-
-      const keyObjects = uniqueKeys.map((key) => ({ code: key }));
-      return { response: { data: keyObjects, count: 1, pages: 1 } };
+      
+      // Extract unique keys from the aggregation results
+      const uniqueKeys = response.aggregations.tags_nested.attribute_filter.list_nested.unique_attribute_keys.buckets.map(bucket => bucket.key);
+      
+      // Format the result
+      const keyObjects = uniqueKeys.map(key => ({ code: key }));
+      
+      return { response: { data: keyObjects, count: keyObjects.length, pages: 1 } };
+      
     } catch (err) {
       throw err;
     }
   }
+  
+  
+  
+  
 
   async getAttributesValues(searchRequest) {
     try {
@@ -891,22 +920,17 @@ class SearchService {
             {
               bool: {
                 should: [
+
                   {
-                    regexp: {
-                      "item_details.descriptor.name": {
-                        value: `.*${searchRequest.name}.*`,
-                        case_insensitive: true,
-                      },
-                    },
+                    "match_phrase": {
+                      "item_details.descriptor.name": searchRequest.name
+                    }
                   },
                   {
-                    regexp: {
-                      "provider_details.descriptor.name": {
-                        value: `.*${searchRequest.name}.*`,
-                        case_insensitive: true,
-                      },
-                    },
-                  },
+                    "match_phrase": {
+                      "provider_details.descriptor.name":searchRequest.name
+                    }
+                  }
                 ],
               },
             },
