@@ -997,83 +997,13 @@ class SearchService {
         },
       };
 
-      // let query_obj = {
-      //   bool: {
-      //     must: [
-      //       {
-      //         bool: {
-      //           should: [
-      //             {
-      //               match: {
-      //                 "item_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   fuzziness: "AUTO",
-      //                   operator: "or", // Match any words in the query
-      //                   boost: 2 // Boosting relevance score for name matches
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match: {
-      //                 "provider_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   fuzziness: "AUTO",
-      //                   operator: "or",
-      //                   boost: 2
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match_phrase_prefix: { // Match prefix for better relevance
-      //                 "item_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   max_expansions: 10,
-      //                   boost: 1.5
-      //                 }
-      //               }
-      //             },
-      //             {
-      //               match_phrase_prefix: {
-      //                 "provider_details.descriptor.name": {
-      //                   query: searchRequest.name,
-      //                   max_expansions: 10,
-      //                   boost: 1.5
-      //                 }
-      //               }
-      //             }
-      //           ]
-      //         }
-      //       },
-      //       {
-      //         match: {
-      //           "location_details.type.keyword": "pan",
-      //         },
-      //       },
-      //       {
-      //         geo_shape: {
-      //           "location_details.polygons": {
-      //             shape: {
-      //               type: "point",
-      //               coordinates: [
-      //                 parseFloat(searchRequest.latitude),
-      //                 parseFloat(searchRequest.longitude),
-      //               ],
-      //             },
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // };
-
-      // let query_obj = {bool:{}}
       // Define the aggregation query
       let aggr_query = {
         unique_providers: {
           composite: {
             size: searchRequest.limit,
             sources: [
-              { provider_id: { terms: { field: "provider_details.id" } } }
+              { provider_id: { terms: { field: "location_details.id" } } }
             ],
             after: searchRequest.afterKey ? { provider_id: searchRequest.afterKey } : undefined
           },
@@ -1087,7 +1017,7 @@ class SearchService {
         },
         unique_provider_count: {
           cardinality: {
-            field: "provider_details.id"
+            field: "location_details.id"
           }
         }
       };
