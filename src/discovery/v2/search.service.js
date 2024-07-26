@@ -622,7 +622,7 @@ class SearchService {
         body: {
           query: {
             bool: {
-              // Add other search criteria if necessary
+              must: matchQuery
             }
           },
           aggs: {
