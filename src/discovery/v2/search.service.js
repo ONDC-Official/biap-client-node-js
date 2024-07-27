@@ -983,14 +983,24 @@ class SearchService {
 
                   {
                     "match_phrase": {
-                      "item_details.descriptor.name": searchRequest.name
-                    }
-                  },
-                  {
-                    "match_phrase": {
                       "provider_details.descriptor.name":searchRequest.name
                     }
-                  }
+                  },{
+                    "match_phrase": {
+                      "item_details.descriptor.name": searchRequest.name,
+                    },
+                  },{
+                    "match_phrase": {
+                      "item_details.descriptor.short_desc": searchRequest.name,
+                    },},
+                    {
+                    "match_phrase": {
+                      "item_details.descriptor.long_desc": searchRequest.name,
+                    },},
+                    {
+                    "match_phrase": {
+                      "item_details.category_id": searchRequest.name,
+                    },}
                 ],
               },
             },
@@ -1041,7 +1051,7 @@ class SearchService {
           aggs: {
             products: {
               top_hits: {
-                size: 1,
+                size: 100,
               }
             }
           }
