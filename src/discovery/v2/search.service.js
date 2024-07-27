@@ -56,27 +56,29 @@ class SearchService {
         if (key.startsWith('product_attr_')) {
             const attributeName = key.slice('product_attr_'.length);
             // productAttrParams[attributeName] = value;
-            matchQuery.push({
-              "nested": {
-                "path": "attribute_key_values",
-                "query": {
-                  "bool": {
-                    "must": [
-                      {
-                        "term": {
-                          "attribute_key_values.key": attributeName
+            if(value){
+              matchQuery.push({
+                "nested": {
+                  "path": "attribute_key_values",
+                  "query": {
+                    "bool": {
+                      "must": [
+                        {
+                          "term": {
+                            "attribute_key_values.key": attributeName
+                          }
+                        },
+                        {
+                          "term": {
+                            "attribute_key_values.value": value
+                          }
                         }
-                      },
-                      {
-                        "term": {
-                          "attribute_key_values.value": value
-                        }
-                      }
-                    ]
+                      ]
+                    }
                   }
                 }
-              }
-            });
+              });
+            }
         }
     }
 
