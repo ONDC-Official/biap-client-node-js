@@ -942,10 +942,10 @@ class SearchService {
                 null;
 
             return {
-                // domain: details.context.domain,
-                // provider_descriptor: details.provider_details.descriptor,
-                // provider: details.provider_details.id,
-                // ...details.location_details,
+                domain: details.context.domain,
+                provider_descriptor: details.provider_details.descriptor,
+                provider: details.provider_details.id,
+                ...details.location_details,
                 combined_distance_and_time:((distance * 60) / 15) + (details.location_details.median_time_to_ship/60),
                 distance: distance,
                 time_to_ship:details.location_details.median_time_to_ship
