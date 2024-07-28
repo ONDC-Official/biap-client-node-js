@@ -882,47 +882,7 @@ class SearchService {
             },
         };
 
-        // Aggregation query
-        let aggr_query = {
-            unique_location: {
-                composite: {
-                    size: searchRequest.limit,
-                    sources: [
-                        { location_id: { terms: { field: "location_details.id" } } }
-                    ],
-                    after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
-                },
-                aggs: {
-                    top_products: {
-                        top_hits: {
-                            size: 1,
-                            sort: [
-                                { "location_details.median_time_to_ship": { "order": "asc" } }
-                            ],
-                        }
-                    },
-                    location_time_to_ship: {
-                        min: {
-                            field: "location_details.median_time_to_ship"
-                        }
-                    },
-                    sorted_buckets: {
-                        bucket_sort: {
-                            sort: [
-                                { "location_time_to_ship": { "order": "asc" } }
-                            ],
-                        }
-                    }
-                }
-            },
-            unique_location_count: {
-                cardinality: {
-                    field: "location_details.id"
-                }
-            }
-        };
-
-        // Script to combine distance and median_time_to_ship for sorting
+        // Script to calculate distance
         let script_sort = {
             _script: {
                 type: "number",
@@ -930,15 +890,30 @@ class SearchService {
                     source: `
                         double distance = 0.0;
                         if (doc.containsKey('location_details.circle.gps') && !doc['location_details.circle.gps'].empty) {
-                            double lat = doc['location_details.circle.gps'].lat;
-                            double lon = doc['location_details.circle.gps'].lon;
-                            distance = Math.sqrt(Math.pow(lat - params.lat, 2) + Math.pow(lon - params.lon, 2));
-                            double speed = 15.0; // Speed in km/h
-                            double timeInMinutes = distance * 60 / speed;
-                            distance = timeInMinutes;
+                            // Get the GPS coordinates from the document
+                            double docLat = doc['location_details.circle.gps'].lat;
+                            double docLon = doc['location_details.circle.gps'].lon;
+
+                            // Convert latitude and longitude from degrees to radians
+                            double lat1 = Math.toRadians(docLat);
+                            double lon1 = Math.toRadians(docLon);
+                            double lat2 = Math.toRadians(params.lat);
+                            double lon2 = Math.toRadians(params.lon);
+
+                            // Haversine formula
+                            double dLat = lat2 - lat1;
+                            double dLon = lon2 - lon1;
+                            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                       Math.cos(lat1) * Math.cos(lat2) *
+                                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                            double earthRadius = 6371; // Earth's radius in kilometers
+                            distance = earthRadius * c;
                         }
                         double timeToShip = !doc['location_details.median_time_to_ship'].empty ? doc['location_details.median_time_to_ship'].value : 0;
-                        return (distance +timeToShip);
+
+                        // Return the combined value for sorting
+                        return  ((distance * 60) / 15) + (timeToShip/60);
                     `,
                     params: {
                         lat: parseFloat(searchRequest.latitude),
@@ -954,42 +929,37 @@ class SearchService {
             index: 'items', // Replace with your index name
             body: {
                 query: query_obj,
-                aggs: aggr_query,
                 sort: [script_sort]
             }
         });
 
-        // Extract unique locations from aggregation results
-        let unique_locations = queryResults.aggregations.unique_location.buckets.map(bucket => {
-            const details = bucket.top_products.hits.hits[0]._source;
+        // Extract unique locations from search results
+        let unique_locations = queryResults.hits.hits.map(hit => {
+            const details = hit._source;
             const gps = details.location_details.circle && details.location_details.circle.gps ? details.location_details.circle.gps.split(',') : [null, null];
             const distance = (gps[0] && gps[1]) ? 
                 Math.sqrt(Math.pow(parseFloat(gps[0]) - parseFloat(searchRequest.latitude), 2) + Math.pow(parseFloat(gps[1]) - parseFloat(searchRequest.longitude), 2)) : 
                 null;
-            const timeToShip = details.location_details.median_time_to_ship ? details.location_details.median_time_to_ship : 0;
 
             return {
-                domain: details.context.domain,
-                provider_descriptor: details.provider_details.descriptor,
-                provider: details.provider_details.id,
-                ...details.location_details,
-                combined_distance_and_time: (distance * 60 / 15) + timeToShip,
-                distance: distance * 60 / 15,
-                time_to_ship: timeToShip
+                // domain: details.context.domain,
+                // provider_descriptor: details.provider_details.descriptor,
+                // provider: details.provider_details.id,
+                // ...details.location_details,
+                combined_distance_and_time:((distance * 60) / 15) + (details.location_details.median_time_to_ship/60),
+                distance: distance,
+                time_to_ship:details.location_details.median_time_to_ship
+
             };
         });
 
-        // Get total count and pagination details
-        let totalCount = queryResults.aggregations.unique_location_count.value;
-        let totalPages = Math.ceil(totalCount / searchRequest.limit);
-        let afterKey = queryResults.aggregations.unique_location.after_key;
+        // Get total count
+        let totalCount = queryResults.hits.total.value;
 
-        // Return the response with count, data, afterKey, and pages
+        // Return the response with count, data
         return {
             count: totalCount,
-            data: unique_locations,
-            afterKey: afterKey,
-            pages: totalPages,
+            data: unique_locations
         };
 
     } catch (err) {
@@ -997,6 +967,7 @@ class SearchService {
         throw err;
     }
 }
+
 
 
 
