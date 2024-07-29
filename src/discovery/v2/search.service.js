@@ -746,7 +746,6 @@ class SearchService {
       throw err;
     }
   }
-  
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
         // Match queries for filtering
@@ -766,7 +765,7 @@ class SearchService {
         // Build the main query object
         let query_obj = {
             bool: {
-                must: matchQuery,
+                must: [...matchQuery, { exists: { field: "location_details" } }],
                 should: [
                     {
                         match: {
@@ -790,61 +789,111 @@ class SearchService {
             },
         };
 
-        // Script to calculate distance for sorting
-        let script_sort = {
-            _script: {
-                type: "number",
-                script: {
-                    source: `
-                        double toRadians(double degrees) {
-                            return degrees * Math.PI / 180;
-                        }
-                        
-                        double distance = 0.0;
-                        if (doc.containsKey('location_details.circle.gps') && !doc['location_details.circle.gps'].empty) {
-                            double docLat = doc['location_details.circle.gps'].lat;
-                            double docLon = doc['location_details.circle.gps'].lon;
-
-                            double lat1 = toRadians(docLat);
-                            double lon1 = toRadians(docLon);
-                            double lat2 = toRadians(params.lat);
-                            double lon2 = toRadians(params.lon);
-
-                            double dLat = lat2 - lat1;
-                            double dLon = lon2 - lon1;
-                            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                                       Math.cos(lat1) * Math.cos(lat2) *
-                                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                            double earthRadius = 6371; // Earth's radius in kilometers
-                            distance = earthRadius * c;
-                        }
-                        return distance;
-                    `,
-                    params: {
-                        lat: parseFloat(searchRequest.latitude),
-                        lon: parseFloat(searchRequest.longitude)
-                    }
-                },
-                order: "asc"
-            }
-        };
-
         // Perform the Elasticsearch search
         let queryResults = await client.search({
-            index: 'items', // Replace with your index name
+            index: 'items', // specify your index name
             body: {
+                size: 0,
                 query: query_obj,
-                sort: [script_sort]
+                aggs: {
+                    unique_location: {
+                        composite: {
+                            size: searchRequest.limit,
+                            sources: [
+                                {
+                                    location_id: {
+                                        terms: {
+                                            field: "location_details.id"
+                                        }
+                                    }
+                                }
+                            ],
+                            after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
+                        },
+                        aggs: {
+                            top_product: {
+                                top_hits: {
+                                    size: 1,
+                                    _source: {
+                                        includes: [
+                                            "location_details.circle.gps",
+                                            "location_details.median_time_to_ship",
+                                            "context.domain",
+                                            "provider_details.descriptor",
+                                            "provider_details.id"
+                                        ]
+                                    }
+                                }
+                            },
+                            distance_and_time: {
+                                scripted_metric: {
+                                    init_script: "state.distances = []",
+                                    map_script: `
+                                        if (doc['location_details.circle.gps'].size() > 0 && doc['location_details.median_time_to_ship'].size() > 0) {
+                                            def lat = doc['location_details.circle.gps'].lat;
+                                            def lon = doc['location_details.circle.gps'].lon;
+                                            def timeToShip = doc['location_details.median_time_to_ship'].value;
+                                            double lat1 = params.lat * Math.PI / 180;
+                                            double lon1 = params.lon * Math.PI / 180;
+                                            double lat2 = lat * Math.PI / 180;
+                                            double lon2 = lon * Math.PI / 180;
+                                            double dLat = lat2 - lat1;
+                                            double dLon = lon2 - lon1;
+                                            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                                            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                                            double earthRadius = 6371;
+                                            double distance = earthRadius * c;
+                                            distance = ((distance * 60) / 15) + (timeToShip / 60);
+                                            state.distances.add(distance);
+                                        }
+                                    `,
+                                    combine_script: "state.distances",
+                                    reduce_script: `
+                                        double minDist = Double.POSITIVE_INFINITY;
+                                        for (d in states) {
+                                            for (dist in d) {
+                                                if (dist < minDist) {
+                                                    minDist = dist;
+                                                }
+                                            }
+                                        }
+                                        return minDist;
+                                    `,
+                                    params: {
+                                        lat: parseFloat(searchRequest.latitude),
+                                        lon: parseFloat(searchRequest.longitude)
+                                    }
+                                }
+                            },
+                            sorted_buckets: {
+                                bucket_sort: {
+                                    sort: [
+                                        {
+                                            "distance_and_time.value": {
+                                                order: "asc"
+                                            }
+                                        }
+                                    ],
+                                    size: 100
+                                }
+                            }
+                        }
+                    },
+                    unique_location_count: {
+                        cardinality: {
+                            field: "location_details.id"
+                        }
+                    }
+                }
             }
         });
 
         // Extract unique locations from search results
-        let unique_locations = queryResults.hits.hits.map(hit => {
-            const details = hit._source;
-            const gps = details.location_details.circle && details.location_details.circle.gps ? details.location_details.circle.gps.split(',') : [null, null];
+        let unique_locations = queryResults.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.top_product.hits.hits[0]._source;
             let distance = 0;
-            if (gps[0] && gps[1]) {
+            if (details.location_details.circle && details.location_details.circle.gps) {
+                const gps = details.location_details.circle.gps.split(',');
                 const docLat = parseFloat(gps[0]);
                 const docLon = parseFloat(gps[1]);
                 const lat1 = docLat * Math.PI / 180;
@@ -864,10 +913,10 @@ class SearchService {
             const timeToShip = details.location_details.median_time_to_ship ? details.location_details.median_time_to_ship : 0;
 
             return {
-                // domain: details.context.domain,
-                // provider_descriptor: details.provider_details.descriptor,
-                // provider: details.provider_details.id,
-                // ...details.location_details,
+                domain: details.context.domain,
+                provider_descriptor: details.provider_details.descriptor,
+                provider: details.provider_details.id,
+                ...details.location_details,
                 combined_distance_and_time: ((distance * 60) / 15) + (timeToShip / 60),
                 distance: distance,
                 time_to_ship: timeToShip
@@ -875,13 +924,15 @@ class SearchService {
         });
 
         // Get total count and pagination details
-        let totalCount = queryResults.hits.total.value;
+        let totalCount = queryResults.aggregations.unique_location_count.value;
+        let afterKey = queryResults.aggregations.unique_location.after_key;
         let totalPages = Math.ceil(totalCount / searchRequest.limit);
 
-        // Return the response with count, data, and pages
+        // Return the response with count, data, afterKey, and pages
         return {
             count: totalCount,
             data: unique_locations,
+            afterKey: afterKey,
             pages: totalPages,
         };
 
@@ -890,18 +941,6 @@ class SearchService {
         throw err;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {
