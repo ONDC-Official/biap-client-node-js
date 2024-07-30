@@ -659,6 +659,71 @@ class SearchService {
       throw err;
     }
   }
+
+  async getUniqueCategories(searchRequest, targetLanguage = "en") {
+    let matchQuery = [];
+
+    if (searchRequest.domain) {
+      matchQuery.push({
+        match: {
+          "context.domain": searchRequest.domain,
+        },
+      });
+    }
+
+    matchQuery.push({
+      match: {
+        language: targetLanguage,
+      },
+    });
+
+    let query_obj = {
+      bool: {
+        must: matchQuery,
+      },
+    };
+
+    const totalCategories = await client.search({
+      index: "items",
+      size: 0,
+      query: query_obj,
+      aggs: {
+        domainCategories: {
+          terms: {
+            field: "context.domain",
+            size:10000000
+          },
+          aggs: {
+            uniqueCategories: {
+              terms: {
+                field: "item_details.category_id",
+                size:1000000
+              },
+            },
+          },
+        },
+      },
+    });
+
+    console.log("CATEGORIES", totalCategories);
+  
+    const domainBuckets = totalCategories.aggregations.domainCategories.buckets;
+
+    console.log("DOMAIN BUCKETS", totalCategories.aggregations.domainCategories.buckets);
+
+    let result = {};
+  
+    domainBuckets.forEach(domainBucket => {
+      const domainName = domainBucket.key;
+      const uniqueCategories = domainBucket.uniqueCategories.buckets.map(category => {
+        return { code: category.key, label: category.key };
+      });
+  
+      result[domainName] = uniqueCategories;
+    });
+  
+    return result;
+  }
   
   async getAttributesValues(searchRequest) {
     try {
@@ -874,7 +939,7 @@ class SearchService {
                                             }
                                         }
                                     ],
-                                    size: 100
+                                    size: searchRequest.limit
                                 }
                             }
                         }
@@ -941,6 +1006,8 @@ class SearchService {
         throw err;
     }
 }
+
+
 
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {

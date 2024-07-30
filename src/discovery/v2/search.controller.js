@@ -253,6 +253,25 @@ class SearchController {
         });
     }
 
+
+    getUniqueCategories(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+
+        searchService.getUniqueCategories(searchRequest,targetLanguage).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
     /**
     * get attribute values
     * @param {*} req    HTTP request object
