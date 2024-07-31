@@ -811,9 +811,23 @@ class SearchService {
       throw err;
     }
   }
+
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
-        // Match queries for filtering
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const toRadians = (degree) => degree * Math.PI / 180;
+            const R = 6371; // Radius of the Earth in km
+            const dLat = toRadians(lat2 - lat1);
+            const dLon = toRadians(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in km
+        };
+
+        // Match queries for filtering common conditions
         let matchQuery = [
             { match: { language: targetLanguage } },
             { match: { type: 'item' } }
@@ -826,40 +840,8 @@ class SearchService {
         if (searchRequest.provider) {
             matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
         }
-        
-        let query_obj = {
-          bool: {
-              must: matchQuery,
-              filter: [
-                  {
-                      bool: {
-                          should: [
-                              {
-                                  match: {
-                                      "location_details.type": "pan",
-                                  },
-                              },
-                              {
-                                  geo_shape: {
-                                      "location_details.polygons": {
-                                          relation: "intersects",
-                                          shape: {
-                                              type: "point",
-                                              coordinates: [
-                                                  parseFloat(searchRequest.latitude),
-                                                  parseFloat(searchRequest.longitude),
-                                              ],
-                                          },
-                                      },
-                                  },
-                              },
-                          ],
-                      },
-                  },
-              ],
-          },
-      };
 
+        // Aggregation query
         let aggr_query = {
             unique_location: {
                 composite: {
@@ -884,46 +866,132 @@ class SearchService {
             }
         };
 
-        // Perform the Elasticsearch search
-        let queryResults = await client.search({
+        // First query: Results within 5km
+        let queryWithin5km = {
+            bool: {
+                must: matchQuery,
+                filter: [
+                    {
+                        geo_distance: {
+                            distance: "5km",
+                            "location_details.circle.gps": {
+                                lat: parseFloat(searchRequest.latitude),
+                                lon: parseFloat(searchRequest.longitude)
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+
+        // Second query: Results more than 5km away with type=PAN, limit 1000
+        let queryBeyond5kmWithPAN = {
+            bool: {
+                must: [
+                    ...matchQuery,
+                    { match: { "location_details.type": "pan" } }
+                ],
+                must_not: [
+                    {
+                        geo_distance: {
+                            distance: "5km",
+                            "location_details.circle.gps": {
+                                lat: parseFloat(searchRequest.latitude),
+                                lon: parseFloat(searchRequest.longitude)
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+
+        // Perform the Elasticsearch search for within 5km
+        let resultsWithin5km = await client.search({
             index: 'items', // specify your index name
             body: {
-                query: query_obj,
+                query: queryWithin5km,
                 aggs: aggr_query,
                 size: 0
             }
         });
-        
-        // Extract unique providers from the aggregation results
-        let unique_location = queryResults.aggregations.unique_location.buckets.map(bucket => {
-            const details = bucket.products.hits.hits.map((hit) => hit._source)[0];
-            return ({
-                domain: details.context.domain,
-                provider_descriptor: details.provider_details.descriptor,
-                provider: details.provider_details.id,
-                ...details.location_details,
-            });
+
+        // Perform the Elasticsearch search for beyond 5km with type=PAN
+        let resultsBeyond5kmWithPAN = await client.search({
+            index: 'items', // specify your index name
+            body: {
+                query: queryBeyond5kmWithPAN,
+                aggs: aggr_query,
+                size: 0
+            }
         });
 
-        // Get the unique provider count
-        let totalCount = queryResults.aggregations.unique_location_count.value;
-        let totalPages = Math.ceil(totalCount / searchRequest.limit);
+        // Extract and process hits from both query results
+        let hitsWithin5km = resultsWithin5km.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.products.hits.hits[0]._source;
+            if (details.location_details.circle && details.location_details.circle.gps) {
+                const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
+                const distance = haversineDistance(
+                    parseFloat(searchRequest.latitude),
+                    parseFloat(searchRequest.longitude),
+                    lat,
+                    lon
+                );
+                return {
+                    domain: details.context.domain,
+                    provider_descriptor: details.provider_details.descriptor,
+                    provider: details.provider_details.id,
+                    ...details.location_details,
+                    distance: distance  ,
+                    distance_time_to_ship: ((distance * 60) / 15)+(details.location_details.median_time_to_ship/60) ,
+                    median_time_to_ship: details.median_time_to_ship/60 // Include median time to ship
+                };
+            } else {
+                return null; // Exclude results without GPS data
+            }
+        }).filter(result => result !== null) // Remove null entries
+        .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Sort by distance + median_time_to_ship
 
-        // Get the after key for pagination
-        let afterKey = queryResults.aggregations.unique_location.after_key;
+        let hitsBeyond5kmWithPAN = resultsBeyond5kmWithPAN.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.products.hits.hits[0]._source;
+            if (details.location_details.circle && details.location_details.circle.gps) {
+                const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
+                const distance = haversineDistance(
+                    parseFloat(searchRequest.latitude),
+                    parseFloat(searchRequest.longitude),
+                    lat,
+                    lon
+                );
+                return {
+                    domain: details.context.domain,
+                    provider_descriptor: details.provider_details.descriptor,
+                    provider: details.provider_details.id,
+                    ...details.location_details,
+                    distance,
+                    median_time_to_ship: details.location_details.median_time_to_ship // Include median time to ship
+                };
+            } else {
+                return null; // Exclude results without GPS data
+            }
+        }).filter(result => result !== null) // Remove null entries
+        .sort((a, b) => a.median_time_to_ship - b.median_time_to_ship); // Sort by median_time_to_ship
 
-        // Return the response with count, data, afterKey, and pages
+        // Merge results
+        let allResults = [...hitsWithin5km, ...hitsBeyond5kmWithPAN];
+
+        // Get the unique provider count from both results
+        let totalCount = resultsWithin5km.aggregations.unique_location_count.value + resultsBeyond5kmWithPAN.aggregations.unique_location_count.value;
+
+        // Return the combined results
         return {
             count: totalCount,
-            data: unique_location,
-            afterKey: afterKey,
-            pages: totalPages,
+            data: allResults
         };
     } catch (err) {
         console.error(err); // Log the error for debugging
         throw err;
     }
 }
+
 
 
 
