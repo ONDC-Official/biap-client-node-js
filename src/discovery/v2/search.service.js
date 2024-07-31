@@ -830,21 +830,41 @@ class SearchService {
         // Build the main query object
         let query_obj = {
             bool: {
-                must: [...matchQuery, { exists: { field: "location_details" } }],
-                should: [
+                must: [
+                    ...matchQuery,
+                    { exists: { field: "location_details" } },
                     {
-                      geo_distance_range: {
-                        from: '5km',
-                        to: '10km',
-                        "location_details.circle.gps": {
-                          lat: parseFloat(searchRequest.latitude),
-                          lon: parseFloat(searchRequest.longitude),
-                        },
-                      },
-                    },
-                ],
-                minimum_should_match: 1
-            },
+                        bool: {
+                            filter: [
+                                {
+                                    geo_distance: {
+                                        distance: '10km',
+                                        "location_details.circle.gps": {
+                                            lat: parseFloat(searchRequest.latitude),
+                                            lon: parseFloat(searchRequest.longitude),
+                                        }
+                                    }
+                                },
+                                {
+                                    bool: {
+                                        must_not: [
+                                            {
+                                                geo_distance: {
+                                                    distance: '5km',
+                                                    "location_details.circle.gps": {
+                                                        lat: parseFloat(searchRequest.latitude),
+                                                        lon: parseFloat(searchRequest.longitude),
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
         };
 
         // Perform the Elasticsearch search
@@ -971,6 +991,10 @@ class SearchService {
             const timeToShip = details.location_details.median_time_to_ship ? details.location_details.median_time_to_ship : 0;
 
             return {
+                              domain: details.context.domain,
+                provider_descriptor: details.provider_details.descriptor,
+                provider: details.provider_details.id,
+                ...details.location_details,
                 combined_distance_and_time: ((distance * 60) / 15) + (timeToShip / 60),
                 distance: distance,
                 time_to_ship: timeToShip
