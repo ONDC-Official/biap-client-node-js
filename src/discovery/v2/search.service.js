@@ -984,7 +984,10 @@ class SearchService {
         // Return the combined results
         return {
             count: totalCount,
-            data: allResults
+            data: allResults,
+            pages: null,
+            afterKey:{location_id:"location_id" //to make web UI backward compatible
+            }
         };
     } catch (err) {
         console.error(err); // Log the error for debugging
