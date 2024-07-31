@@ -10,6 +10,7 @@ import SelectOrderController from './select/selectOrder.controller.js';
 import UpdateOrderController from './update/updateOrder.controller.js';
 import ComplaintOrderController from './complaint/complaintOrder.controller.js';
 import UploadController from '../upload/upload.controller.js';
+import RatingController from './rating/ratingcontroller.js';
 
 const rootRouter = new Router();
 
@@ -22,7 +23,7 @@ const selectOrderController = new SelectOrderController();
 const updateOrderController = new UpdateOrderController();
 const complaintOrderController  = new  ComplaintOrderController ();
 const uploadController = new  UploadController();
-
+const ratingController = new  RatingController();
 //#region confirm order
 
 // confirm order v1
@@ -146,6 +147,6 @@ rootRouter.get('/v2/orders/:orderId', authentication(), confirmOrderController.o
 
 rootRouter.post('/v2/orders/push/oms', confirmOrderController.orderPushToOMS);
 
-//#endregion
+rootRouter.post('/v2/rating/:orderId', authentication(),  ratingController.rateOrder);
 
 export default rootRouter;

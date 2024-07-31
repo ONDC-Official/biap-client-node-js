@@ -833,24 +833,17 @@ class SearchService {
                 must: [...matchQuery, { exists: { field: "location_details" } }],
                 should: [
                     {
-                        match: {
-                            "location_details.type": "pan",
+                      geo_distance_range: {
+                        from: '5km',
+                        to: '10km',
+                        "location_details.circle.gps": {
+                          lat: parseFloat(searchRequest.latitude),
+                          lon: parseFloat(searchRequest.longitude),
                         },
-                    },
-                    {
-                        geo_shape: {
-                            "location_details.polygons": {
-                                shape: {
-                                    type: "point",
-                                    coordinates: [
-                                        parseFloat(searchRequest.latitude),
-                                        parseFloat(searchRequest.longitude),
-                                    ],
-                                },
-                            },
-                        },
+                      },
                     },
                 ],
+                minimum_should_match: 1
             },
         };
 
@@ -978,10 +971,6 @@ class SearchService {
             const timeToShip = details.location_details.median_time_to_ship ? details.location_details.median_time_to_ship : 0;
 
             return {
-                domain: details.context.domain,
-                provider_descriptor: details.provider_details.descriptor,
-                provider: details.provider_details.id,
-                ...details.location_details,
                 combined_distance_and_time: ((distance * 60) / 15) + (timeToShip / 60),
                 distance: distance,
                 time_to_ship: timeToShip

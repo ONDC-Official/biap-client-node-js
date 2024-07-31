@@ -7,6 +7,7 @@ const ON_STATUS = "protocol/response/v1/on_status";
 const ON_SUPPORT = "protocol/response/v1/on_support";
 const ON_TRACK = "protocol/response/v1/on_track";
 const ON_UPDATE = "protocol/response/v1/on_update";
+const ON_RATING = "protocol/response/v1/on_rating";
 
 const CONFIRM = "protocol/confirm";
 const DUMP = "protocol/request-dump";
@@ -16,6 +17,7 @@ const SEARCH = "protocol/search";
 const SELECT = "protocol/select";
 const STATUS = "protocol/status";
 const SUPPORT = "protocol/support";
+const RATING = "protocol/rating";
 const TRACK = "protocol/track";
 const UPDATE = "protocol/update";
 const SEARCH_ITEM = "protocol/items";
@@ -35,6 +37,8 @@ const PROTOCOL_API_URLS = {
     LOCATIONS_DETAILS,
     CONFIRM,
     CANCEL,
+    RATING,
+    ON_RATING,
     INIT,
     ON_CANCEL,
     ON_CONFIRM,
