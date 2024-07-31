@@ -832,37 +832,7 @@ class SearchService {
             bool: {
                 must: [
                     ...matchQuery,
-                    { exists: { field: "location_details" } },
-                    {
-                        bool: {
-                            filter: [
-                                {
-                                    geo_distance: {
-                                        distance: '10km',
-                                        "location_details.circle.gps": {
-                                            lat: parseFloat(searchRequest.latitude),
-                                            lon: parseFloat(searchRequest.longitude),
-                                        }
-                                    }
-                                },
-                                {
-                                    bool: {
-                                        must_not: [
-                                            {
-                                                geo_distance: {
-                                                    distance: '5km',
-                                                    "location_details.circle.gps": {
-                                                        lat: parseFloat(searchRequest.latitude),
-                                                        lon: parseFloat(searchRequest.longitude),
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
+                    { exists: { field: "location_details" } }
                 ]
             }
         };
