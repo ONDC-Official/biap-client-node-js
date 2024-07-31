@@ -811,10 +811,8 @@ class SearchService {
       throw err;
     }
   }
-
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
-
         function haversineDistance(lat1, lon1, lat2, lon2) {
             const toRadians = (degree) => degree * Math.PI / 180;
             const R = 6371; // Radius of the Earth in km
@@ -825,7 +823,7 @@ class SearchService {
                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c; // Distance in km
-        };
+        }
 
         // Match queries for filtering common conditions
         let matchQuery = [
@@ -854,7 +852,7 @@ class SearchService {
                 aggs: {
                     products: {
                         top_hits: {
-                            size: 1,
+                            size: 1
                         }
                     }
                 }
@@ -866,7 +864,7 @@ class SearchService {
             }
         };
 
-        // First query: Results within 5km
+        // Define queries
         let queryWithin5km = {
             bool: {
                 must: matchQuery,
@@ -884,7 +882,6 @@ class SearchService {
             }
         };
 
-        // Second query: Results more than 5km away with type=PAN, limit 1000
         let queryBeyond5kmWithPAN = {
             bool: {
                 must: [
@@ -905,27 +902,27 @@ class SearchService {
             }
         };
 
-        // Perform the Elasticsearch search for within 5km
-        let resultsWithin5km = await client.search({
-            index: 'items', // specify your index name
-            body: {
-                query: queryWithin5km,
-                aggs: aggr_query,
-                size: 0
-            }
-        });
+        // Perform Elasticsearch searches in parallel
+        const [resultsWithin5km, resultsBeyond5kmWithPAN] = await Promise.all([
+            client.search({
+                index: 'items', // specify your index name
+                body: {
+                    query: queryWithin5km,
+                    aggs: aggr_query,
+                    size: 0
+                }
+            }),
+            client.search({
+                index: 'items', // specify your index name
+                body: {
+                    query: queryBeyond5kmWithPAN,
+                    aggs: aggr_query,
+                    size: 0
+                }
+            })
+        ]);
 
-        // Perform the Elasticsearch search for beyond 5km with type=PAN
-        let resultsBeyond5kmWithPAN = await client.search({
-            index: 'items', // specify your index name
-            body: {
-                query: queryBeyond5kmWithPAN,
-                aggs: aggr_query,
-                size: 0
-            }
-        });
-
-        // Extract and process hits from both query results
+        // Process results from within 5km
         let hitsWithin5km = resultsWithin5km.aggregations.unique_location.buckets.map(bucket => {
             const details = bucket.products.hits.hits[0]._source;
             if (details.location_details.circle && details.location_details.circle.gps) {
@@ -941,9 +938,9 @@ class SearchService {
                     provider_descriptor: details.provider_details.descriptor,
                     provider: details.provider_details.id,
                     ...details.location_details,
-                    distance: distance  ,
-                    distance_time_to_ship: ((distance * 60) / 15)+(details.location_details.median_time_to_ship/60) ,
-                    median_time_to_ship: details.median_time_to_ship
+                    distance,
+                    distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
+                    median_time_to_ship: details.location_details.median_time_to_ship
                 };
             } else {
                 return null; // Exclude results without GPS data
@@ -951,6 +948,7 @@ class SearchService {
         }).filter(result => result !== null) // Remove null entries
         .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Sort by distance + median_time_to_ship
 
+        // Process results from beyond 5km with type=PAN
         let hitsBeyond5kmWithPAN = resultsBeyond5kmWithPAN.aggregations.unique_location.buckets.map(bucket => {
             const details = bucket.products.hits.hits[0]._source;
             if (details.location_details.circle && details.location_details.circle.gps) {
@@ -986,8 +984,7 @@ class SearchService {
             count: totalCount,
             data: allResults,
             pages: null,
-            afterKey:{location_id:"location_id" //to make web UI backward compatible
-            }
+            afterKey: { location_id: "location_id" } // to make web UI backward compatible
         };
     } catch (err) {
         console.error(err); // Log the error for debugging
