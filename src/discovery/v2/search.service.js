@@ -828,26 +828,37 @@ class SearchService {
         }
         
         let query_obj = {
-            bool: {
-                must: matchQuery,
-                filter: [
-                    {
-                        geo_shape: {
-                            "location_details.polygons": {
-                                relation: "intersects",
-                                shape: {
-                                    type: "point",
-                                    coordinates: [
-                                        parseFloat(searchRequest.latitude),
-                                        parseFloat(searchRequest.longitude),
-                                    ],
-                                },
-                            },
-                        },
-                    },
-                ],
-            },
-        };
+          bool: {
+              must: matchQuery,
+              filter: [
+                  {
+                      bool: {
+                          should: [
+                              {
+                                  match: {
+                                      "location_details.type": "pan",
+                                  },
+                              },
+                              {
+                                  geo_shape: {
+                                      "location_details.polygons": {
+                                          relation: "intersects",
+                                          shape: {
+                                              type: "point",
+                                              coordinates: [
+                                                  parseFloat(searchRequest.latitude),
+                                                  parseFloat(searchRequest.longitude),
+                                              ],
+                                          },
+                                      },
+                                  },
+                              },
+                          ],
+                      },
+                  },
+              ],
+          },
+      };
 
         let aggr_query = {
             unique_location: {
