@@ -943,7 +943,7 @@ class SearchService {
                     ...details.location_details,
                     distance: distance  ,
                     distance_time_to_ship: ((distance * 60) / 15)+(details.location_details.median_time_to_ship/60) ,
-                    median_time_to_ship: details.median_time_to_ship/60 // Include median time to ship
+                    median_time_to_ship: details.median_time_to_ship
                 };
             } else {
                 return null; // Exclude results without GPS data
