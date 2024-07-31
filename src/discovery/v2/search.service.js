@@ -826,14 +826,50 @@ class SearchService {
         if (searchRequest.provider) {
             matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
         }
-
-        // Build the main query object
+        
         let query_obj = {
             bool: {
-                must: [
-                    ...matchQuery,
-                    { exists: { field: "location_details" } }
-                ]
+                must: matchQuery,
+                filter: [
+                    {
+                        geo_shape: {
+                            "location_details.polygons": {
+                                relation: "intersects",
+                                shape: {
+                                    type: "point",
+                                    coordinates: [
+                                        parseFloat(searchRequest.latitude),
+                                        parseFloat(searchRequest.longitude),
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+        };
+
+        let aggr_query = {
+            unique_location: {
+                composite: {
+                    size: searchRequest.limit,
+                    sources: [
+                        { location_id: { terms: { field: "location_details.id" } } }
+                    ],
+                    after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
+                },
+                aggs: {
+                    products: {
+                        top_hits: {
+                            size: 1,
+                        }
+                    }
+                }
+            },
+            unique_location_count: {
+                cardinality: {
+                    field: "location_details.id"
+                }
             }
         };
 
@@ -841,149 +877,37 @@ class SearchService {
         let queryResults = await client.search({
             index: 'items', // specify your index name
             body: {
-                size: 0,
                 query: query_obj,
-                aggs: {
-                    unique_location: {
-                        composite: {
-                            size: searchRequest.limit,
-                            sources: [
-                                {
-                                    location_id: {
-                                        terms: {
-                                            field: "location_details.id"
-                                        }
-                                    }
-                                }
-                            ],
-                            after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
-                        },
-                        aggs: {
-                            top_product: {
-                                top_hits: {
-                                    size: 1,
-                                    _source: {
-                                        includes: [
-                                            "location_details.circle.gps",
-                                            "location_details.median_time_to_ship",
-                                            "context.domain",
-                                            "provider_details.descriptor",
-                                            "provider_details.id"
-                                        ]
-                                    }
-                                }
-                            },
-                            distance_and_time: {
-                                scripted_metric: {
-                                    init_script: "state.distances = []",
-                                    map_script: `
-                                        if (doc['location_details.circle.gps'].size() > 0 && doc['location_details.median_time_to_ship'].size() > 0) {
-                                            def lat = doc['location_details.circle.gps'].lat;
-                                            def lon = doc['location_details.circle.gps'].lon;
-                                            def timeToShip = doc['location_details.median_time_to_ship'].value;
-                                            double lat1 = params.lat * Math.PI / 180;
-                                            double lon1 = params.lon * Math.PI / 180;
-                                            double lat2 = lat * Math.PI / 180;
-                                            double lon2 = lon * Math.PI / 180;
-                                            double dLat = lat2 - lat1;
-                                            double dLon = lon2 - lon1;
-                                            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                                            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                                            double earthRadius = 6371;
-                                            double distance = earthRadius * c;
-                                            distance = ((distance * 60) / 15) + (timeToShip / 60);
-                                            state.distances.add(distance);
-                                        }
-                                    `,
-                                    combine_script: "state.distances",
-                                    reduce_script: `
-                                        double minDist = Double.POSITIVE_INFINITY;
-                                        for (d in states) {
-                                            for (dist in d) {
-                                                if (dist < minDist) {
-                                                    minDist = dist;
-                                                }
-                                            }
-                                        }
-                                        return minDist;
-                                    `,
-                                    params: {
-                                        lat: parseFloat(searchRequest.latitude),
-                                        lon: parseFloat(searchRequest.longitude)
-                                    }
-                                }
-                            },
-                            sorted_buckets: {
-                                bucket_sort: {
-                                    sort: [
-                                        {
-                                            "distance_and_time.value": {
-                                                order: "asc"
-                                            }
-                                        }
-                                    ],
-                                    size: searchRequest.limit
-                                }
-                            }
-                        }
-                    },
-                    unique_location_count: {
-                        cardinality: {
-                            field: "location_details.id"
-                        }
-                    }
-                }
+                aggs: aggr_query,
+                size: 0
             }
         });
-
-        // Extract unique locations from search results
-        let unique_locations = queryResults.aggregations.unique_location.buckets.map(bucket => {
-            const details = bucket.top_product.hits.hits[0]._source;
-            let distance = 0;
-            if (details.location_details.circle && details.location_details.circle.gps) {
-                const gps = details.location_details.circle.gps.split(',');
-                const docLat = parseFloat(gps[0]);
-                const docLon = parseFloat(gps[1]);
-                const lat1 = docLat * Math.PI / 180;
-                const lon1 = docLon * Math.PI / 180;
-                const lat2 = parseFloat(searchRequest.latitude) * Math.PI / 180;
-                const lon2 = parseFloat(searchRequest.longitude) * Math.PI / 180;
-                const dLat = lat2 - lat1;
-                const dLon = lon2 - lon1;
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                          Math.cos(lat1) * Math.cos(lat2) *
-                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const earthRadius = 6371; // Earth's radius in kilometers
-                distance = earthRadius * c;
-            }
-
-            const timeToShip = details.location_details.median_time_to_ship ? details.location_details.median_time_to_ship : 0;
-
-            return {
-                              domain: details.context.domain,
+        
+        // Extract unique providers from the aggregation results
+        let unique_location = queryResults.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.products.hits.hits.map((hit) => hit._source)[0];
+            return ({
+                domain: details.context.domain,
                 provider_descriptor: details.provider_details.descriptor,
                 provider: details.provider_details.id,
                 ...details.location_details,
-                combined_distance_and_time: ((distance * 60) / 15) + (timeToShip / 60),
-                distance: distance,
-                time_to_ship: timeToShip
-            };
+            });
         });
 
-        // Get total count and pagination details
+        // Get the unique provider count
         let totalCount = queryResults.aggregations.unique_location_count.value;
-        let afterKey = queryResults.aggregations.unique_location.after_key;
         let totalPages = Math.ceil(totalCount / searchRequest.limit);
+
+        // Get the after key for pagination
+        let afterKey = queryResults.aggregations.unique_location.after_key;
 
         // Return the response with count, data, afterKey, and pages
         return {
             count: totalCount,
-            data: unique_locations,
+            data: unique_location,
             afterKey: afterKey,
             pages: totalPages,
         };
-
     } catch (err) {
         console.error(err); // Log the error for debugging
         throw err;
