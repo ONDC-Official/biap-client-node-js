@@ -822,8 +822,8 @@ class SearchService {
                       Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Distance in km
-        }
+            return (R * c)*1.4; // Distance in km * 1.4 approximate routing distance
+        };
 
         // Match queries for filtering common conditions
         let matchQuery = [
@@ -839,11 +839,13 @@ class SearchService {
             matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
         }
 
+        let TTS = 24*3600; //ie. 24hours
+
         // Aggregation query
         let aggr_query = {
             unique_location: {
                 composite: {
-                    size: searchRequest.limit,
+                    size: 10000,
                     sources: [
                         { location_id: { terms: { field: "location_details.id" } } }
                     ],
@@ -852,7 +854,7 @@ class SearchService {
                 aggs: {
                     products: {
                         top_hits: {
-                            size: 1
+                            size: 1,
                         }
                     }
                 }
@@ -864,66 +866,95 @@ class SearchService {
             }
         };
 
-        // Define queries
-        let queryWithin5km = {
+        let serviceabilityFilter =[
+                  {
+                      bool: {
+                          should: [
+                              {
+                                  match: {
+                                      "location_details.type": "pan",
+                                  },
+                              },
+                              {
+                                  geo_shape: {
+                                      "location_details.polygons": {
+                                          relation: "intersects",
+                                          shape: {
+                                              type: "point",
+                                              coordinates: [
+                                                  parseFloat(searchRequest.latitude),
+                                                  parseFloat(searchRequest.longitude),
+                                              ],
+                                          },
+                                      },
+                                  },
+                              },
+                          ],
+                      },
+                  },
+              ]
+
+
+        // First query: Results within 5km
+        let queryTTSLess = {
             bool: {
-                must: matchQuery,
-                filter: [
-                    {
-                        geo_distance: {
-                            distance: "5km",
-                            "location_details.circle.gps": {
-                                lat: parseFloat(searchRequest.latitude),
-                                lon: parseFloat(searchRequest.longitude)
-                            }
-                        }
-                    }
-                ]
+                must:[
+                  ...matchQuery,
+                  {
+                      range: {
+                          "location_details.median_time_to_ship": {
+                              lte: TTS // 5 hours in seconds
+                          }
+                      }
+                  }
+              ],
+                filter: serviceabilityFilter
             }
         };
 
-        let queryBeyond5kmWithPAN = {
-            bool: {
-                must: [
-                    ...matchQuery,
-                    { match: { "location_details.type": "pan" } }
-                ],
-                must_not: [
-                    {
-                        geo_distance: {
-                            distance: "5km",
-                            "location_details.circle.gps": {
-                                lat: parseFloat(searchRequest.latitude),
-                                lon: parseFloat(searchRequest.longitude)
-                            }
+        // Perform the Elasticsearch search for within 5km
+        let resultsTTSLess = await client.search({
+            index: 'items', // specify your index name
+            body: {
+                query: queryTTSLess
+      ,
+                aggs: aggr_query,
+                size: 0
+            }
+        });
+
+        // Extract IDs of locations within 5km
+        let idsWithin5km = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => bucket.key.location_id);
+
+        // Second query: Results beyond 5km with type=PAN, excluding IDs from the first query
+        let queryMoreTTS = {
+          bool: {
+              must:[
+                ...matchQuery,
+                {
+                    range: {
+                        "location_details.median_time_to_ship": {
+                            gt: TTS // 5 hours in seconds
                         }
                     }
-                ]
+                }
+            ],
+              filter: serviceabilityFilter
+          }
+      };
+
+       // Perform the Elasticsearch search for beyond 5km with type=PAN
+        let resultMoreTTS = await client.search({
+            index: 'items', // specify your index name
+            body: {
+                query: queryMoreTTS,
+                aggs: aggr_query,
+                size: 0
             }
-        };
+        });
 
-        // Perform Elasticsearch searches in parallel
-        const [resultsWithin5km, resultsBeyond5kmWithPAN] = await Promise.all([
-            client.search({
-                index: 'items', // specify your index name
-                body: {
-                    query: queryWithin5km,
-                    aggs: aggr_query,
-                    size: 0
-                }
-            }),
-            client.search({
-                index: 'items', // specify your index name
-                body: {
-                    query: queryBeyond5kmWithPAN,
-                    aggs: aggr_query,
-                    size: 0
-                }
-            })
-        ]);
-
-        // Process results from within 5km
-        let hitsWithin5km = resultsWithin5km.aggregations.unique_location.buckets.map(bucket => {
+        // Extract and process hits from both query results
+        let hitsWithinTTS = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => {
             const details = bucket.products.hits.hits[0]._source;
             if (details.location_details.circle && details.location_details.circle.gps) {
                 const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
@@ -934,13 +965,14 @@ class SearchService {
                     lon
                 );
                 return {
-                    domain: details.context.domain,
-                    provider_descriptor: details.provider_details.descriptor,
-                    provider: details.provider_details.id,
-                    ...details.location_details,
-                    distance,
+                  domain: details.context.domain,
+                  provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.name,images:details.provider_details.descriptor.images},
+                  provider: details.provider_details.id,
+                  location:details.location_details.id,
+                    distance: distance,
                     distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
-                    median_time_to_ship: details.location_details.median_time_to_ship
+                    median_time_to_ship: details.location_details.median_time_to_ship,
+                    timeToShip: details.location_details.time_to_ship
                 };
             } else {
                 return null; // Exclude results without GPS data
@@ -948,8 +980,7 @@ class SearchService {
         }).filter(result => result !== null) // Remove null entries
         .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Sort by distance + median_time_to_ship
 
-        // Process results from beyond 5km with type=PAN
-        let hitsBeyond5kmWithPAN = resultsBeyond5kmWithPAN.aggregations.unique_location.buckets.map(bucket => {
+        let hitsOutsideTTS = resultMoreTTS.aggregations.unique_location.buckets.map(bucket => {
             const details = bucket.products.hits.hits[0]._source;
             if (details.location_details.circle && details.location_details.circle.gps) {
                 const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
@@ -961,10 +992,11 @@ class SearchService {
                 );
                 return {
                     domain: details.context.domain,
-                    provider_descriptor: details.provider_details.descriptor,
+                    provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.name,images:details.provider_details.descriptor.images},
                     provider: details.provider_details.id,
-                    ...details.location_details,
+                    location:details.location_details.id,
                     distance,
+                    timeToShip: details.location_details.time_to_ship,
                     median_time_to_ship: details.location_details.median_time_to_ship // Include median time to ship
                 };
             } else {
@@ -973,11 +1005,14 @@ class SearchService {
         }).filter(result => result !== null) // Remove null entries
         .sort((a, b) => a.median_time_to_ship - b.median_time_to_ship); // Sort by median_time_to_ship
 
+
         // Merge results
-        let allResults = [...hitsWithin5km, ...hitsBeyond5kmWithPAN];
+        let allResults = [...hitsWithinTTS,...hitsOutsideTTS];
+
+        //return limit = 10 -> last record afterKey 
 
         // Get the unique provider count from both results
-        let totalCount = resultsWithin5km.aggregations.unique_location_count.value + resultsBeyond5kmWithPAN.aggregations.unique_location_count.value;
+        let totalCount = resultsTTSLess.aggregations.unique_location_count.value + resultMoreTTS.aggregations.unique_location_count.value;
 
         // Return the combined results
         return {
@@ -991,9 +1026,6 @@ class SearchService {
         throw err;
     }
 }
-
-
-
 
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {

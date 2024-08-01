@@ -22,6 +22,16 @@ class RatingController {
         });
     }
 
+    getRating(req, res, next) {
+        const { body: request,params } = req;
+        const { orderId } = params;
+        ratingService.getRating(request,orderId).then(response => {
+            res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+
     /**
     * on rate order
     * @param {*} req    HTTP request object

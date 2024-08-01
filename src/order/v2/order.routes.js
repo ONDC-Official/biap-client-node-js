@@ -149,4 +149,7 @@ rootRouter.post('/v2/orders/push/oms', confirmOrderController.orderPushToOMS);
 
 rootRouter.post('/v2/rating/:orderId', authentication(),  ratingController.rateOrder);
 
+rootRouter.get('/v2/rating/:orderId', authentication(),  ratingController.getRating);
+
+
 export default rootRouter;

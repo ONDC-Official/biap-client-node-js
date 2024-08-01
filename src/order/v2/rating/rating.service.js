@@ -56,7 +56,7 @@ class RatingService {
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.RATING,
                 transactionId: orderDetails[0]?.transactionId,
-                bppId: orderDetails[0]?.bpp_id,
+                bppId: orderDetails[0]?.bppId,
                 bpp_uri: orderDetails[0]?.bpp_uri,
                 cityCode: orderDetails[0].city,
                 city: orderDetails[0].city,
@@ -67,6 +67,19 @@ class RatingService {
                 context,
                 rating
             );
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    async getRating(rating,id) {
+        try {
+
+
+            const ratings = await Rating.find({ orderId: id }).lean();
+            console.log(ratings)
+            return ratings
         }
         catch (err) {
             throw err;
