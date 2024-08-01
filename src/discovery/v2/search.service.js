@@ -43,6 +43,14 @@ class SearchService {
         });
       }
 
+      if (searchRequest.locationIds) {
+        matchQuery.push({
+          match: {
+            "location_details.id": searchRequest.locationIds,
+          },
+        });
+      }
+
       if (searchRequest.categoryIds) {
         matchQuery.push({
           match: {
