@@ -853,7 +853,7 @@ class SearchService {
         let aggr_query = {
             unique_location: {
                 composite: {
-                    size: 10000,
+                    size: searchRequest.limitExtended,
                     sources: [
                         { location_id: { terms: { field: "location_details.id" } } }
                     ],
@@ -974,7 +974,7 @@ class SearchService {
                 );
                 return {
                   domain: details.context.domain,
-                  provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.name,images:details.provider_details.descriptor.images},
+                  provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
                   provider: details.provider_details.id,
                   location:details.location_details.id,
                     distance: distance,
@@ -1000,7 +1000,7 @@ class SearchService {
                 );
                 return {
                     domain: details.context.domain,
-                    provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.name,images:details.provider_details.descriptor.images},
+                    provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
                     provider: details.provider_details.id,
                     location:details.location_details.id,
                     distance,
