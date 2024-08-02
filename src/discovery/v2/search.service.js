@@ -1052,7 +1052,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                     Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          return (R * c)*1.4; // Distance in km * 1.4 approximate routing distance
+          return (R * c) * 1.4; // Distance in km * 1.4 approximate routing distance
       };
 
       // Match queries for filtering common conditions
@@ -1069,16 +1069,17 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
           matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
       }
 
-      let TTS = 24*3600; //ie. 24hours
+      let TTS = 24 * 3600; // ie. 60 hours
 
-      if(!searchRequest.limitExtended){
-        searchRequest.limitExtended=1000;
+      if (!searchRequest.limitExtended) {
+        searchRequest.limitExtended = 1000;
       }
-      // Aggregation query
+
+      // Aggregation query with sorting by median_time_to_ship
       let aggr_query = {
           unique_location: {
               composite: {
-                  size: searchRequest.limitExtended,
+                  size: 100,
                   sources: [
                       { location_id: { terms: { field: "location_details.id" } } }
                   ],
@@ -1088,6 +1089,9 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                   products: {
                       top_hits: {
                           size: 1,
+                  //         sort: [
+                  //             { "location_details.median_time_to_ship": { order: "asc" } }
+                  //         ]
                       }
                   }
               }
@@ -1099,48 +1103,42 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
           }
       };
 
-      let serviceabilityFilter =[
-                {
-                    bool: {
-                        should: [
-                            {
-                                match: {
-                                    "location_details.type": "pan",
-                                },
-                            },
-                            {
-                                geo_shape: {
-                                    "location_details.polygons": {
-                                        relation: "intersects",
-                                        shape: {
-                                            type: "point",
-                                            coordinates: [
-                                                parseFloat(searchRequest.latitude),
-                                                parseFloat(searchRequest.longitude),
-                                            ],
-                                        },
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                },
-            ]
-
+      let serviceabilityFilter = [
+          {
+              bool: {
+                  should: [
+                      {
+                          geo_shape: {
+                              "location_details.polygons": {
+                                  relation: "intersects",
+                                  shape: {
+                                      type: "point",
+                                      coordinates: [
+                                          parseFloat(searchRequest.latitude),
+                                          parseFloat(searchRequest.longitude),
+                                      ],
+                                  },
+                              },
+                          },
+                      },
+                  ],
+              },
+          },
+      ];
 
       // First query: Results within 5km
       let queryTTSLess = {
           bool: {
-              must:[
-                ...matchQuery,
-                {
-                    range: {
-                        "location_details.median_time_to_ship": {
-                            lte: TTS // 5 hours in seconds
-                        }
-                    }
-                }
-            ],
+              must: [
+                  ...matchQuery,
+                  {
+                      range: {
+                          "location_details.median_time_to_ship": {
+                              lte: TTS // 24 hours in seconds
+                          }
+                      }
+                  }
+              ],
               filter: serviceabilityFilter
           }
       };
@@ -1149,43 +1147,13 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
       let resultsTTSLess = await client.search({
           index: 'items', // specify your index name
           body: {
-              query: queryTTSLess
-    ,
+              query: queryTTSLess,
               aggs: aggr_query,
               size: 0
           }
       });
 
-      // Extract IDs of locations within 5km
-      let idsWithin5km = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => bucket.key.location_id);
-
-      // Second query: Results beyond 5km with type=PAN, excluding IDs from the first query
-      let queryMoreTTS = {
-        bool: {
-            must:[
-              ...matchQuery,
-              {
-                  range: {
-                      "location_details.median_time_to_ship": {
-                          gt: TTS // 5 hours in seconds
-                      }
-                  }
-              }
-          ],
-            filter: serviceabilityFilter
-        }
-    };
-
-     // Perform the Elasticsearch search for beyond 5km with type=PAN
-      let resultMoreTTS = await client.search({
-          index: 'items', // specify your index name
-          body: {
-              query: queryMoreTTS,
-              aggs: aggr_query,
-              size: 0
-          }
-      });
-
+   
       // Extract and process hits from both query results
       let hitsWithinTTS = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => {
           const details = bucket.products.hits.hits[0]._source;
@@ -1198,10 +1166,10 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                   lon
               );
               return {
-                domain: details.context.domain,
-                provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
-                provider: details.provider_details.id,
-                location:details.location_details.id,
+                  domain: details.context.domain,
+                  provider_descriptor: { name: details.provider_details.descriptor.name, symbol: details.provider_details.descriptor.symbol, images: details.provider_details.descriptor.images },
+                  provider: details.provider_details.id,
+                  location: details.location_details.id,
                   distance: distance,
                   distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
                   median_time_to_ship: details.location_details.median_time_to_ship,
@@ -1211,47 +1179,18 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
               return null; // Exclude results without GPS data
           }
       }).filter(result => result !== null) // Remove null entries
-      .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Sort by distance + median_time_to_ship
-
-      let hitsOutsideTTS = resultMoreTTS.aggregations.unique_location.buckets.map(bucket => {
-          const details = bucket.products.hits.hits[0]._source;
-          if (details.location_details.circle && details.location_details.circle.gps) {
-              const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
-              const distance = haversineDistance(
-                  parseFloat(searchRequest.latitude),
-                  parseFloat(searchRequest.longitude),
-                  lat,
-                  lon
-              );
-              return {
-                  domain: details.context.domain,
-                  provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
-                  provider: details.provider_details.id,
-                  location:details.location_details.id,
-                  distance,
-                  timeToShip: details.location_details.time_to_ship,
-                  distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
-                  median_time_to_ship: details.location_details.median_time_to_ship // Include median time to ship
-              };
-          } else {
-              return null; // Exclude results without GPS data
-          }
-      }).filter(result => result !== null) // Remove null entries
-      .sort((a, b) => a.median_time_to_ship - b.median_time_to_ship); // Sort by median_time_to_ship
-
+      .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship);; // Remove null entries
 
       // Merge results
-      let allResults = [...hitsWithinTTS,...hitsOutsideTTS];
-
-      //return limit = 10 -> last record afterKey 
+      let allResults = [...hitsWithinTTS];
 
       // Get the unique provider count from both results
-      let totalCount = resultsTTSLess.aggregations.unique_location_count.value + resultMoreTTS.aggregations.unique_location_count.value;
+      let totalCount = resultsTTSLess.aggregations.unique_location_count.value 
 
       // Return the combined results
       return {
           count: totalCount,
-          data: allResults,
+          data: allResults.slice(0, 20),
           pages: null,
           afterKey: { location_id: "location_id" } // to make web UI backward compatible
       };
@@ -1260,6 +1199,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
       throw err;
   }
 }
+
 
   async getGlobalProviders(searchRequest, targetLanguage = "en") {
     try {

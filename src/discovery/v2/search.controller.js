@@ -216,6 +216,7 @@ class SearchController {
             next(err);
         });
     }
+    
 
     getLocations(req, res, next) {
         const searchRequest = req.query;
@@ -235,6 +236,24 @@ class SearchController {
         });
     }
 
+    getLocationsNearest(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+
+        searchService.getLocationsNearest(searchRequest,targetLanguage).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
+    
     getGlobalProviders(req, res, next) {
         const searchRequest = req.query;
 

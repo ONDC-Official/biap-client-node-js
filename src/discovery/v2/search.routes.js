@@ -58,6 +58,10 @@ router.get(
     '/v2/locations',  searchController.getLocations,
 );
 
+router.get(
+    '/v2/nearlocations',  searchController.getLocationsNearest,
+);
+
 // get item attributes values
 router.get(
     '/v2/attributeValues',  searchController.getAttributesValues,
