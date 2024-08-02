@@ -849,6 +849,9 @@ class SearchService {
 
         let TTS = 24*3600; //ie. 24hours
 
+        if(!searchRequest.limitExtended){
+          searchRequest.limitExtended=200;
+        }
         // Aggregation query
         let aggr_query = {
             unique_location: {
