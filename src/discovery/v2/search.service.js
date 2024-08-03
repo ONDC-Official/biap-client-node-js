@@ -823,19 +823,7 @@ class SearchService {
   }
   async getLocations(searchRequest, targetLanguage = "en") {
     try {
-        function haversineDistance(lat1, lon1, lat2, lon2) {
-            const toRadians = (degree) => degree * Math.PI / 180;
-            const R = 6371; // Radius of the Earth in km
-            const dLat = toRadians(lat2 - lat1);
-            const dLon = toRadians(lon2 - lon1);
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return (R * c)*1.4; // Distance in km * 1.4 approximate routing distance
-        };
-
-        // Match queries for filtering common conditions
+        // Match queries for filtering
         let matchQuery = [
             { match: { language: targetLanguage } },
             { match: { type: 'item' } }
@@ -845,201 +833,143 @@ class SearchService {
             matchQuery.push({ match: { "context.domain": searchRequest.domain } });
         }
 
-        if (searchRequest.provider) {
-            matchQuery.push({ match: { "provider_details.id": searchRequest.provider } });
-        }
-
-        let TTS = 24*3600; //ie. 24hours
-
-        if(!searchRequest.limitExtended){
-          searchRequest.limitExtended=1000;
-        }
-        // Aggregation query
-        let aggr_query = {
-            unique_location: {
-                composite: {
-                    size: searchRequest.limitExtended,
-                    sources: [
-                        { location_id: { terms: { field: "location_details.id" } } }
-                    ],
-                    after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
+        let query_obj = {
+            function_score: {
+                query: {
+                    bool: {
+                        must: matchQuery,
+                        should: [
+                            {
+                                geo_shape: {
+                                    "location_details.polygons": {
+                                        shape: {
+                                            type: "point",
+                                            coordinates: [
+                                                parseFloat(searchRequest.latitude),
+                                                parseFloat(searchRequest.longitude),
+                                            ],
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                match: {
+                                    "location_details.type": "pan",
+                                }
+                            }
+                        ]
+                    }
                 },
+                functions: [
+                    {
+                        filter: {
+                            geo_shape: {
+                                "location_details.polygons": {
+                                    shape: {
+                                        type: "point",
+                                        coordinates: [
+                                            parseFloat(searchRequest.latitude),
+                                            parseFloat(searchRequest.longitude),
+                                        ],
+                                    }
+                                }
+                            }
+                        },
+                        weight: 2 // Boost for geo_shape matches
+                    },
+                    {
+                        filter: {
+                            match: {
+                                "location_details.type": "pan",
+                            }
+                        },
+                        weight: 0.5 // Lower boost for match type
+                    }
+                ],
+                score_mode: "sum",
+                boost_mode: "multiply"
+            }
+        };
+
+        // Perform the Elasticsearch search with sorting by _score
+        let queryResults = await client.search({
+            index: 'items', // Replace with your index name
+            body: {
+                query: query_obj,
+                sort: [
+                    { "_score": { "order": "desc" } } // Prioritize based on score
+                ],
                 aggs: {
-                    products: {
-                        top_hits: {
-                            size: 1,
+                    "unique_location": {
+                        composite: {
+                            size: searchRequest.limit,
+                            sources: [
+                                { location_id: { terms: { field: "location_details.id" } } }
+                            ],
+                            after: searchRequest.afterKey ? { location_id: searchRequest.afterKey } : undefined
+                        },
+                        "aggs": {
+                            "top_products": {
+                                "top_hits": {
+                                    "size": 1,
+                                    "sort": [
+                                        { "location_details.median_time_to_ship": { "order": "asc" } }
+                                    ],
+                                }
+                            },
+                            "location_time_to_ship": {
+                                "min": {
+                                    "field": "location_details.median_time_to_ship"
+                                }
+                            },
+                            "sorted_buckets": {
+                                "bucket_sort": {
+                                    "sort": [
+                                        { "location_time_to_ship": { "order": "asc" } }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_location_count": {
+                        "cardinality": {
+                            "field": "location_details.id"
                         }
                     }
-                }
-            },
-            unique_location_count: {
-                cardinality: {
-                    field: "location_details.id"
-                }
-            }
-        };
-
-        let serviceabilityFilter =[
-                  {
-                      bool: {
-                          should: [
-                              {
-                                  match: {
-                                      "location_details.type": "pan",
-                                  },
-                              },
-                              {
-                                  geo_shape: {
-                                      "location_details.polygons": {
-                                          relation: "intersects",
-                                          shape: {
-                                              type: "point",
-                                              coordinates: [
-                                                  parseFloat(searchRequest.latitude),
-                                                  parseFloat(searchRequest.longitude),
-                                              ],
-                                          },
-                                      },
-                                  },
-                              },
-                          ],
-                      },
-                  },
-              ]
-
-
-        // First query: Results within 5km
-        let queryTTSLess = {
-            bool: {
-                must:[
-                  ...matchQuery,
-                  {
-                      range: {
-                          "location_details.median_time_to_ship": {
-                              lte: TTS // 5 hours in seconds
-                          }
-                      }
-                  }
-              ],
-                filter: serviceabilityFilter
-            }
-        };
-
-        // Perform the Elasticsearch search for within 5km
-        let resultsTTSLess = await client.search({
-            index: 'items', // specify your index name
-            body: {
-                query: queryTTSLess
-      ,
-                aggs: aggr_query,
-                size: 0
+                },
+                //size: 0 // We don't need hits, just aggregations
             }
         });
 
-        // Extract IDs of locations within 5km
-        let idsWithin5km = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => bucket.key.location_id);
-
-        // Second query: Results beyond 5km with type=PAN, excluding IDs from the first query
-        let queryMoreTTS = {
-          bool: {
-              must:[
-                ...matchQuery,
-                {
-                    range: {
-                        "location_details.median_time_to_ship": {
-                            gt: TTS // 5 hours in seconds
-                        }
-                    }
-                }
-            ],
-              filter: serviceabilityFilter
-          }
-      };
-
-       // Perform the Elasticsearch search for beyond 5km with type=PAN
-        let resultMoreTTS = await client.search({
-            index: 'items', // specify your index name
-            body: {
-                query: queryMoreTTS,
-                aggs: aggr_query,
-                size: 0
-            }
+        // Extract unique locations from aggregation results
+        let unique_locations = queryResults.aggregations.unique_location.buckets.map(bucket => {
+            const details = bucket.top_products.hits.hits[0]._source;
+            return {
+                domain: details.context.domain,
+                provider_descriptor: details.provider_details.descriptor,
+                provider: details.provider_details.id,
+                ...details.location_details,
+            };
         });
 
-        // Extract and process hits from both query results
-        let hitsWithinTTS = resultsTTSLess.aggregations.unique_location.buckets.map(bucket => {
-            const details = bucket.products.hits.hits[0]._source;
-            if (details.location_details.circle && details.location_details.circle.gps) {
-                const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
-                const distance = haversineDistance(
-                    parseFloat(searchRequest.latitude),
-                    parseFloat(searchRequest.longitude),
-                    lat,
-                    lon
-                );
-                return {
-                  domain: details.context.domain,
-                  provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
-                  provider: details.provider_details.id,
-                  location:details.location_details.id,
-                    distance: distance,
-                    distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
-                    median_time_to_ship: details.location_details.median_time_to_ship,
-                    timeToShip: details.location_details.time_to_ship
-                };
-            } else {
-                return null; // Exclude results without GPS data
-            }
-        }).filter(result => result !== null) // Remove null entries
-        .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Sort by distance + median_time_to_ship
+        // Get total count and pagination details
+        let totalCount = queryResults.aggregations.unique_location_count.value;
+        let totalPages = Math.ceil(totalCount / searchRequest.limit);
+        let afterKey = queryResults.aggregations.unique_location.after_key;
 
-        let hitsOutsideTTS = resultMoreTTS.aggregations.unique_location.buckets.map(bucket => {
-            const details = bucket.products.hits.hits[0]._source;
-            if (details.location_details.circle && details.location_details.circle.gps) {
-                const [lat, lon] = details.location_details.circle.gps.split(',').map(parseFloat);
-                const distance = haversineDistance(
-                    parseFloat(searchRequest.latitude),
-                    parseFloat(searchRequest.longitude),
-                    lat,
-                    lon
-                );
-                return {
-                    domain: details.context.domain,
-                    provider_descriptor: {name:details.provider_details.descriptor.name,symbol:details.provider_details.descriptor.symbol,images:details.provider_details.descriptor.images},
-                    provider: details.provider_details.id,
-                    location:details.location_details.id,
-                    distance,
-                    timeToShip: details.location_details.time_to_ship,
-                    distance_time_to_ship: ((distance * 60) / 15) + (details.location_details.median_time_to_ship / 60),
-                    median_time_to_ship: details.location_details.median_time_to_ship // Include median time to ship
-                };
-            } else {
-                return null; // Exclude results without GPS data
-            }
-        }).filter(result => result !== null) // Remove null entries
-        .sort((a, b) => a.median_time_to_ship - b.median_time_to_ship); // Sort by median_time_to_ship
-
-
-        // Merge results
-        let allResults = [...hitsWithinTTS,...hitsOutsideTTS];
-
-        //return limit = 10 -> last record afterKey 
-
-        // Get the unique provider count from both results
-        let totalCount = resultsTTSLess.aggregations.unique_location_count.value + resultMoreTTS.aggregations.unique_location_count.value;
-
-        // Return the combined results
+        // Return the response with count, data, afterKey, and pages
         return {
             count: totalCount,
-            data: allResults,
-            pages: null,
-            afterKey: { location_id: "location_id" } // to make web UI backward compatible
+            data: unique_locations,
+            afterKey: afterKey,
+            pages: totalPages,
         };
+
     } catch (err) {
-        console.error(err); // Log the error for debugging
         throw err;
     }
 }
+
 
 async getLocationsNearest(searchRequest, targetLanguage = "en") {
   try {
