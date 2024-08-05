@@ -1,7 +1,16 @@
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../../utils/constants.js";
 import { protocolInit } from "../../../utils/protocolApis/index.js";
-
+import crypto from 'crypto'
 class BppInitService {
+
+
+    async getShortHash(input) {
+        // Create a SHA-256 hash of the input string
+        const hash = crypto.createHash('sha256').update(input).digest('base64');
+      
+        // Take the first 12 characters of the base64 hash
+        return hash.substring(0, 12);
+      }
     /**
     * bpp init order
     * @param {Object} context
@@ -47,7 +56,17 @@ class BppInitService {
             let locationSet = new Set()
             for(let item of order.items){
 
-                let parentItemId = item?.parent_item_id?.toString();
+                //create hash of item.id and all customisation.id to prepare 12 char hash ie parent item id
+                let parentItemKeys
+                if(item.customisations){
+                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+
+                }else{
+                    parentItemKeys = item?.local_id?.toString()
+                }
+
+                let parentItemId =await this.getShortHash(parentItemKeys);
+
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -62,7 +81,7 @@ class BppInitService {
                     }
                 }
                 if(item?.parent_item_id){
-                    let parentItemId = item?.parent_item_id?.toString();
+                    
                     selectitem.parent_item_id = parentItemId;
                 }
                 // selectitem.parent_item_id = parentItemId;
@@ -144,6 +163,17 @@ class BppInitService {
             }
 
             };
+
+            if (order.offers && order.offers.length) {
+
+                //convert array to array of objects
+
+                initRequest.message.order.offers = order.offers.map(offer => {
+                    return { id: offer };
+                  });
+            }
+
+            console.log("init requrest--->",JSON.stringify(initRequest))
 
             const response = await protocolInit(initRequest);
 

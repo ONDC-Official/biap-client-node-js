@@ -55,6 +55,8 @@ export const PROTOCOL_CONTEXT = {
     ON_SELECT: "on_select",
     UPDATE: "update",
     ON_UPDATE: "on_update",
+    RATING: "rating",
+    ON_RATING: "on_rating",
 };
 
 export const PROTOCOL_PAYMENT = {

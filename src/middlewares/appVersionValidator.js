@@ -1,4 +1,5 @@
 const appVersionValidator = (options) => (req, res, next) => {
+    console.log("req.get('appVersion')",req.get('appVersion'))
     if (req.get('appVersion')) {
         const systemVersion = process.env.MIN_ALLOWED_APP_VERSION.split('.');
         const appVersion = req.get('appVersion').split('.');

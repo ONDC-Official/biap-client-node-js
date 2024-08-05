@@ -58,6 +58,10 @@ router.get(
     '/v2/locations',  searchController.getLocations,
 );
 
+router.get(
+    '/v2/nearlocations',  searchController.getLocationsNearest,
+);
+
 // get item attributes values
 router.get(
     '/v2/attributeValues',  searchController.getAttributesValues,
@@ -81,6 +85,12 @@ router.get(
 // get offers
 router.get(
     '/v2/offers',  searchController.getOffers,
+);
+
+
+// get offers
+router.get(
+    '/v2/categories',  searchController.getUniqueCategories,
 );
 
 

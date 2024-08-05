@@ -23,6 +23,23 @@ const protocolConfirm = async (data) => {
     return result.data;
 }
 
+
+
+const protocolRating = async (data) => {
+
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.RATING,
+        "POST",
+        {
+            ...data
+        }
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+}
+
 const protocolGetDumps = async (data) => {
 
     const apiCall = new HttpRequest(
@@ -498,6 +515,24 @@ const onOrderStatus = async (messageId) => {
     return result.data;
 };
 
+
+/**
+ * on order rating
+ * @param {String} messageId 
+ */
+const onRating = async (messageId) => {
+    const apiCall = new HttpRequest(
+        process.env.PROTOCOL_BASE_URL,
+        PROTOCOL_API_URLS.RESPONSE,
+        "get",
+        {requestType:'on_rating',messageId:messageId}
+    );
+
+    const result = await apiCall.send();
+    return result.data;
+};
+
+
 /**
  * on order status
  * @param {String} messageId
@@ -590,6 +625,7 @@ export {
     protocolSupport,
     protocolTrack,
     protocolSelect,
+    protocolRating,
     protocolUpdate,
     onUpdateStatus,
     protocolSearchItems,
@@ -605,5 +641,6 @@ export {
     protocolGetLocationDetails,
     protocolGetDumps,
     protocolProvideDetails,
-    protocolGetItemDetails
+    protocolGetItemDetails,
+
 };

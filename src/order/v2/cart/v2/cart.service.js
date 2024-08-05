@@ -20,22 +20,22 @@ class CartService {
                         error: { message: "Request is invalid" }
                     }
                 }
-           let cart = await Cart.findOne({userId:data.userId,location_id:data.product.location_id});
-            console.log("datadata.product.location_id----",data.product.location_id);
+           let cart = await Cart.findOne({userId:data.userId,location_id:data.location_details?.id});
+            console.log("datadata.product.location_id----",data.location_details?.id);
            if(cart){
                //add items to the cart
 
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
                cartItem.item =data;
-               cartItem.location_id =data.product.location_id;
+               cartItem.location_id =data.location_details?.id
               return  await cartItem.save();
            }else{
                //create a new cart
-               let cart =await new Cart({userId:data.userId,location_id:data.product.location_id}).save()
+               let cart =await new Cart({userId:data.userId,location_id:data.location_details?.id}).save()
                let cartItem = new CartItem();
                cartItem.cart=cart._id;
-               cartItem.location_id =data.product.location_id;
+               cartItem.location_id =data.location_details?.id
                cartItem.item =data;
                return  await cartItem.save();
            }
@@ -78,8 +78,12 @@ class CartService {
 
     async clearCart(data) {
         try {
-            const cart = await Cart.findOne({userId:data.userId})
-            return  await CartItem.deleteMany({cart:cart._id});
+            const cart = await Cart.findOne({userId:data.userId,_id:data.id})
+            await Cart.deleteMany({userId:data.userId,_id:data.id})
+            if(cart){
+                await CartItem.deleteMany({cart:cart._id});
+            }
+            return  {}
         }
         catch (err) {
             throw err;
@@ -91,6 +95,8 @@ class CartService {
             let query = {userId:data.userId};
             if(data.location_id){
                 query.location_id=data.location_id
+            }else{
+                query.location_id = { $exists: false };
             }
             const cart = await Cart.findOne(query);
             if(cart){
@@ -113,6 +119,11 @@ class CartService {
     
             const cartWithItems = await Promise.all(cart.map(async cartItem => {
                 if (cartItem) {
+                    //get location details
+                    if(cartItem.location_id){
+                        cartItem.location= await bppSearchService.getLocationDetails({id:cartItem.location_id})
+                    }
+                    
                     const items = await CartItem.find({ cart: cartItem._id }).lean();
                     return { ...cartItem, items };
                 } else {

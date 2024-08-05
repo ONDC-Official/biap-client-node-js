@@ -287,6 +287,13 @@ class BppConfirmService {
                 }
             };
 
+                        
+            if (storedOrder.offers && storedOrder.offers.length) {
+                confirmRequest.message.order.offers = storedOrder.offers.map(offer => {
+                    return { id: offer };
+                  });
+            }
+            
 
             console.log({confirmRequest})
             let confirmResponse = await this.confirm(confirmRequest);

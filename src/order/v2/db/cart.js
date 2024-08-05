@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const  CartSchema = new mongoose.Schema(
     {
         userId: { type: String, required: true },
-        location_id: { type: String, required: true }
+        location_id: { type: String, required: false }
     },
     { 
         _id: true,

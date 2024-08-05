@@ -292,7 +292,8 @@ class ConfirmOrderService {
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
                 //clear cart
 
-                cartService.clearCart({userId:dbResponse.userId});
+                cartService.clearCart({userId:dbResponse.userId}); //TODO: clear cart once order placed in multicart flows
+                
             }
 
 
@@ -398,11 +399,11 @@ class ConfirmOrderService {
     async getOrderDetails(orderId,user){
 
         const dbResponse = await getOrderById(orderId);
-        if(dbResponse[0].userId !==user.decodedToken.uid){
-            return []
-        }else{
+        // if(dbResponse[0].userId !==user.decodedToken.uid){
+        //     return []
+        // }else{
             return dbResponse
-        }
+        // }
 
     }
 

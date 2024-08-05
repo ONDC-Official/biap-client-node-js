@@ -57,7 +57,7 @@ class SelectOrderService {
     async selectOrder(orderRequest) {
         try {
             const { context: requestContext, message = {} } = orderRequest || {};
-            const { cart = {}, fulfillments = [] } = message;
+            const { cart = {}, fulfillments = [], offers=[] } = message;
 
             //get bpp_url and check if item is available
             let itemContext={}
@@ -112,7 +112,7 @@ class SelectOrderService {
 
             return await bppSelectService.select(
                 context,
-                { cart, fulfillments }
+                { cart, fulfillments,offers }
             );
         }
         catch (err) {

@@ -1,6 +1,15 @@
 import { protocolSelect } from "../../../utils/protocolApis/index.js";
-
+import crypto from 'crypto'
 class BppSelectService {
+
+
+    async getShortHash(input) {
+        // Create a SHA-256 hash of the input string
+        const hash = crypto.createHash('sha256').update(input).digest('base64');
+      
+        // Take the first 12 characters of the base64 hash
+        return hash.substring(0, 12);
+      }
 
     /**
     * bpp select order
@@ -10,17 +19,26 @@ class BppSelectService {
     */
     async select(context, order = {}) {
         try {
-            const { cart = {}, fulfillments = [] } = order || {};
+            const { cart = {}, fulfillments = [],offers=undefined } = order || {};
 
             const provider = cart?.items?.[0]?.provider || {};
 
             //check if item has customisation present
 
+            
             let items  = []
             let locationSet = new Set()
             for(let [index,item] of cart.items.entries()){
 
-                let parentItemId = "DI"+index.toString();
+                let parentItemKeys
+                if(item.customisations){
+                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+
+                }else{
+                    parentItemKeys = item?.local_id?.toString()
+                }
+                let parentItemId =await this.getShortHash(parentItemKeys);
+
                 let selectitem = {
                     id: item?.local_id?.toString(),
                     quantity: item?.quantity,
@@ -69,7 +87,6 @@ class BppSelectService {
 
             }
 
-            console.log({locationSet})
             const selectRequest = {
                 context: context,
                 message: {
@@ -77,9 +94,9 @@ class BppSelectService {
                         items: items,
                         provider: {
                             id: provider?.local_id,
-                            locations: Array.from(locationSet).map(location => {
-                                return { id: location };
-                            })
+                            locations: Array.from(locationSet).map(location => ({
+                                id: location
+                            }))
                         },
                         fulfillments: fulfillments && fulfillments.length ? 
                             [...fulfillments] : 
@@ -87,8 +104,12 @@ class BppSelectService {
                     }
                 }
             };
-
-            console.log("select request",selectRequest)
+            
+            if (offers && offers.length) {
+                selectRequest.message.order.offers = offers;
+            }
+            
+            console.log("select request",JSON.stringify(selectRequest))
             const response = await protocolSelect(selectRequest);
 
             return { context: context, message: response.message };
