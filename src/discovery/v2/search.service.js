@@ -1555,31 +1555,6 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                 },
                 functions: [
                     {
-                        filter: {
-                            geo_shape: {
-                                "location_details.polygons": {
-                                    shape: {
-                                        type: "point",
-                                        coordinates: [
-                                            parseFloat(searchRequest.longitude),
-                                            parseFloat(searchRequest.latitude),
-                                        ]
-                                    },
-                                    "relation": "intersects" 
-                                }
-                            }
-                        },
-                        weight: 2
-                    },
-                    {
-                        filter: {
-                            match: {
-                                "location_details.type": "pan",
-                            }
-                        },
-                        weight: 0.5
-                    },
-                    {
                         script_score: {
                             script: {
                                 source: `
@@ -1614,7 +1589,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                     }
                 ],
                 score_mode: "sum",
-                boost_mode: "multiply"
+                boost_mode: "replace"
             }
         };
 
