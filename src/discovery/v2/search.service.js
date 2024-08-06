@@ -1656,6 +1656,9 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             return {
                 minDays : minDays,
                 minDaysWithTTS : minDays + source.location_details.median_time_to_ship,
+                domain: source.context.domain,
+                provider_descriptor:source.provider_details.descriptor,
+                provider: source.provider_details.id,
                 ...source.location_details,
                 calculated_score: hit._score
             };
