@@ -253,6 +253,26 @@ class SearchController {
             next(err);
         });
     }
+
+    
+
+    servieablelocations(req, res, next) {
+        const searchRequest = req.query;
+
+        console.log({searchRequest})
+        const headers = req.headers;
+
+        let targetLanguage = headers['targetlanguage'];
+
+        searchService.servieablelocations(searchRequest,targetLanguage).then(response => {
+            if(!response || response === null)
+                throw new NoRecordFoundError("No result found");
+            else
+                res.json(response);
+        }).catch((err) => {
+            next(err);
+        });
+    }
     
     getGlobalProviders(req, res, next) {
         const searchRequest = req.query;

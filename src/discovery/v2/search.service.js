@@ -1511,6 +1511,171 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
     }
   }
 
+  async servieablelocations(searchRequest, targetLanguage = "en") {
+    try {
+        const page = searchRequest.page ? parseInt(searchRequest.page, 10) : 0;
+        const limit = searchRequest.limit ? parseInt(searchRequest.limit, 10) : 10;
+
+        if (isNaN(page) || page < 0) throw new Error("Invalid page number");
+        if (isNaN(limit) || limit <= 0) throw new Error("Invalid limit");
+
+        let matchQuery = [];
+        if (searchRequest.domain) {
+            matchQuery.push({ match: { "context.domain": searchRequest.domain } });
+        }
+
+        let query_obj = {
+            function_score: {
+                query: {
+                    bool: {
+                        must: matchQuery,
+                        should: [
+                            {
+                                geo_shape: {
+                                    "location_details.polygons": {
+                                        shape: {
+                                            type: "point",
+                                            coordinates: [
+                                                parseFloat(searchRequest.longitude),
+                                                parseFloat(searchRequest.latitude),
+                                            ]
+                                        },
+                                        "relation": "intersects" 
+                                    },
+
+                                }
+                            },
+                            {
+                                match: {
+                                    "location_details.type": "pan",
+                                }
+                            }
+                        ]
+                    }
+                },
+                functions: [
+                    {
+                        filter: {
+                            geo_shape: {
+                                "location_details.polygons": {
+                                    shape: {
+                                        type: "point",
+                                        coordinates: [
+                                            parseFloat(searchRequest.longitude),
+                                            parseFloat(searchRequest.latitude),
+                                        ]
+                                    },
+                                    "relation": "intersects" 
+                                }
+                            }
+                        },
+                        weight: 2
+                    },
+                    {
+                        filter: {
+                            match: {
+                                "location_details.type": "pan",
+                            }
+                        },
+                        weight: 0.5
+                    },
+                    {
+                        script_score: {
+                            script: {
+                                source: `
+                                    String inputPincode = params.inputPincode;
+                                    String docPincode = doc.containsKey('location_details.address.area_code') ? doc['location_details.address.area_code'].value : '';
+                                    int matchCount = 0;
+
+                                    for (int i = 0; i < inputPincode.length(); i++) {
+                                        if (i < docPincode.length() && inputPincode.charAt(i) == docPincode.charAt(i)) {
+                                            matchCount++;
+                                        } else {
+                                            break;
+                                        }
+                                    }
+
+                                    int minDays;
+                                    if (matchCount == 6) minDays = 15*60;
+                                    else if (matchCount == 5) minDays = 30*60;
+                                    else if (matchCount == 4) minDays = 45*60;
+                                    else if (matchCount == 3) minDays = 60*60;
+                                    else if (matchCount == 2) minDays = 1440*60;
+                                    else if (matchCount == 1) minDays = 1440*60;
+                                    else minDays = 10080*60;
+
+                                    return (doc.containsKey('location_details.median_time_to_ship') ? doc['location_details.median_time_to_ship'].value + minDays : minDays);
+                                `,
+                                params: {
+                                    inputPincode: searchRequest.pincode
+                                }
+                            }
+                        }
+                    }
+                ],
+                score_mode: "sum",
+                boost_mode: "multiply"
+            }
+        };
+
+        let queryResults = await client.search({
+            index: 'locations',
+            body: {
+                query: query_obj,
+                sort: [
+                    { "_score": { "order": "asc" } }
+                ],
+                from: page * limit,
+                size: limit
+            }
+        });
+
+        console.log("Raw query results:", JSON.stringify(queryResults, null, 2));
+
+        let locations = queryResults.hits.hits.map(hit => {
+            const source = hit._source || {};
+            let docPincode = source.location_details.address.area_code;
+            let matchCount = 0;
+            for (let i = 0; i < searchRequest.pincode.length; i++) {
+              if (i < docPincode.length && searchRequest.pincode.charAt(i) == docPincode.charAt(i)) {
+                matchCount++;
+              }else {
+                break;
+            }
+            }
+
+            let minDays;
+            if (matchCount == 6) minDays = 15*60;
+            else if (matchCount == 5) minDays = 30*60;
+            else if (matchCount == 4) minDays = 45*60;
+            else if (matchCount == 3) minDays = 60*60;
+            else if (matchCount == 2) minDays = 1440*60;
+            else if (matchCount == 1) minDays = 1440*60;
+            else minDays = 10080*60; //other state
+
+            return {
+                minDays : minDays,
+                minDaysWithTTS : minDays + source.location_details.median_time_to_ship,
+                ...source.location_details,
+                calculated_score: hit._score
+            };
+        }).filter(item => item !== null);
+
+        let totalCount = queryResults.hits.total.value;
+        let totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            count: totalCount,
+            data: locations,
+            pages: totalPages
+        };
+
+    } catch (err) {
+        console.error("Error executing search query:", err);
+        throw err;
+    }
+}
+
 }
 
 export default SearchService;
