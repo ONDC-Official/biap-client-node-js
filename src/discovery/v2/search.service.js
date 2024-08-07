@@ -428,8 +428,29 @@ class SearchService {
       let location_details = null;
       if (queryResults.hits.hits.length > 0) {
         let details = queryResults.hits.hits[0]._source; // Return the source of the first hit
+        let minDays=0;
+        if(searchRequest.pincode){
+          let docPincode = details.location_details.address.area_code;
+          let matchCount = 0;
+          for (let i = 0; i < searchRequest.pincode.length; i++) {
+            if (i < docPincode.length && searchRequest.pincode.charAt(i) == docPincode.charAt(i)) {
+              matchCount++;
+            }else {
+              break;
+          }
+          }
+          if (matchCount == 6) minDays = 15*60;
+          else if (matchCount == 5) minDays = 30*60;
+          else if (matchCount == 4) minDays = 45*60;
+          else if (matchCount == 3) minDays = 60*60;
+          else if (matchCount == 2) minDays = 1440*60;
+          else if (matchCount == 1) minDays = 1440*60;
+          else minDays = 10080*60; //other state
+        }
         location_details = {
           domain: details.context.domain,
+          minDays:minDays,
+          minDaysWithTTS : minDays + details.location_details.median_time_to_ship,
           provider_descriptor: details.provider_details.descriptor,
           ...details.location_details,
           time_to_ship: details.item_details["@ondc/org/time_to_ship"]
@@ -1236,7 +1257,29 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
 
       // Extract unique providers from the aggregation results
       let unique_providers = queryResults.aggregations.unique_providers.buckets.map(bucket => {
-        return { ...bucket.products.hits.hits[0]._source.provider_details, items: bucket.products.hits.hits.map((hit) => hit._source) };
+
+        console.log("bucket.products.hits.hits[0]._source.--->",bucket.products.hits.hits[0]._source)
+        let minDays=0;
+        if(searchRequest.pincode){
+          let docPincode = bucket.products.hits.hits[0]._source.location_details.address.area_code;
+          let matchCount = 0;
+          for (let i = 0; i < searchRequest.pincode.length; i++) {
+            if (i < docPincode.length && searchRequest.pincode.charAt(i) == docPincode.charAt(i)) {
+              matchCount++;
+            }else {
+              break;
+          }
+          }
+          if (matchCount == 6) minDays = 15*60;
+          else if (matchCount == 5) minDays = 30*60;
+          else if (matchCount == 4) minDays = 45*60;
+          else if (matchCount == 3) minDays = 60*60;
+          else if (matchCount == 2) minDays = 1440*60;
+          else if (matchCount == 1) minDays = 1440*60;
+          else minDays = 10080*60; //other state
+        }
+
+        return { ...bucket.products.hits.hits[0]._source.provider_details,minDays,minDaysWithTTS : minDays + bucket.products.hits.hits[0]._source.location_details.median_time_to_ship, items: bucket.products.hits.hits.map((hit) => hit._source) };
       });
 
       // Get the unique provider count
