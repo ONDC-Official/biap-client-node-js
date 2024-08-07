@@ -1566,6 +1566,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         if (searchRequest.domain) {
             matchQuery.push({ match: { "context.domain": searchRequest.domain } });
         }
+        matchQuery.push({exists: { field: "location_details.address.area_code" } })
 
         let query_obj = {
             function_score: {
