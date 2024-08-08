@@ -1612,6 +1612,12 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         if (searchRequest.domain) {
             matchQuery.push({ match: { "context.domain": searchRequest.domain } });
         }
+        matchQuery.push({
+          match: {
+            language: targetLanguage,
+          },
+        });
+        
         matchQuery.push({exists: { field: "location_details.address.area_code" } })
 
         let query_obj = {
