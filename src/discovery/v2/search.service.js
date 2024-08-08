@@ -1234,7 +1234,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
           aggs: {
             products: {
               top_hits: {
-                size: 100,
+                size: 10,
               }
             }
           }
