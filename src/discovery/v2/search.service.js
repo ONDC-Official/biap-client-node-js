@@ -171,12 +171,19 @@ class SearchService {
         },
       });
 
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      })
+
       if (searchRequest.name) {
         matchQuery.push({
           match: {
             "item_details.descriptor.name": searchRequest.name,
           },
         });
+
         searchQuery.push({
           match: {
             "item_details.descriptor.short_desc": searchRequest.name,
@@ -242,6 +249,7 @@ class SearchService {
         bool: {
           must: matchQuery,
           should: searchQuery,
+          minimum_should_match: 1, // Ensures at least one `should` clause is matched
         },
       };
 
@@ -354,6 +362,12 @@ class SearchService {
           language: targetLanguage,
         },
       });
+
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      })
 
       if (searchRequest.id) {
         matchQuery.push({
@@ -643,6 +657,12 @@ class SearchService {
           },
         });
       }
+
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      })
   
       if (searchRequest.provider) {
         matchQuery.push({
@@ -707,6 +727,12 @@ class SearchService {
       },
     });
 
+    matchQuery.push({
+      match: {
+        "type": 'item',
+      },
+    })
+
     let query_obj = {
       bool: {
         must: matchQuery,
@@ -768,6 +794,12 @@ class SearchService {
         });
       }
   
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      })
+
       if (searchRequest.provider) {
         matchQuery.push({
           match: {
@@ -878,7 +910,8 @@ class SearchService {
                                     "location_details.type": "pan",
                                 }
                             }
-                        ]
+                        ],
+                        minimum_should_match: 1
                     }
                 },
                 functions: [
@@ -1163,7 +1196,6 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             {
               bool: {
                 should: [
-
                   {
                     "match_phrase": {
                       "provider_details.descriptor.name":searchRequest.name
@@ -1185,6 +1217,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                       "item_details.category_id": searchRequest.name,
                     },}
                 ],
+                minimum_should_match: 1
               },
             },
             //default language search
@@ -1313,7 +1346,13 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             {
               match: {
                 language: targetLanguage,
-              }
+              },
+              
+            },
+            {
+              match: {
+                "type": 'item',
+              },
             }
           ]
         }
@@ -1410,6 +1449,12 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
           language: targetLanguage,
         },
       });
+
+      matchQuery.push({
+        match: {
+          "type": 'item',
+        },
+      })
 
       if (searchRequest.provider) {
         matchQuery.push({
@@ -1526,7 +1571,8 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         query: {
           bool: {
             must: matchQuery,
-            should: searchQuery
+            should: searchQuery,
+            minimum_should_match: 1
           },
         },
         size: 20
@@ -1594,7 +1640,8 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                                     "location_details.type": "pan",
                                 }
                             }
-                        ]
+                        ],
+                        minimum_should_match: 1
                     }
                 },
                 functions: [
