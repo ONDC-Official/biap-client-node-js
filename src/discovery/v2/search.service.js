@@ -1617,7 +1617,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             language: targetLanguage,
           },
         });
-        
+
         matchQuery.push({exists: { field: "location_details.address.area_code" } })
 
         let query_obj = {
@@ -1632,11 +1632,11 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                                         shape: {
                                             type: "point",
                                             coordinates: [
-                                                parseFloat(searchRequest.longitude),
-                                                parseFloat(searchRequest.latitude),
+                                              parseFloat(searchRequest.latitude),
+                                              parseFloat(searchRequest.longitude),
                                             ]
                                         },
-                                        "relation": "intersects" 
+                                        //  "relation": "within" 
                                     },
 
                                 }
