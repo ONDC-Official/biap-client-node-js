@@ -20,11 +20,27 @@ class SearchService {
     try {
       // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
       let matchQuery = [];
+      let shouldQuery = [];
 
       // bhashini translated data
       matchQuery.push({
         match: {
           language: targetLanguage,
+        },
+      });
+      matchQuery.push({
+        match: {
+          "item_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "location_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "provider_details.time.label": 'enable',
         },
       });
 
@@ -68,7 +84,7 @@ class SearchService {
             let values = value.split(',');
             for(let valueObj of values){
               if(valueObj){
-                matchQuery.push({
+                shouldQuery.push({
                   "nested": {
                     "path": "attribute_key_values",
                     "query": {
@@ -107,6 +123,8 @@ class SearchService {
       let query_obj = {
         bool: {
           must: matchQuery,
+          should:shouldQuery,
+          minimum_should_match: 1,
         },
         // "should": [ //TODO: enable this once UI apis have been changed
         //     {
@@ -168,6 +186,22 @@ class SearchService {
       matchQuery.push({
         match: {
           language: targetLanguage,
+        },
+      });
+
+      matchQuery.push({
+        match: {
+          "item_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "location_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "provider_details.time.label": 'enable',
         },
       });
 
@@ -657,7 +691,21 @@ class SearchService {
           },
         });
       }
-
+      matchQuery.push({
+        match: {
+          "item_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "location_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "provider_details.time.label": 'enable',
+        },
+      });
       matchQuery.push({
         match: {
           "type": 'item',
@@ -729,6 +777,22 @@ class SearchService {
 
     matchQuery.push({
       match: {
+        "item_details.time.label": 'enable',
+      },
+    });
+    matchQuery.push({
+      match: {
+        "location_details.time.label": 'enable',
+      },
+    });
+    matchQuery.push({
+      match: {
+        "provider_details.time.label": 'enable',
+      },
+    });
+
+    matchQuery.push({
+      match: {
         "type": 'item',
       },
     })
@@ -794,6 +858,12 @@ class SearchService {
         });
       }
   
+      matchQuery.push({
+        match: {
+          "item_details.time.label": 'enable',
+        },
+      });
+
       matchQuery.push({
         match: {
           "type": 'item',
@@ -881,6 +951,17 @@ class SearchService {
             { match: { language: targetLanguage } },
             { match: { type: 'item' } }
         ];
+
+        matchQuery.push({
+          match: {
+            "location_details.time.label": 'enable',
+          },
+        });
+        matchQuery.push({
+          match: {
+            "provider_details.time.label": 'enable',
+          },
+        });
 
         if (searchRequest.domain) {
             matchQuery.push({ match: { "context.domain": searchRequest.domain } });
@@ -1189,12 +1270,30 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
     try {
       console.log("searchRequest", searchRequest);
 
+      let matchQuery = []
+      matchQuery.push({
+        match: {
+          "item_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "location_details.time.label": 'enable',
+        },
+      });
+      matchQuery.push({
+        match: {
+          "provider_details.time.label": 'enable',
+        },
+      });
+
       // Define the query object with additional filters on names
       let query_obj = {
         bool: {
           must: [
             {
               bool: {
+                must:matchQuery,
                 should: [
                   {
                     "match_phrase": {
@@ -1215,7 +1314,8 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                     {
                     "match_phrase": {
                       "item_details.category_id": searchRequest.name,
-                    },}
+                    },},
+                    {exists: { field: "item_details" } }
                 ],
                 minimum_should_match: 1
               },
@@ -1352,6 +1452,21 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             {
               match: {
                 "type": 'item',
+              },
+            },
+            {
+              match: {
+                "item_details.time.label": 'enable',
+              },
+            },
+            {
+              match: {
+                "location_details.time.label": 'enable',
+              },
+            },
+            {
+              match: {
+                "provider_details.time.label": 'enable',
               },
             }
           ]
@@ -1615,6 +1730,21 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         matchQuery.push({
           match: {
             language: targetLanguage,
+          },
+        });
+        matchQuery.push({
+          match: {
+            "location_details.time.label": 'enable',
+          },
+        });
+        matchQuery.push({
+          match: {
+            "location_details.time.label": 'enable',
+          },
+        });
+        matchQuery.push({
+          match: {
+            "provider_details.time.label": 'enable',
           },
         });
 
