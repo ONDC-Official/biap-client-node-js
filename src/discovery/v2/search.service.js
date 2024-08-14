@@ -663,6 +663,7 @@ class SearchService {
           provider_descriptor: details.provider_details.descriptor,
           provider_details: details.provider_details,
           ...details.location_details,
+          fulfillment:details.fulfillment,
           time_to_ship: details.item_details["@ondc/org/time_to_ship"]
         };
       }
