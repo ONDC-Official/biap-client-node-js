@@ -259,11 +259,11 @@ class SearchService {
         },
       });
       
-      matchQuery.push({
-        match: {
-          "in_stock": true
-        },
-      });
+      // matchQuery.push({
+      //   match: {
+      //     "in_stock": true
+      //   },
+      // });
   
       // Define filter conditions
       let filterConditions = [
@@ -420,7 +420,7 @@ class SearchService {
             {
               filter: {
                 term: {
-                  "item_details.inStock": true
+                  "in_stock": true
                 }
               },
               weight: 100000 // High weight for in-stock items
@@ -430,7 +430,7 @@ class SearchService {
                 bool: {
                   must_not: {
                     term: {
-                      "item_details.inStock": true
+                      "in_stock": true
                     }
                   }
                 }
@@ -1592,7 +1592,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
           {
             filter: {
               term: {
-                "item_details.inStock": true
+                "in_stock": true
               }
             },
             weight: 100000 // High weight for in-stock items
@@ -1602,13 +1602,41 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
               bool: {
                 must_not: {
                   term: {
-                    "item_details.inStock": true
+                    "in_stock": true
                   }
                 }
               }
             },
             weight: 0 // Low weight for out-of-stock items
-          }
+          },
+          {
+            filter: {
+                bool: {
+                    must_not: {
+                        range: {
+                            "enable_percentage": {
+                                gte: 80 //TODO: make it configurable
+                            }
+                        }
+                    }
+                }
+            },
+            weight: 0 // Weight for documents where enable_percentage is < 100
+        },
+        {
+          filter: {
+              bool: {
+                  must: {
+                      range: {
+                          "enable_percentage": {
+                              gte: 80 //TODO: make it configurable
+                          }
+                      }
+                  }
+              }
+          },
+          weight: 100000 // Weight for documents where enable_percentage is < 100
+      },
         ],
         score_mode: "sum", // Combine scores from all functions
         boost_mode: "replace" // Replace the final score with the score calculated by the functions
