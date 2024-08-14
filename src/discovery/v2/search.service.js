@@ -10,7 +10,7 @@ import { OBJECT_TYPE } from "../../utils/constants.js";
 // import logger from "../lib/logger";
 const bppSearchService = new BppSearchService();
 import client from "../../database/elasticSearch.js";
-
+import moment from 'moment-timezone';
 class SearchService {
   isBppFilterSpecified(context = {}) {
     return typeof context.bpp_id !== "undefined";
@@ -1723,15 +1723,23 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         if (isNaN(page) || page < 0) throw new Error("Invalid page number");
         if (isNaN(limit) || limit <= 0) throw new Error("Invalid limit");
 
-        let today = new Date();
-        const currentDay = today.getDay() === 0 ? 7 : today.getDay(); // Adjusting for Sunday
-        const hours = today.getHours().toString().padStart(2, '0');
-        const minutes = today.getMinutes().toString().padStart(2, '0');
-        const currentTime = 2000//parseInt(hours + minutes, 10);
-    
-        console.log("*********************");
-        console.log(currentDay);
-        console.log(currentTime);
+        // Set the timezone to Asia/Kolkata (IST)
+        const timezone = 'Asia/Kolkata';
+
+        // Get the current time in the specified timezone
+        const today = moment().tz(timezone);
+
+        // Get the current day of the week (1 = Monday, ..., 7 = Sunday)
+        const currentDay = today.day() === 0 ? 7 : today.day(); // Adjusting for Sunday
+
+        // Get the current time in hours and minutes
+        const hours = today.hours().toString().padStart(2, '0');
+        const minutes = today.minutes().toString().padStart(2, '0');
+        const currentTime = parseInt(hours + minutes, 10);
+
+        console.log(`Current Day: ${currentDay}`);
+        console.log(`Current Time: ${currentTime}`);
+  
 
         let matchQuery = [];
         if (searchRequest.domain) {
@@ -1812,7 +1820,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                         must_not: {
                             range: {
                                 "enable_percentage": {
-                                    gte: 20
+                                    gte: 80 //TODO: make it configurable
                                 }
                             }
                         }
@@ -1826,7 +1834,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                       must: {
                           range: {
                               "enable_percentage": {
-                                  gte: 20
+                                  gte: 80 //TODO: make it configurable
                               }
                           }
                       }
