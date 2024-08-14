@@ -500,6 +500,7 @@ class SearchService {
           minDays:minDays,
           minDaysWithTTS : minDays + details.location_details.median_time_to_ship,
           provider_descriptor: details.provider_details.descriptor,
+          provider_details: details.provider_details,
           ...details.location_details,
           time_to_ship: details.item_details["@ondc/org/time_to_ship"]
         };
@@ -1714,7 +1715,6 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
       throw err;
     }
   }
-
   async servieablelocations(searchRequest, targetLanguage = "en") {
     try {
         const page = searchRequest.page ? parseInt(searchRequest.page, 10) : 0;
@@ -1722,6 +1722,16 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
 
         if (isNaN(page) || page < 0) throw new Error("Invalid page number");
         if (isNaN(limit) || limit <= 0) throw new Error("Invalid limit");
+
+        let today = new Date();
+        const currentDay = today.getDay() === 0 ? 7 : today.getDay(); // Adjusting for Sunday
+        const hours = today.getHours().toString().padStart(2, '0');
+        const minutes = today.getMinutes().toString().padStart(2, '0');
+        const currentTime = 2000//parseInt(hours + minutes, 10);
+    
+        console.log("*********************");
+        console.log(currentDay);
+        console.log(currentTime);
 
         let matchQuery = [];
         if (searchRequest.domain) {
@@ -1739,11 +1749,6 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         });
         matchQuery.push({
           match: {
-            "location_details.time.label": 'enable',
-          },
-        });
-        matchQuery.push({
-          match: {
             "provider_details.time.label": 'enable',
           },
         });
@@ -1751,74 +1756,145 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
         matchQuery.push({exists: { field: "location_details.address.area_code" } })
 
         let query_obj = {
-            function_score: {
-                query: {
-                    bool: {
-                        must: matchQuery,
-                        should: [
-                            {
-                                geo_shape: {
-                                    "location_details.polygons": {
-                                        shape: {
-                                            type: "point",
-                                            coordinates: [
+          function_score: {
+              query: {
+                  bool: {
+                      must: matchQuery,
+                      should: [
+                          {
+                              geo_shape: {
+                                  "location_details.polygons": {
+                                      shape: {
+                                          type: "point",
+                                          coordinates: [
                                               parseFloat(searchRequest.latitude),
                                               parseFloat(searchRequest.longitude),
-                                            ]
-                                        },
-                                        //  "relation": "within" 
-                                    },
-
-                                }
-                            },
-                            {
-                                match: {
-                                    "location_details.type": "pan",
-                                }
-                            }
-                        ],
-                        minimum_should_match: 1
-                    }
-                },
-                functions: [
-                    {
-                        script_score: {
-                            script: {
-                                source: `
-                                    String inputPincode = params.inputPincode;
-                                    String docPincode = doc.containsKey('location_details.address.area_code') ? doc['location_details.address.area_code'].value : '';
-                                    int matchCount = 0;
-
-                                    for (int i = 0; i < inputPincode.length(); i++) {
-                                        if (i < docPincode.length() && inputPincode.charAt(i) == docPincode.charAt(i)) {
-                                            matchCount++;
-                                        } else {
-                                            break;
-                                        }
-                                    }
-
-                                    int minDays;
-                                    if (matchCount == 6) minDays = 15*60;
-                                    else if (matchCount == 5) minDays = 30*60;
-                                    else if (matchCount == 4) minDays = 45*60;
-                                    else if (matchCount == 3) minDays = 60*60;
-                                    else if (matchCount == 2) minDays = 1440*60;
-                                    else if (matchCount == 1) minDays = 1440*60;
-                                    else minDays = 10080*60;
-
-                                    return (doc.containsKey('location_details.median_time_to_ship') ? doc['location_details.median_time_to_ship'].value + minDays : minDays);
-                                `,
-                                params: {
-                                    inputPincode: searchRequest.pincode
+                                          ]
+                                      }
+                                  }
+                              }
+                          },
+                          {
+                              match: {
+                                  "location_details.type": "pan",
+                              }
+                          }
+                      ],
+                      minimum_should_match: 1
+                  }
+              },
+              functions: [
+                {
+                  filter: {
+                      nested: {
+                          path: `availability.${currentDay}`,
+                          query: {
+                              bool: {
+                                  should: [
+                                      {
+                                          bool: {
+                                              must: [
+                                                  { range: { [`availability.${currentDay}.start`]: { lte: currentTime } } },
+                                                  { range: { [`availability.${currentDay}.end`]: { gte: currentTime } } }
+                                              ]
+                                          }
+                                      }
+                                  ]
+                              }
+                          }
+                      }
+                  },
+                  weight: 0 // Low weight for documents matching the filter
+              },
+              {
+                filter: {
+                    bool: {
+                        must_not: {
+                            range: {
+                                "enable_percentage": {
+                                    gte: 20
                                 }
                             }
                         }
                     }
-                ],
-                score_mode: "sum",
-                boost_mode: "replace"
-            }
-        };
+                },
+                weight: 10000000 // Weight for documents where enable_percentage is < 100
+            },
+            {
+              filter: {
+                  bool: {
+                      must: {
+                          range: {
+                              "enable_percentage": {
+                                  gte: 20
+                              }
+                          }
+                      }
+                  }
+              },
+              weight: 0 // Weight for documents where enable_percentage is < 100
+          },
+              {
+                filter: {
+                    bool: {
+                        must_not: {
+                            nested: {
+                                path: `availability.${currentDay}`,
+                                query: {
+                                    bool: {
+                                        must: [
+                                            { range: { [`availability.${currentDay}.start`]: { lte: currentTime } } },
+                                            { range: { [`availability.${currentDay}.end`]: { gte: currentTime } } }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                weight: 10000000 // High weight for documents not matching the filter
+            },
+            
+                  {
+                      script_score: {
+                          script: {
+                              source: `
+                                  String inputPincode = params.inputPincode;
+                                  String docPincode = doc.containsKey('location_details.address.area_code') ? doc['location_details.address.area_code'].value : '';
+                                  int matchCount = 0;
+      
+                                  for (int i = 0; i < inputPincode.length(); i++) {
+                                      if (i < docPincode.length() && inputPincode.charAt(i) == docPincode.charAt(i)) {
+                                          matchCount++;
+                                      } else {
+                                          break;
+                                      }
+                                  }
+      
+                                  int minDays;
+                                  if (matchCount == 6) minDays = 15*60;
+                                  else if (matchCount == 5) minDays = 30*60;
+                                  else if (matchCount == 4) minDays = 45*60;
+                                  else if (matchCount == 3) minDays = 60*60;
+                                  else if (matchCount == 2) minDays = 1440*60;
+                                  else if (matchCount == 1) minDays = 1440*60;
+                                  else minDays = 10080*60;
+      
+                                  return (doc.containsKey('location_details.median_time_to_ship') ? doc['location_details.median_time_to_ship'].value + minDays : minDays);
+                              `,
+                              params: {
+                                  inputPincode: searchRequest.pincode
+                              }
+                          }
+                      }
+                  }
+              ],
+              score_mode: "sum", // Combine scores from all functions
+              boost_mode: "replace" // Replace the final score with the score calculated by the functions
+          }
+      };
+      
+      
 
         let queryResults = await client.search({
             index: 'locations',
@@ -1831,8 +1907,6 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                 size: limit
             }
         });
-
-        console.log("Raw query results:", JSON.stringify(queryResults, null, 2));
 
         let locations = queryResults.hits.hits.map(hit => {
             const source = hit._source || {};
@@ -1858,11 +1932,13 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
             return {
                 minDays : minDays,
                 minDaysWithTTS : minDays + source.location_details.median_time_to_ship,
-                domain: source.context.domain,
-                provider_descriptor:source.provider_details.descriptor,
-                provider: source.provider_details.id,
-                ...source.location_details,
-                calculated_score: hit._score
+                // domain: source.context.domain,
+                // provider_descriptor:source.provider_details.descriptor,
+                // provider: source.provider_details.id,
+                // ...source.location_details,
+                calculated_score: hit._score,
+                availability:source.availability
+
             };
         }).filter(item => item !== null);
 
