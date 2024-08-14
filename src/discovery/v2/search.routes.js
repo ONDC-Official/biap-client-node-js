@@ -8,93 +8,93 @@ const searchController = new SearchController();
 
 // search
 router.get(
-    '/v2/search',  searchController.search,
+    '/v2/search',authentication(),  searchController.search,
 );
 
 // search
 router.get(
-    '/v2/search/global/items',  searchController.globalSearchItems,
+    '/v2/search/global/items',authentication(),  searchController.globalSearchItems,
 );
 
 // get item details
 router.get(
-    '/v2/items/:id', searchController.getItem,
+    '/v2/items/:id', authentication(),searchController.getItem,
 );
 
 // get item details
 router.get(
-    '/v2/providers/:itemId', searchController.getProvider,
+    '/v2/providers/:itemId',authentication(), searchController.getProvider,
 );
 
 // get item details
 router.get(
-    '/v2/provider-details',searchController.getProvideDetails,
+    '/v2/provider-details',authentication(),searchController.getProvideDetails,
 );
 // get item details
 router.get(
-    '/v2/location-details',searchController.getLocationDetails,
-);
-
-// get item details
-router.get(
-    '/v2/item-details',searchController.getItemDetails,
+    '/v2/location-details',authentication(),searchController.getLocationDetails,
 );
 
 // get item details
 router.get(
-    '/v2/locations/:id',  searchController.getLocation,
+    '/v2/item-details',authentication(),searchController.getItemDetails,
+);
+
+// get item details
+router.get(
+    '/v2/locations/:id',authentication(),  searchController.getLocation,
 );
 
 
 router.get(
-    '/v2/attributes',  searchController.getAttributes,
+    '/v2/attributes',authentication(),  searchController.getAttributes,
 );
 
 router.get(
-    '/v2/items', searchController.getItems,
+    '/v2/items',authentication(), searchController.getItems,
 );
 
 router.get(
-    '/v2/locations',  searchController.getLocations,
+    '/v2/locations',authentication(),  searchController.getLocations,
 );
 
 router.get(
-    '/v2/nearlocations',  searchController.getLocationsNearest,
+    '/v2/nearlocations',authentication(),  searchController.getLocationsNearest,
 );
 
 router.get(
-    '/v2/servieablelocations',  searchController.servieablelocations,
+    '/v2/servieablelocations',authentication(),  searchController.servieablelocations,
 );
 
 // get item attributes values
 router.get(
-    '/v2/attributeValues',  searchController.getAttributesValues,
+    '/v2/attributeValues',authentication(),  searchController.getAttributesValues,
 );
 
 // get providers
 router.get(
-    '/v2/providers',  searchController.getProviders,
+    '/v2/providers',authentication(),  searchController.getProviders,
 );
 
 // get providers
 router.get(
-    '/v2/search/global/providers',  searchController.getGlobalProviders,
+    '/v2/search/global/providers',authentication(),  searchController.getGlobalProviders,
 );
 
 // get custom menus
 router.get(
-    '/v2/custom-menus',  searchController.getCustomMenu,
+    '/v2/custom-menus',authentication(),  searchController.getCustomMenu,
 );
 
 // get offers
 router.get(
-    '/v2/offers',  searchController.getOffers,
+    '/v2/offers',authentication(),  searchController.getOffers,
 );
 
 
 // get offers
 router.get(
-    '/v2/categories',  searchController.getUniqueCategories,
+    '/v2/categories',authentication(),  searchController.getUniqueCategories,
 );
 
 
