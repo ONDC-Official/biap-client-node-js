@@ -124,7 +124,7 @@ class SearchService {
         bool: {
           must: matchQuery,
           should:shouldQuery,
-          minimum_should_match: 1,
+          minimum_should_match: 0,
         },
         // "should": [ //TODO: enable this once UI apis have been changed
         //     {
@@ -416,27 +416,27 @@ class SearchService {
               },
               weight: 0 // Low weight for documents matching the filter
             },
-            // New filter for inStock
-            {
-              filter: {
-                term: {
-                  "in_stock": true
-                }
-              },
-              weight: 100000 // High weight for in-stock items
-            },
-            {
-              filter: {
-                bool: {
-                  must_not: {
-                    term: {
-                      "in_stock": true
-                    }
-                  }
-                }
-              },
-              weight: 0 // Low weight for out-of-stock items
-            }
+            // // New filter for inStock
+            // {
+            //   filter: {
+            //     term: {
+            //       "in_stock": true
+            //     }
+            //   },
+            //   weight: 100000 // High weight for in-stock items
+            // },
+            // {
+            //   filter: {
+            //     bool: {
+            //       must_not: {
+            //         term: {
+            //           "in_stock": true
+            //         }
+            //       }
+            //     }
+            //   },
+            //   weight: 0 // Low weight for out-of-stock items
+            // }
           ],
           score_mode: "sum", // Combine scores from all functions
           boost_mode: "replace" // Replace the final score with the score calculated by the functions
