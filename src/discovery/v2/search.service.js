@@ -18,10 +18,9 @@ class SearchService {
 
   async search(searchRequest = {}, targetLanguage = "en") {
     try {
-      // providerIds=ondc-mock-server-dev.thewitslab.com_ONDC:RET10_ondc-mock-server-dev.thewitslab.com
       let matchQuery = [];
       let shouldQuery = [];
-
+  
       // bhashini translated data
       matchQuery.push({
         match: {
@@ -43,7 +42,7 @@ class SearchService {
           "provider_details.time.label": 'enable',
         },
       });
-
+  
       if (searchRequest.name) {
         matchQuery.push({
           match: {
@@ -51,7 +50,7 @@ class SearchService {
           },
         });
       }
-
+  
       if (searchRequest.providerIds) {
         matchQuery.push({
           match: {
@@ -59,7 +58,7 @@ class SearchService {
           },
         });
       }
-
+  
       if (searchRequest.locationIds) {
         matchQuery.push({
           match: {
@@ -67,7 +66,7 @@ class SearchService {
           },
         });
       }
-
+  
       if (searchRequest.categoryIds) {
         matchQuery.push({
           match: {
@@ -75,94 +74,95 @@ class SearchService {
           },
         });
       }
-
-      let productAttrParams = {}
+  
       for (const [key, value] of Object.entries(searchRequest)) {
         if (key.startsWith('product_attr_')) {
-            const attributeName = key.slice('product_attr_'.length);
-            // productAttrParams[attributeName] = value;
-            let values = value.split(',');
-            for(let valueObj of values){
-              if(valueObj){
-                shouldQuery.push({
-                  "nested": {
-                    "path": "attribute_key_values",
-                    "query": {
-                      "bool": {
-                        "must": [
-                          {
-                            "term": {
-                              "attribute_key_values.key": attributeName
-                            }
+          const attributeName = key.slice('product_attr_'.length);
+          let values = value.split(',');
+          for (let valueObj of values) {
+            if (valueObj) {
+              shouldQuery.push({
+                nested: {
+                  path: "attribute_key_values",
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            "attribute_key_values.key": attributeName,
                           },
-                          {
-                            "term": {
-                              "attribute_key_values.value": valueObj
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
-                });
-              }
+                        },
+                        {
+                          term: {
+                            "attribute_key_values.value": valueObj,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
             }
-
+          }
         }
-    }
-
-    //  return productAttrParams;
-
+      }
+  
       // for variants we set is_first = true
       matchQuery.push({
         match: {
           is_first: true,
         },
       });
-
+  
       let query_obj = {
         bool: {
           must: matchQuery,
-          should:shouldQuery,
+          should: shouldQuery,
           minimum_should_match: 0,
         },
-        // "should": [ //TODO: enable this once UI apis have been changed
-        //     {
-        //         "match": {
-        //             "location_details.type.keyword": "pan"
-        //         }
-        //     },
-        //     {
-        //         "geo_shape": {
-        //             "location_details.polygons": {
-        //                 "shape": {
-        //                     "type": "point",
-        //                     "coordinates": [lat, lng]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // ]
       };
-
+  
+      // Apply function_score to boost in_stock=true items
+      let finalQuery = {
+        function_score: {
+          query: query_obj,
+          functions: [
+            {
+              filter: {
+                term: { "item_details.in_stock": true },
+              },
+              weight: 2, // Boost for in-stock items
+            },
+            {
+              filter: {
+                term: { "item_details.in_stock": false },
+              },
+              weight: 1, // Lower weight for out-of-stock items
+            },
+          ],
+          score_mode: "sum",
+          boost_mode: "multiply",
+        },
+      };
+  
       // Calculate the starting point for the search
       let size = parseInt(searchRequest.limit);
       let page = parseInt(searchRequest.pageNumber);
       const from = (page - 1) * size;
-
+  
       // Perform the search with pagination parameters
       let queryResults = await client.search({
-        query: query_obj,
+        query: finalQuery,
         from: from,
         size: size,
       });
-
+  
       // Extract the _source field from each hit
       let sources = queryResults.hits.hits.map((hit) => hit._source);
-
+  
       // Get the total count of results
       let totalCount = queryResults.hits.total.value;
-
+  
       // Return the total count and the sources
       return {
         response: {
@@ -175,6 +175,7 @@ class SearchService {
       throw err;
     }
   }
+  
 
   async globalSearchItems(searchRequest = {}, targetLanguage = "en") {
     try {
@@ -392,7 +393,7 @@ class SearchService {
                   }
                 }
               },
-              weight: 10000000 // High weight for documents not matching the filter
+              weight: 10 // High weight for documents not matching the filter
             },
             {
               filter: {
@@ -416,27 +417,27 @@ class SearchService {
               },
               weight: 0 // Low weight for documents matching the filter
             },
-            // // New filter for inStock
-            // {
-            //   filter: {
-            //     term: {
-            //       "in_stock": true
-            //     }
-            //   },
-            //   weight: 100000 // High weight for in-stock items
-            // },
-            // {
-            //   filter: {
-            //     bool: {
-            //       must_not: {
-            //         term: {
-            //           "in_stock": true
-            //         }
-            //       }
-            //     }
-            //   },
-            //   weight: 0 // Low weight for out-of-stock items
-            // }
+            // New filter for inStock
+            {
+              filter: {
+                term: {
+                  "in_stock": true
+                }
+              },
+              weight: 0 // High weight for in-stock items
+            },
+            {
+              filter: {
+                bool: {
+                  must_not: {
+                    term: {
+                      "in_stock": true
+                    }
+                  }
+                }
+              },
+              weight: 10  // Low weight for out-of-stock items
+            }
           ],
           score_mode: "sum", // Combine scores from all functions
           boost_mode: "replace" // Replace the final score with the score calculated by the functions
