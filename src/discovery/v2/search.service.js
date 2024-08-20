@@ -318,7 +318,7 @@ class SearchService {
                     should: [
                       {
                         "match": {
-                          "item_details.descriptor.name": `*${searchRequest.name}*`
+                          "item_details.descriptor.name": searchRequest.name
                         },
                       },
                       // {
@@ -333,7 +333,7 @@ class SearchService {
                       // },
                       {
                         "match": {
-                          "item_details.category_id": `*${searchRequest.name}*`
+                          "item_details.category_id": searchRequest.name
                         },
                       },
                      
@@ -1486,12 +1486,12 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
                   should: [
                     {
                       "match": {
-                        "provider_details.descriptor.name": `*${searchRequest.name}*`
+                        "provider_details.descriptor.name": searchRequest.name
                       }
                     },
                     {
                       "match": {
-                        "item_details.descriptor.name": `*${searchRequest.name}*`
+                        "item_details.descriptor.name": searchRequest.name
                       },
                     },
                     // {
@@ -1506,7 +1506,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
                     // },
                     {
                       "match": {
-                        "item_details.category_id": `*${searchRequest.name}*`
+                        "item_details.category_id": searchRequest.name
                       },
                     },
                    
