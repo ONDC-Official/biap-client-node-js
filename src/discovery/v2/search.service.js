@@ -317,22 +317,22 @@ class SearchService {
                     must: matchQuery,
                     should: [
                       {
-                        "wildcard": {
+                        "match": {
                           "item_details.descriptor.name": `*${searchRequest.name}*`
                         },
                       },
+                      // {
+                      //   "wildcard": {
+                      //     "item_details.descriptor.short_desc": `*${searchRequest.name}*`
+                      //   },
+                      // },
+                      // {
+                      //   "wildcard": {
+                      //     "item_details.descriptor.long_desc":`*${searchRequest.name}*`
+                      //   },
+                      // },
                       {
-                        "wildcard": {
-                          "item_details.descriptor.short_desc": `*${searchRequest.name}*`
-                        },
-                      },
-                      {
-                        "wildcard": {
-                          "item_details.descriptor.long_desc":`*${searchRequest.name}*`
-                        },
-                      },
-                      {
-                        "wildcard": {
+                        "match": {
                           "item_details.category_id": `*${searchRequest.name}*`
                         },
                       },
@@ -1457,22 +1457,22 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
     });
     matchQuery.push({ exists: { field: "item_details" } })
 
-            // Set the timezone to Asia/Kolkata (IST)
-            const timezone = 'Asia/Kolkata';
+    // Set the timezone to Asia/Kolkata (IST)
+    const timezone = 'Asia/Kolkata';
 
-            // Get the current time in the specified timezone
-            const today = moment().tz(timezone);
+    // Get the current time in the specified timezone
+    const today = moment().tz(timezone);
     
-            // Get the current day of the week (1 = Monday, ..., 7 = Sunday)
-            const currentDay = today.day() === 0 ? 7 : today.day(); // Adjusting for Sunday
+    // Get the current day of the week (1 = Monday, ..., 7 = Sunday)
+    const currentDay = today.day() === 0 ? 7 : today.day(); // Adjusting for Sunday
     
-            // Get the current time in hours and minutes
-            const hours = today.hours().toString().padStart(2, '0');
-            const minutes = today.minutes().toString().padStart(2, '0');
-            const currentTime = parseInt(hours + minutes, 10);
+     // Get the current time in hours and minutes
+    const hours = today.hours().toString().padStart(2, '0');
+    const minutes = today.minutes().toString().padStart(2, '0');
+    const currentTime = parseInt(hours + minutes, 10);
     
-            console.log(`Current Day: ${currentDay}`);
-            console.log(`Current Time: ${currentTime}`);
+    console.log(`Current Day: ${currentDay}`);
+    console.log(`Current Time: ${currentTime}`);
 
     // Base query object with additional filters
     let query_obj = {
@@ -1485,27 +1485,27 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
                   must: matchQuery,
                   should: [
                     {
-                      "wildcard": {
+                      "match": {
                         "provider_details.descriptor.name": `*${searchRequest.name}*`
                       }
                     },
                     {
-                      "wildcard": {
+                      "match": {
                         "item_details.descriptor.name": `*${searchRequest.name}*`
                       },
                     },
+                    // {
+                    //   "wildcard": {
+                    //     "item_details.descriptor.short_desc": `*${searchRequest.name}*`
+                    //   },
+                    // },
+                    // {
+                    //   "wildcard": {
+                    //     "item_details.descriptor.long_desc":`*${searchRequest.name}*`
+                    //   },
+                    // },
                     {
-                      "wildcard": {
-                        "item_details.descriptor.short_desc": `*${searchRequest.name}*`
-                      },
-                    },
-                    {
-                      "wildcard": {
-                        "item_details.descriptor.long_desc":`*${searchRequest.name}*`
-                      },
-                    },
-                    {
-                      "wildcard": {
+                      "match": {
                         "item_details.category_id": `*${searchRequest.name}*`
                       },
                     },
@@ -1597,7 +1597,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
                 "in_stock": true
               }
             },
-            weight: 100000 // High weight for in-stock items
+            weight: 10 // High weight for in-stock items
           },
           {
             filter: {
@@ -1637,7 +1637,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
                   }
               }
           },
-          weight: 100000 // Weight for documents where enable_percentage is < 100
+          weight: 10 // Weight for documents where enable_percentage is < 100
       },
         ],
         score_mode: "sum", // Combine scores from all functions
