@@ -15,7 +15,6 @@ class SearchService {
   isBppFilterSpecified(context = {}) {
     return typeof context.bpp_id !== "undefined";
   }
-
   async search(searchRequest = {}, targetLanguage = "en") {
     try {
       let matchQuery = [];
@@ -129,19 +128,19 @@ class SearchService {
           functions: [
             {
               filter: {
-                term: { "item_details.in_stock": true },
+                term: { "in_stock": true },
               },
-              weight: 2, // Boost for in-stock items
+              weight: 10, // Boost for in-stock items
             },
             {
               filter: {
-                term: { "item_details.in_stock": false },
+                term: { "in_stock": false },
               },
               weight: 1, // Lower weight for out-of-stock items
             },
           ],
-          score_mode: "sum",
-          boost_mode: "multiply",
+          score_mode: "sum", // Ensure sum mode to add up scores
+          boost_mode: "multiply", // Use multiply to enhance the effect of the weights
         },
       };
   
@@ -168,13 +167,14 @@ class SearchService {
         response: {
           count: totalCount,
           data: sources,
-          pages: parseInt(totalCount / size),
+          pages: Math.ceil(totalCount / size),
         },
       };
     } catch (err) {
       throw err;
     }
   }
+  
   
 
   async globalSearchItems(searchRequest = {}, targetLanguage = "en") {
