@@ -2056,6 +2056,12 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
           },
         });
 
+        matchQuery.push({
+          match: {
+            "provider_details.id": searchRequest.providerId,
+          },
+        });
+
         matchQuery.push({exists: { field: "location_details.address.area_code" } })
 
         let query_obj = {
