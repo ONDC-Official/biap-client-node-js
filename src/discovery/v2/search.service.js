@@ -489,14 +489,15 @@ class SearchService {
   async getItems(searchRequest = {}, targetLanguage = "en") {
     try {
       let matchQuery = [];
-
-      // bhashini translated data
+  
+      // Match on the target language
       matchQuery.push({
         match: {
           language: targetLanguage,
         },
       });
-
+  
+      // Match on customMenu if provided
       if (searchRequest.customMenu) {
         matchQuery.push({
           nested: {
@@ -515,26 +516,51 @@ class SearchService {
           },
         });
       }
-
+  
       let query_obj = {
         bool: {
           must: matchQuery,
         },
       };
-
-      // Perform the search with pagination parameters
+  
+      // Add function_score to boost in_stock items
+      let boostedQuery = {
+        function_score: {
+          query: query_obj,
+          functions: [
+            {
+              filter: {
+                term: {
+                  in_stock: true,
+                },
+              },
+              weight: 2, // Adjust the weight as necessary
+            },
+            {
+              filter: {
+                term: { "in_stock": false },
+              },
+              weight: 1, // Lower weight for out-of-stock items
+            },
+          ],
+          boost_mode: "multiply", // This will multiply the score by the weight
+          score_mode: "sum", // Sum the scores to combine with the base query
+        },
+      };
+  
+      // Perform the search with the boosted query
       let queryResults = await client.search({
         body: {
-          query: query_obj,
+          query: boostedQuery,
         },
       });
-
+  
       // Extract the _source field from each hit
       let sources = queryResults.hits.hits.map((hit) => hit._source);
-
+  
       // Get the total count of results
       let totalCount = queryResults.hits.total.value;
-
+  
       // Return the total count and the sources
       return {
         response: {
@@ -547,7 +573,7 @@ class SearchService {
       throw err;
     }
   }
-
+  
   async getProvideDetails(searchRequest = {}, targetLanguage = "en") {
     try {
       // id=pramaan.ondc.org/alpha/mock-server_ONDC:RET12_pramaan.ondc.org/alpha/mock-server
