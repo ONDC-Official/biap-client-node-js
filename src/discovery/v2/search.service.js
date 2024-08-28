@@ -180,7 +180,7 @@ class SearchService {
   async globalSearchItems(searchRequest = {}, targetLanguage = "en") {
     try {
       let matchQuery = [];
-      let searchQuery = [];
+      // let searchQuery = [];
       
       // Base match queries
       matchQuery.push({
@@ -213,29 +213,29 @@ class SearchService {
         },
       });
   
-      if (searchRequest.name) {
-        searchQuery.push({
-          match: {
-            "item_details.descriptor.name": searchRequest.name,
-          },
-        });
+      // if (searchRequest.name) {
+      //   searchQuery.push({
+      //     match: {
+      //       "item_details.descriptor.name": searchRequest.name,
+      //     },
+      //   });
   
-        searchQuery.push({
-          match: {
-            "item_details.descriptor.short_desc": searchRequest.name,
-          },
-        });
-        searchQuery.push({
-          match: {
-            "item_details.descriptor.long_desc": searchRequest.name,
-          },
-        });
-        searchQuery.push({
-          match: {
-            "item_details.category_id": searchRequest.name,
-          },
-        });
-      }
+      //   searchQuery.push({
+      //     match: {
+      //       "item_details.descriptor.short_desc": searchRequest.name,
+      //     },
+      //   });
+      //   searchQuery.push({
+      //     match: {
+      //       "item_details.descriptor.long_desc": searchRequest.name,
+      //     },
+      //   });
+      //   searchQuery.push({
+      //     match: {
+      //       "item_details.category_id": searchRequest.name,
+      //     },
+      //   });
+      // }
   
       if (searchRequest.providerIds) {
         matchQuery.push({
@@ -266,30 +266,30 @@ class SearchService {
       //   },
       // });
   
-      // Define filter conditions
-      let filterConditions = [
-        {
-          match: {
-            "location_details.type": "pan",
-          },
-        },
-      ];
+      // // Define filter conditions
+      // let filterConditions = [
+      //   {
+      //     match: {
+      //       "location_details.type": "pan",
+      //     },
+      //   },
+      // ];
   
-      if (searchRequest.latitude && searchRequest.longitude) {
-        filterConditions.push({
-          geo_shape: {
-            "location_details.polygons": {
-              shape: {
-                type: "point",
-                coordinates: [
-                  parseFloat(searchRequest.latitude),
-                  parseFloat(searchRequest.longitude),
-                ],
-              },
-            },
-          },
-        });
-      }
+      // if (searchRequest.latitude && searchRequest.longitude) {
+      //   filterConditions.push({
+      //     geo_shape: {
+      //       "location_details.polygons": {
+      //         shape: {
+      //           type: "point",
+      //           coordinates: [
+      //             parseFloat(searchRequest.latitude),
+      //             parseFloat(searchRequest.longitude),
+      //           ],
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
   
       // Set the timezone to Asia/Kolkata (IST)
       const timezone = 'Asia/Kolkata';
@@ -739,15 +739,15 @@ class SearchService {
         // add variant details if available
         if (item_details.item_details.parent_item_id) {
           // hit db to find all related items
-          let matchQuery = [];
+          let matchQueryRelatedItems = [];
 
-          matchQuery.push({
+          matchQueryRelatedItems.push({
             match: {
               language: targetLanguage,
             },
           });
 
-          matchQuery.push({
+          matchQueryRelatedItems.push({
             match: {
               "item_details.parent_item_id":
                 item_details.item_details.parent_item_id,
@@ -755,49 +755,49 @@ class SearchService {
           });
 
           // match provider id
-          matchQuery.push({
+          matchQueryRelatedItems.push({
             match: {
               "provider_details.id": item_details.provider_details.id,
             },
           });
 
           // match location id
-          matchQuery.push({
+          matchQueryRelatedItems.push({
             match: {
               "location_details.id": item_details.location_details.id,
             },
           });
 
-          matchQuery.push(
+          matchQueryRelatedItems.push(
             {
               match: {
                 language: targetLanguage,
               },
             })
 
-          let query_obj = {
+          let query_obj_related_items = {
             bool: {
-              must: matchQuery,
+              must: matchQueryRelatedItems,
             },
           };
 
-          let queryResults = await client.search({
-            query: query_obj,
+          let queryResultsRelatedItems = await client.search({
+            query: query_obj_related_items,
             size:100
           });
 
-          item_details.related_items = queryResults.hits.hits.map(
+          item_details.related_items = queryResultsRelatedItems.hits.hits.map(
             (hit) => {
              let data =  hit._source 
 
                    //map attribute keys 
-      const flatObject = {};
+      const flatObjectAttributes = {};
       if(data.attribute_key_values && data.attribute_key_values.length>0){
         data.attribute_key_values.forEach(pair => {
-          flatObject[pair.key] = pair.value;
+          flatObjectAttributes[pair.key] = pair.value;
       });
       }
-      data.attributes = flatObject
+      data.attributes = flatObjectAttributes
 
             return  data;
             
@@ -832,19 +832,19 @@ class SearchService {
             });
             
           // Create the query object
-          let query_obj = {
+          let query_obj_customisation = {
             bool: {
               must: customisationQuery,
             },
           };
 
-          let queryResults = await client.search({
-            query: query_obj,
+          let queryResultsCustomisation = await client.search({
+            query: query_obj_customisation,
             size: 100
           });
 
-          console.log(queryResults);
-          item_details.customisation_items = queryResults.hits.hits.map(
+          console.log(queryResultsCustomisation);
+          item_details.customisation_items = queryResultsCustomisation.hits.hits.map(
             (hit) => hit._source,
           );
         }
@@ -1879,27 +1879,6 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
 
   async getCustomMenu(searchRequest, targetLanguage = "en") {
     try {
-      let matchQuery = [];
-
-      matchQuery.push({
-        match: {
-          language: targetLanguage,
-        },
-      });
-
-      matchQuery.push({
-        match: {
-          "type": 'item',
-        },
-      })
-
-      if (searchRequest.provider) {
-        matchQuery.push({
-          match: {
-            "provider_details.id": searchRequest.provider,
-          },
-        });
-      }
 
       let queryResults = await client.search({
         query: {

@@ -89,7 +89,7 @@ class ConfirmOrderService {
      * @param {Number} total
      * @param {Boolean} confirmPayment
      */
-    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true,paymentData) {
+    async confirmAndUpdateOrder(orderRequest, total, confirmPayment ,paymentData) {
         const {
             context: requestContext,
             message: order = {}
@@ -101,7 +101,7 @@ class ConfirmOrderService {
 
         console.log("dbResponse---------------->",dbResponse)
 
-        if (dbResponse?.paymentStatus === null) {
+        if (!dbResponse?.paymentStatus) {
 
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
@@ -135,7 +135,7 @@ class ConfirmOrderService {
             //     paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
             //
             // }else{
-            paymentStatus = {txn_id:requestContext?.transaction_id}
+            //paymentStatus = {txn_id:requestContext?.transaction_id}
             // }
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
@@ -277,7 +277,7 @@ class ConfirmOrderService {
                 }
                 orderSchema.items = updateItems;
                 orderSchema.updatedQuote= orderSchema.quote;
-                orderSchema.tags= orderSchema.tags;
+               // orderSchema.tags= orderSchema.tags;
                 orderSchema.domain= response?.context.domain
 
                 await addOrUpdateOrderWithTransactionIdAndProvider(
@@ -410,7 +410,7 @@ class ConfirmOrderService {
     async orderPushToOMS(data){
 
         try{
-            let orderCount = await OrderMongooseModel.count()
+            //let orderCount = await OrderMongooseModel.count()
 
             // Calculate the date two days ago
             const twoDaysAgo = new Date();

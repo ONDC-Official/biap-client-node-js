@@ -27,7 +27,7 @@ class SearchController {
         //     targetLanguage = undefined
         // }
         searchService.search(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -49,7 +49,7 @@ class SearchController {
         //     targetLanguage = undefined
         // }
         searchService.globalSearchItems(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -71,7 +71,7 @@ class SearchController {
             targetLanguage = undefined
         }
         searchService.getProvideDetails(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -89,7 +89,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getLocationDetails(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -111,7 +111,7 @@ class SearchController {
             targetLanguage = undefined
         }
         searchService.getItemDetails(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -134,7 +134,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getItem(searchRequest,itemId).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -150,7 +150,7 @@ class SearchController {
         console.log("get providers*****1*********" ,{searchRequest,itemId})
 
         searchService.getProvider(searchRequest,itemId).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response.response);
@@ -166,7 +166,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getLocation(searchRequest,locationId).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response.response);
@@ -188,7 +188,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getAttributes(searchRequest).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -208,7 +208,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getItems(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response.response);
@@ -227,7 +227,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getLocations(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -245,7 +245,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getLocationsNearest(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -265,7 +265,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.servieablelocations(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response || response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -283,7 +283,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getGlobalProviders(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -302,7 +302,7 @@ class SearchController {
         let targetLanguage = headers['targetlanguage'];
 
         searchService.getUniqueCategories(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -324,7 +324,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getAttributesValues(searchRequest).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -351,7 +351,7 @@ class SearchController {
             targetLanguage = undefined
         }
         searchService.getProviders(searchRequest,targetLanguage).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -373,7 +373,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getCustomMenu(searchRequest).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);
@@ -389,7 +389,7 @@ class SearchController {
         console.log({searchRequest})
 
         searchService.getOffers(searchRequest).then(response => {
-            if(!response || response === null)
+            if(!response)
                 throw new NoRecordFoundError("No result found");
             else
                 res.json(response);

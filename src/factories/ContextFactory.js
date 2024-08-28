@@ -13,8 +13,8 @@ class ContextFactory {
             country = process.env.COUNTRY,
             bapId = process.env.BAP_ID,
             bapUrl = process.env.BAP_URL,
-            city,
-            state
+            // city,
+            // state
         } = arg || {};
 
         this.domain = domain;
@@ -91,7 +91,8 @@ class ContextFactory {
             messageId = uuidv4(),
             action = PROTOCOL_CONTEXT.SEARCH,
             bppId,
-            city,state,cityCode,bpp_uri,
+            city,
+            bpp_uri,
             pincode,
             domain
 

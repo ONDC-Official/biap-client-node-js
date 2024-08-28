@@ -9,7 +9,7 @@ class BppCancelService {
      * @param {String} cancellationReasonId 
      * @returns 
      */
-    async cancelOrder(context, orderId, cancellationReasonId = "001",fulfillmentId) {
+    async cancelOrder(context, orderId, cancellationReasonId ,fulfillmentId) {
         try {
 
             const cancelRequest = {

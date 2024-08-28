@@ -8,7 +8,7 @@ class BppSupportService {
      * @param {String} refId 
      * @returns 
      */
-    async support(context = {}, refId) {
+    async support(context, refId) {
         try {
 
             const supportRequest = {

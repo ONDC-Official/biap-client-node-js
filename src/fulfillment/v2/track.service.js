@@ -94,10 +94,10 @@ class TrackService {
     */
     async onTrackMultipleOrder(messageIds) {
         try {
-            const onTrackResponse = await Promise.all(
+            let onTrackResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onTrackResponse = await this.onTrack(messageId);
+                        onTrackResponse = await this.onTrack(messageId);
                         return { ...onTrackResponse };
                     }
                     catch (err) {

@@ -122,8 +122,6 @@ class BppConfirmService {
             storedOrder = storedOrder?.toJSON();
 
             const n = new Date();
-            const count = await OrderMongooseModel.count({
-            });
 
 
             //get TAT object from select request
@@ -146,8 +144,6 @@ class BppConfirmService {
             //find terms from init call
 
             let bpp_term = storedOrder?.tags?.find(x => x.code === 'bpp_terms')
-
-            let tax_number = bpp_term?.list?.find(x => x.code === 'tax_number')
 
             console.log(bpp_term)
             let bpp_terms =[

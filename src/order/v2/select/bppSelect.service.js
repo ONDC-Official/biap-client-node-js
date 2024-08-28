@@ -28,11 +28,11 @@ class BppSelectService {
             
             let items  = []
             let locationSet = new Set()
-            for(let [index,item] of cart.items.entries()){
+            for(let item of cart.items.entries()){
 
                 let parentItemKeys
                 if(item.customisations){
-                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
+                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(itemObj => itemObj.local_id).join('_');
 
                 }else{
                     parentItemKeys = item?.local_id?.toString()
@@ -59,16 +59,16 @@ class BppSelectService {
                 items.push(selectitem);
                 if(item.customisations){
                     for(let customisation of item.customisations){
-                        let selectitem = {
+                        let selectitemObj = {
                             id: customisation?.local_id?.toString(),
                             quantity: customisation.quantity,
                             location_id: item?.product?.location_id?.toString()
                         }
-                        let tag=undefined
+                        let tagData=undefined
                         if(customisation.item_details?.tags && customisation.item_details?.tags.length>0){
-                            tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
+                            tagData= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
                             let finalTags = []
-                            for(let tg of tag){tag
+                            for(let tg of tagData){
                                 if(tg.code==='parent'){
                                     if(tg.list.length>0){
                                         tg.list= tg.list.filter(i =>{ return i.code==='id'});
@@ -78,10 +78,10 @@ class BppSelectService {
                                     finalTags.push(tg);
                                 }
                             }
-                            selectitem.tags =finalTags;
+                            selectitemObj.tags =finalTags;
                         }
-                        selectitem.parent_item_id = parentItemId;
-                        items.push(selectitem);
+                        selectitemObj.parent_item_id = parentItemId;
+                        items.push(selectitemObj);
                     }
                 }
 

@@ -1,46 +1,49 @@
 import mongoose from "mongoose";
 
+const defaultString = { type: String, default: null };
+const defaultDate = { type: Date, default: null };
+
 const OrganizationSchema = new mongoose.Schema(
     {
-        name: { type: String, default: null },
-        cred: { type: String, default: null },
+        name: defaultString,
+        cred: defaultString,
     },
     { _id: false }
 );
 
 const AddressSchema = new mongoose.Schema(
     {
-        door: { type: String, default: null },
-        name: { type: String, default: null },
-        building: { type: String, default: null },
-        street: { type: String, default: null },
-        locality: { type: String, default: null },
-        ward: { type: String, default: null },
-        city: { type: String, default: null },
-        state: { type: String, default: null },
-        country: { type: String, default: null },
-        areaCode: { type: String, default: null },
-        lat:{ type: String, default: null },
-        lng:{ type: String, default: null }
+        door: defaultString,
+        name: defaultString,
+        building: defaultString,
+        street: defaultString,
+        locality: defaultString,
+        ward: defaultString,
+        city: defaultString,
+        state: defaultString,
+        country: defaultString,
+        areaCode: defaultString,
+        lat: defaultString,
+        lng: defaultString,
     },
     { _id: false }
 );
 
 const TimeRangeSchema = new mongoose.Schema(
     {
-        start: { type: Date, default: null },
-        end: { type: Date, default: null },
+        start: defaultDate,
+        end: defaultDate,
     },
     { _id: false }
 );
 
 const TimeSchema = new mongoose.Schema(
     {
-        label: { type: String, default: null },
-        timestamp: { type: Date, default: null },
-        duration: { type: String, default: null },
+        label: defaultString,
+        timestamp: defaultDate,
+        duration: defaultString,
         range: { type: TimeRangeSchema, default: null },
-        days: { type: String, default: null },
+        days: defaultString,
     },
     { _id: false }
 );
@@ -52,15 +55,15 @@ const BillingSchema = new mongoose.Schema(
         phone: { type: String, required: true },
         organization: { type: OrganizationSchema, default: null },
         address: { type: AddressSchema, default: null },
-        email: { type: String, default: null },
+        email: defaultString,
         time: { type: TimeSchema, default: null },
-        taxNumber: { type: String, default: null },
-        locationId: { type: String, default: null },
+        taxNumber: defaultString,
+        locationId: defaultString,
         userId: String
     },
     { _id: true, timestamps: true }
 );
 
-const Billing = mongoose.model('billing', BillingSchema, "billing");
+const Billing = mongoose.model('Billing', BillingSchema, 'billing');
 
 export default Billing;

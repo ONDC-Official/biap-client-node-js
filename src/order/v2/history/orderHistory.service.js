@@ -35,7 +35,7 @@ class OrderHistoryService {
             limit = parseInt(limit);
             let skip = (pageNumber - 1) * limit;
             
-            let clonedFilterObj = {};
+            let clonedFilterObj = {userId: user.decodedToken.uid};
 
             if (orderId)
                 clonedFilterObj = { ...clonedFilterObj, id: { "$in": orderId.split(",") } };
@@ -48,8 +48,6 @@ class OrderHistoryService {
             if (userId)
                 clonedFilterObj = { ...clonedFilterObj, userId: userId };
 
-           // if (_.isEmpty(clonedFilterObj))
-                clonedFilterObj = {...clonedFilterObj, userId: user.decodedToken.uid };
 
             console.log("clonedFilter obj --->",clonedFilterObj)
             switch (orderStatus) {

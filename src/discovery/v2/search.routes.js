@@ -8,12 +8,12 @@ const searchController = new SearchController();
 
 // search
 router.get(
-    '/v2/search',authentication(),  searchController.search,
+    '/v2/search', searchController.search,
 );
 
 // search
 router.get(
-    '/v2/search/global/items',authentication(),  searchController.globalSearchItems,
+    '/v2/search/global/items', searchController.globalSearchItems,
 );
 
 // get item details
@@ -28,7 +28,7 @@ router.get(
 
 // get item details
 router.get(
-    '/v2/provider-details',authentication(),searchController.getProvideDetails,
+    '/v2/provider-details',searchController.getProvideDetails,
 );
 // get item details
 router.get(
@@ -63,7 +63,7 @@ router.get(
 );
 
 router.get(
-    '/v2/servieablelocations',authentication(),  searchController.servieablelocations,
+    '/v2/servieablelocations',  searchController.servieablelocations,
 );
 
 // get item attributes values
@@ -78,7 +78,7 @@ router.get(
 
 // get providers
 router.get(
-    '/v2/search/global/providers',authentication(),  searchController.getGlobalProviders,
+    '/v2/search/global/providers', searchController.getGlobalProviders,
 );
 
 // get custom menus

@@ -13,14 +13,14 @@ class HttpRequest {
      * @param {*} data HTTP request data (If applicable)
      * @param {*} options other params
      */
-    constructor(baseUrl, url, method = 'get', data = {}, headers = {}, options) {
+    constructor(baseUrl, url, method, data, headers, options) {
         this.baseUrl = baseUrl;
         this.url = url;
-        this.method = method;
-        this.data = data;
-        this.headers = headers;
-        this.options = options;
-    };
+        this.method = method || 'get'; // Default value for method
+        this.data = data || {}; // Default value for data
+        this.headers = headers || {}; // Default value for headers
+        this.options = options; // options does not have a default value
+    }
 
     /**
      * Send http request to server to write data to / read data from server

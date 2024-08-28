@@ -72,22 +72,23 @@ app.use((req, res, next) => {
 app.use('/clientApis',appVersionValidator(), router);
 
 app.use(helmet.xssFilter());
+app.use(helmet.hidePoweredBy());
 // Custom function to escape special characters except for URLs
-function customEscape(value) {
-    if (typeof value === 'string') {
-        if (validator.isURL(value, { require_protocol: true })) {
-            return value;
-        }
-        return value;
-    }
-    return value;
-}
+// function customEscape(value) {
+//     if (typeof value === 'string') {
+//         if (validator.isURL(value, { require_protocol: true })) {
+//             return value;
+//         }
+//         return value;
+//     }
+//     return value;
+// }
 
 // Recursive function to sanitize nested objects and arrays
 function sanitize(input) {
     if (typeof input === 'string') {
         input = validator.trim(input);
-        input = customEscape(input);
+        // input = customEscape(input);
         return purify.sanitize(input);
     } else if (typeof input === 'object' && input !== null) {
         if (Array.isArray(input)) {

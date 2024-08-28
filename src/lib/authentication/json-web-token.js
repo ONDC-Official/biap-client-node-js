@@ -15,11 +15,11 @@ class JsonWebToken {
      */
     sign(token) {
         return new Promise((resolve, reject) => {
-            jwt.sign(token.payload, this.options.secret, {expiresIn: token.exp}, function (err, token) {
+            jwt.sign(token.payload, this.options.secret, {expiresIn: token.exp}, function (err, tokenPayload) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(token);
+                    resolve(tokenPayload);
                 }
             });
         })

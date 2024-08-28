@@ -62,7 +62,7 @@ class SelectOrderService {
             //get bpp_url and check if item is available
             let itemContext={}
             let itemPresent=true
-            for(let [index,item] of cart.items.entries()){
+            for(let item of cart.items.entries()){
                 let items =  await bppSearchService.getItemDetails(
                     {id:item.id}
                 );

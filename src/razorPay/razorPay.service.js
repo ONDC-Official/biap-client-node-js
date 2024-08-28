@@ -26,7 +26,7 @@ class RazorPayService
 
             console.log('[Payment] data......................',data);
 
-            let uuid1 = uuid();
+           
             const intent = await Order .findOne({transactionId:transactionId})
 
             if (!intent)
@@ -127,7 +127,7 @@ class RazorPayService
 
                 console.log('responseData......................',responseData);
                 let order=await Transaction.findOne({order_id:responseData.payload.payment.entity.order_id});
-                let previousTransaction = order;
+              
 
                 if(order){
 
@@ -218,7 +218,7 @@ class RazorPayService
                 });
                 console.log('responseData......................',responseData);
                 let order=await Transaction.findOne({orderId:responseData.razorpay_order_id});
-                let previousTransaction = order;
+
 
                 if(order){
 
@@ -283,8 +283,6 @@ class RazorPayService
                     key_secret:process.env.RAZORPAY_KEY_SECRET
                 });
 
-                if(order){
-
                        let paymentDetails = await instance.payments.fetch(order.payment.id)
 
                        let refund = new Refund()
@@ -309,7 +307,6 @@ class RazorPayService
                         await refund.save();
                     }
 
-                }
             }
         }
         catch (err)

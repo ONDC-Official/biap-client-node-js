@@ -196,7 +196,7 @@ class UpdateOrderService {
                 });
 
                 const { message = {} } = orderRequest || {};
-                const { update_target,order } = message || {};
+                const {order } = message || {};
 
                 if (!(context?.bpp_id)) {
                     throw new CustomError("BPP Id is mandatory");
@@ -340,8 +340,6 @@ class UpdateOrderService {
 
                     if (!(dbResponse || dbResponse.length))
                         throw new NoRecordFoundError();
-                    else {
-                    }
                 }
                 return protocolUpdateResponse;
             }

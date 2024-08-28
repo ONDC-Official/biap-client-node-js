@@ -118,10 +118,10 @@ class OrderStatusService {
     */
     async onOrderStatusV2(messageIds) {
         try {
-            const onOrderStatusResponse = await Promise.all(
+            let onOrderStatusResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onOrderStatusResponse = await this.onOrderStatus(messageId);
+                        onOrderStatusResponse = await this.onOrderStatus(messageId);
 
                         if(!onOrderStatusResponse.error) {
                             const dbResponse = await OrderMongooseModel.find({
@@ -153,7 +153,7 @@ class OrderStatusService {
                                     orderSchema.documents = onOrderStatusResponse?.message?.order?.documents
                                 }
 
-                                let op = orderSchema?.items.map((e, i) => {
+                                orderSchema?.items.map((e, i) => {
                                     let temp = onOrderStatusResponse.message?.order?.fulfillments?.find(fulfillment => fulfillment?.id === e?.fulfillment_id)
                                     if (temp) {
                                         e.fulfillment_status = temp.state?.descriptor?.code ?? ""
@@ -354,7 +354,7 @@ class OrderStatusService {
                 });
 
                 const { message = {} } = orderRequest || {};
-                const { update_target,order } = message || {};
+                const { order } = message || {};
 
                 if (!(context?.bpp_id)) {
                     throw new CustomError("BPP Id is mandatory");
@@ -448,10 +448,10 @@ class OrderStatusService {
 
     async onOrderStatusDbOperation(messageIds) {
         try {
-            const onOrderStatusResponse = await Promise.all(
+            let onOrderStatusResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onOrderStatusResponse = await this.onOrderStatus(messageId);
+                        onOrderStatusResponse = await this.onOrderStatus(messageId);
                             return { ...onOrderStatusResponse };
                     }
                     catch (err) {

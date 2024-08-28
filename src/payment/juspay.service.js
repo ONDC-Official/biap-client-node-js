@@ -66,7 +66,7 @@ class JuspayService {
     */
     async verifyPayment(data) {
         try {
-            const { date_created, event_name, content = {} } = data || {};
+            const { event_name, content = {} } = data || {};
             const { order = {} } = content || {};
             const { amount, order_id } = order;
 
@@ -97,7 +97,7 @@ class JuspayService {
 
             const dbResponse = await getOrderByTransactionId(order_id);
 
-            if (dbResponse?.paymentStatus === null || dbResponse?.paymentStatus !== status) {
+            if (!dbResponse?.paymentStatus || dbResponse?.paymentStatus !== status) {
 
                 const contextFactory = new ContextFactory();
                 const context = contextFactory.create({

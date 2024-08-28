@@ -56,4 +56,6 @@ rootRouter.get(
 );
 
 //#endregion
+
+// Export with the name `rootRouter`
 export default rootRouter;

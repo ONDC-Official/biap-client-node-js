@@ -1,145 +1,115 @@
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../../utils/constants.js";
 import { protocolInit } from "../../../utils/protocolApis/index.js";
-import crypto from 'crypto'
+import crypto from 'crypto';
+
 class BppInitService {
 
-
     async getShortHash(input) {
-        // Create a SHA-256 hash of the input string
         const hash = crypto.createHash('sha256').update(input).digest('base64');
-      
-        // Take the first 12 characters of the base64 hash
         return hash.substring(0, 12);
-      }
-    /**
-    * bpp init order
-    * @param {Object} context
-    * @param {Object} order
-    * @param {String} parentOrderId
-    */
-    async init(context, order = {}, parentOrderId) {
+    }
+
+    transformAddress(address) {
+        if (!address) return address;
+        address.area_code = address.areaCode;
+        delete address.areaCode;
+        address.locality = address.street;
+        delete address.street;
+        delete address.ward;
+        delete address.door;
+        return address;
+    }
+
+    deleteUnnecessaryFields(order) {
+        const addressFieldsToDelete = [
+            'tag', 'lat', 'lng', 'street', 'ward', 'door'
+        ];
+
+        // Delete fields from billing_info address
+        addressFieldsToDelete.forEach(field => delete order.billing_info.address[field]);
+
+        // Delete fields from delivery_info location address
+        addressFieldsToDelete.forEach(field => delete order.delivery_info.location.address[field]);
+    }
+
+    async prepareItems(items) {
+        let locationSet = new Set();
+        let preparedItems = [];
+
+        for (let item of items) {
+            let parentItemKeys = item.customisations
+                ? item.local_id.toString() + '_' + item.customisations.map(c => c.local_id).join('_')
+                : item.local_id.toString();
+
+            let parentItemId = await this.getShortHash(parentItemKeys);
+            let selectItem = {
+                id: item.local_id.toString(),
+                quantity: item.quantity,
+                location_id: item.product?.location_id?.toString(),
+                tags: item.tags?.find(t => t.code === 'type') ? [item.tags.find(t => t.code === 'type')] : undefined,
+                parent_item_id: item.parent_item_id ? parentItemId : undefined,
+                fulfillment_id: item.fulfillment_id
+            };
+
+            locationSet.add(item.product?.location_id?.toString());
+            preparedItems.push(selectItem);
+
+            if (item.customisations) {
+                for (let customisation of item.customisations) {
+                    let selectItemObj = {
+                        id: customisation.local_id.toString(),
+                        quantity: customisation.quantity,
+                        location_id: item.product?.location_id?.toString(),
+                        tags: customisation.item_details.tags
+                            ? customisation.item_details.tags.filter(t => t.code === 'type' || t.code === 'parent')
+                            : undefined,
+                        parent_item_id: parentItemId,
+                        fulfillment_id: item.fulfillment_id
+                    };
+                    preparedItems.push(selectItemObj);
+                }
+            }
+        }
+
+        return { items: preparedItems, locations: Array.from(locationSet).map(id => ({ id })) };
+    }
+
+    async init(context, order, parentOrderId) {
         try {
             const provider = order?.items?.[0]?.provider || {};
 
-            console.log("context---------------->",context);
-            order.delivery_info.location.address.area_code = order.delivery_info.location.address.areaCode
-            delete order.delivery_info.location.address.areaCode
+            console.log("context---------------->", context);
 
-            order.billing_info.address.area_code = order.billing_info.address.areaCode
-            delete order.billing_info.address.areaCode
+            // Transform addresses
+            order.delivery_info.location.address = this.transformAddress(order.delivery_info.location.address);
+            order.billing_info.address = this.transformAddress(order.billing_info.address);
 
-            order.billing_info.address.locality = order.billing_info.address.street
-            order.delivery_info.location.address.locality = order.delivery_info.location.address.street
+            // Remove unnecessary fields
+            this.deleteUnnecessaryFields(order);
 
-            const fulfillments = order?.fulfillments
-            let fulfillment = {}
-            if(fulfillments && fulfillments.length>0){ //TODO: Feature pending for dyanamic fulfillments
-                fulfillment = fulfillments[0]
-            }
+            const fulfillments = order?.fulfillments || [];
+            const fulfillment = fulfillments.length > 0 ? fulfillments[0] : {};
 
-            delete order.billing_info.address.tag
-            delete order.billing_info.address.lat
-            delete order.billing_info.address.lng
-            delete order.delivery_info.location.address.lat
-            delete order.delivery_info.location.address.lng
-            delete order.billing_info.address.street
-            delete order.billing_info.address.ward
-            delete order.billing_info.address.door
-            delete order.delivery_info.location.address.tag
-            delete order.delivery_info.location.address.street
-            delete order.delivery_info.location.address.door
-            delete order.delivery_info.location.address.ward
-
-            //check if item has customisation present
-
-            let items  = []
-            let locationSet = new Set()
-            for(let item of order.items){
-
-                //create hash of item.id and all customisation.id to prepare 12 char hash ie parent item id
-                let parentItemKeys
-                if(item.customisations){
-                    parentItemKeys = item?.local_id?.toString()+'_'+ item.customisations.map(item => item.local_id).join('_');
-
-                }else{
-                    parentItemKeys = item?.local_id?.toString()
-                }
-
-                let parentItemId =await this.getShortHash(parentItemKeys);
-
-                let selectitem = {
-                    id: item?.local_id?.toString(),
-                    quantity: item?.quantity,
-                    location_id: item?.product?.location_id?.toString()
-                }
-                locationSet.add(item?.product?.location_id?.toString());
-                let tag=undefined
-                if(item.tags && item.tags.length>0){
-                    tag= item.tags.find(i => i.code==='type');
-                    if(tag){
-                        selectitem.tags =[tag];
-                    }
-                }
-                if(item?.parent_item_id){
-                    
-                    selectitem.parent_item_id = parentItemId;
-                }
-                // selectitem.parent_item_id = parentItemId;
-                selectitem.fulfillment_id =item?.fulfillment_id
-                items.push(selectitem);
-                if(item.customisations){
-                    for(let customisation of item.customisations){
-                        let selectitem = {
-                            id: customisation?.local_id?.toString(),
-                            quantity: customisation.quantity,
-                            location_id: item?.product?.location_id?.toString()
-                        }
-                        let tag=undefined
-                        if(customisation.item_details.tags && customisation.item_details.tags.length>0){
-                            tag= customisation.item_details.tags.filter(i =>{ return i.code==='type' || i.code==='parent'});
-                            let finalTags = []
-                            for(let tg of tag){tag
-                                if(tg.code==='parent'){
-                                    if(tg.list.length>0){
-                                        tg.list= tg.list.filter(i =>{ return i.code==='id'});
-                                    }
-                                    finalTags.push(tg);
-                                }else{
-                                    finalTags.push(tg);
-                                }
-                            }
-                            selectitem.tags =finalTags;
-                        }
-                        selectitem.fulfillment_id =item?.fulfillment_id
-                        selectitem.parent_item_id = parentItemId;
-                        items.push(selectitem);
-                    }
-
-                }
-
-            }
-
+            const { items, locations } = await this.prepareItems(order.items);
 
             const initRequest = {
-                context: context,
+                context,
                 message: {
                     order: {
                         provider: {
                             id: provider.local_id,
-                            locations: Array.from(locationSet).map(location => {
-                                return { id: location };
-                            })
+                            locations
                         },
-                        items: items,
+                        items,
                         billing: {
                             ...order.billing_info,
                             address: {
                                 ...order.billing_info.address,
                                 name: order.billing_info.name,
-                                area_code: order?.billing_info?.address?.area_code
+                                area_code: order.billing_info.address?.area_code
                             },
-                            created_at:context.timestamp,
-                            updated_at:context.timestamp
+                            created_at: context.timestamp,
+                            updated_at: context.timestamp
                         },
                         fulfillments: [{
                             id: fulfillment?.id,
@@ -154,30 +124,19 @@ class BppInitService {
                                     address: {
                                         ...order.delivery_info.location.address,
                                         name: order.delivery_info.name,
-                                        area_code: order?.delivery_info?.location?.address?.area_code
+                                        area_code: order.delivery_info.location.address?.area_code
                                     }
-                                },
+                                }
                             }
-                        }]
+                        }],
+                        offers: order.offers?.length ? order.offers.map(offer => ({ id: offer })) : undefined
+                    }
                 }
-            }
-
             };
 
-            if (order.offers && order.offers.length) {
-
-                //convert array to array of objects
-
-                initRequest.message.order.offers = order.offers.map(offer => {
-                    return { id: offer };
-                  });
-            }
-
-            console.log("init requrest--->",JSON.stringify(initRequest))
+            console.log("init request--->", JSON.stringify(initRequest));
 
             const response = await protocolInit(initRequest);
-
-            // return initRequest
 
             return {
                 context: {
@@ -187,17 +146,12 @@ class BppInitService {
                 },
                 message: response.message
             };
-        }
-        catch (err) {
-
-            console.log("error------->",err)
-            err.response.data.initRequest =order
-
+        } catch (err) {
+            console.log("error------->", err);
+            err.response.data.initRequest = order;
             throw err;
         }
     }
 }
 
 export default BppInitService;
-
-

@@ -71,7 +71,7 @@ class DeliveryAddressService {
     * @param {Object} request
     * @param {String} userId
     */
-    async updateDeliveryAddress(id, request = {}, userId) {
+    async updateDeliveryAddress(id, request , userId) {
         try {
             
             const deliveryAddressSchema = {

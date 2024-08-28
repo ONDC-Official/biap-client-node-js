@@ -51,8 +51,6 @@ async function translate(data) {
 
             /********************prepare object for translation***************************/
 
-            const callback_url = jsonRes.pipelineInferenceAPIEndPoint.callbackUrl;
-            const callback_url_feedback = jsonRes.feedbackUrl;
             const compute_call_authorization_key = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.name;
             const compute_call_authorization_value = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.value;
             let asr_service_id ='';

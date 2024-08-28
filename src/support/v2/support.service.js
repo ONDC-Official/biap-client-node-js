@@ -91,10 +91,10 @@ class SupportService {
     */
     async onSupportMultipleOrder(messageIds) {
         try {
-            const onSupportResponse = await Promise.all(
+            let onSupportResponse = await Promise.all(
                 messageIds.map(async messageId => {
                     try {
-                        const onSupportResponse = await this.onSupport(messageId);
+                        onSupportResponse = await this.onSupport(messageId);
                         return { ...onSupportResponse };
                     }
                     catch (err) {
