@@ -32,8 +32,8 @@ class SearchService {
         },
       });
       matchQuery.push({
-        match: {
-          "location_details.time.label": 'enable',
+        terms: {
+          "location_details.time.label": ['enable','open'],
         },
       });
       matchQuery.push({
@@ -196,8 +196,8 @@ class SearchService {
       });
   
       matchQuery.push({
-        match: {
-          "location_details.time.label": 'enable',
+        terms: {
+          "location_details.time.label": ['enable','open'],
         },
       });
   
@@ -887,8 +887,8 @@ class SearchService {
         },
       });
       matchQuery.push({
-        match: {
-          "location_details.time.label": 'enable',
+        terms: {
+          "location_details.time.label": ['enable','open'],
         },
       });
       matchQuery.push({
@@ -971,8 +971,8 @@ class SearchService {
       },
     });
     matchQuery.push({
-      match: {
-        "location_details.time.label": 'enable',
+      terms: {
+        "location_details.time.label": ['enable','open'],
       },
     });
     matchQuery.push({
@@ -1143,8 +1143,8 @@ class SearchService {
         ];
 
         matchQuery.push({
-          match: {
-            "location_details.time.label": 'enable',
+          terms: {
+            "location_details.time.label": ['enable','open'],
           },
         });
         matchQuery.push({
@@ -1467,8 +1467,8 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
       },
     });
     matchQuery.push({
-      match: {
-        "location_details.time.label": 'enable',
+      terms: {
+        "location_details.time.label": ['enable','open'],
       },
     });
     matchQuery.push({
@@ -1782,8 +1782,8 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
               },
             },
             {
-              match: {
-                "location_details.time.label": 'enable',
+              terms: {
+                "location_details.time.label": ['enable','open'],
               },
             },
             {
@@ -2072,8 +2072,8 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
           },
         });
         matchQuery.push({
-          match: {
-            "location_details.time.label": 'enable',
+          terms: {
+            "location_details.time.label": ['enable','open'],
           },
         });
         matchQuery.push({
