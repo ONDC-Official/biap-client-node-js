@@ -40,7 +40,15 @@
   },
   "scripts": {
     "debug": "NODE_ENV=development nodemon --exec babel-node src/app.js --trace-deprecation",
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+        "lint:fix": "eslint src/*.js --fix",
+    "lint": "eslint src/*.js",
+    "test": "lint-staged"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "repository": {
     "type": "git",
@@ -70,6 +78,6 @@
     "node": ">=16.0.0"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.js": ["eslint --fix", "git add"]
   }
 }
