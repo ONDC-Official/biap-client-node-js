@@ -45,6 +45,7 @@ class BillingService {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -62,6 +63,7 @@ class BillingService {
             return billingDetails;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -113,6 +115,7 @@ class BillingService {
                 throw new NoRecordFoundError(`Billing address with ${id} not found`);
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

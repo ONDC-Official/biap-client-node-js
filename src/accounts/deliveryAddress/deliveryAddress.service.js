@@ -44,6 +44,7 @@ class DeliveryAddressService {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -61,6 +62,7 @@ class DeliveryAddressService {
             return deliveryAddressDetails;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -112,6 +114,7 @@ class DeliveryAddressService {
                 throw new NoRecordFoundError(`Delivery address with ${id} not found`);
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

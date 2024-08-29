@@ -1,4 +1,4 @@
-import { protocolRating, protocolSelect } from "../../../utils/protocolApis/index.js";
+import { protocolRating } from "../../../utils/protocolApis/index.js";
 class BppRatingService {
 
 
@@ -26,7 +26,7 @@ class BppRatingService {
         catch (err) {
 
 
-            console.log(err);
+            console.error('Error', err);
             // err.response.data.rateRequest =order
 
             throw err;

@@ -1,5 +1,4 @@
 // import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
-import {uuid} from 'uuidv4';
 import Transaction from './db/transaction.js';
 import Order from '../order/v1/db/order.js';
 import {pad} from '../utils/stringHelper.js';
@@ -32,7 +31,6 @@ class RazorPayService
             if (!intent)
                 throw new BadRequestParameterError();
 
-            let paymentDetail;
             let instance = new Razorpay({
                 key_id:process.env.RAZORPAY_KEY_ID,
                 key_secret:process.env.RAZORPAY_KEY_SECRET
@@ -102,6 +100,7 @@ class RazorPayService
         } 
         catch (err) 
         {
+            console.error('Error', err);
 
             throw err;
         }
@@ -199,6 +198,7 @@ class RazorPayService
         } 
         catch (err) 
         {
+            console.error('Error', err);
             throw err;
         }
        
@@ -263,6 +263,7 @@ class RazorPayService
         }
         catch (err)
         {
+            console.error('Error', err);
             throw err;
         }
 
@@ -311,7 +312,7 @@ class RazorPayService
         }
         catch (err)
         {
-            console.log("refund error ---",err)
+            console.error('Error', err);
             throw err;
         }
 

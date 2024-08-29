@@ -224,6 +224,7 @@ class InitOrderService {
             const bppResponse = await bppInitService.init(context, order, parentOrderId);
             return bppResponse;
         } catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -236,6 +237,7 @@ class InitOrderService {
                     await this.createOrder(bppResponse, user?.decodedToken?.uid, order?.message);
                     return bppResponse;
                 } catch (err) {
+                    console.error('Error', err);
                     return err.response.data;
                 }
             })
@@ -264,6 +266,7 @@ class InitOrderService {
                 return protocolInitResponse?.[0];
             }
         } catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -290,6 +293,7 @@ class InitOrderService {
 
                         return protocolInitResponse;
                     } catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -297,6 +301,7 @@ class InitOrderService {
 
             return onInitOrderResponse;
         } catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

@@ -1,4 +1,3 @@
-import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES } from "../../../utils/constants.js";
 import { protocolInit } from "../../../utils/protocolApis/index.js";
 import crypto from 'crypto';
 
@@ -147,7 +146,7 @@ class BppInitService {
                 message: response.message
             };
         } catch (err) {
-            console.log("error------->", err);
+            console.error('Error', err);
             err.response.data.initRequest = order;
             throw err;
         }

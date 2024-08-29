@@ -1,8 +1,7 @@
-import _ from "lodash";
 import { ORDER_STATUS } from "../../../utils/constants.js";
 
 import OrderMongooseModel from '../../v1/db/order.js';
-import {protocolGetLocations,protocolGetLocationDetails} from "../../../utils/protocolApis/index.js";
+import {protocolGetLocationDetails} from "../../../utils/protocolApis/index.js";
 
 class OrderHistoryService {
 
@@ -67,6 +66,7 @@ class OrderHistoryService {
             return { orders, totalCount };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -87,7 +87,6 @@ class OrderHistoryService {
             }
             else {
                 // orders = orders.toJSON();
-                let locations = []
                 let orderList = []
                 for(let order of orders){
 
@@ -110,6 +109,7 @@ class OrderHistoryService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

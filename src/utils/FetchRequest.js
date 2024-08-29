@@ -35,7 +35,7 @@ class FetchRequest {
                 headers: {
                     ...headers
                 }
-            };
+            }
 
             if(this.method.toLowerCase() !== "get") {
                 options = {
@@ -54,9 +54,10 @@ class FetchRequest {
         } 
         catch (err) 
         {
+            console.error('Error', err);
             throw err;
         }
-    };
+    }
 }
 
 export default FetchRequest;

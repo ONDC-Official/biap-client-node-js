@@ -31,6 +31,7 @@ class SupportService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -48,6 +49,7 @@ class SupportService {
                     return supportResponse;
                 }
                 catch (err) {
+                    console.error('Error', err);
                     throw err;
                 }
             })
@@ -81,6 +83,7 @@ class SupportService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -98,6 +101,7 @@ class SupportService {
                         return { ...onSupportResponse };
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -106,6 +110,7 @@ class SupportService {
             return onSupportResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

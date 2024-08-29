@@ -53,8 +53,6 @@ async function translate(data) {
 
             const compute_call_authorization_key = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.name;
             const compute_call_authorization_value = jsonRes.pipelineInferenceAPIEndPoint.inferenceApiKey.value;
-            let asr_service_id ='';
-            let nmt_service_id ='';
             let trans_service_id ='';
 
             const pipelineResponseConfig=jsonRes.pipelineResponseConfig;
@@ -127,10 +125,10 @@ async function translate(data) {
         }
 
     } catch (err) {
-        console.log(err);
+        console.error('Error', err);
         return err;
     }
-};
+}
 
 
 export default translate

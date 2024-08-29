@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Cart from "./cart.js";
 
 const  CartItemSchema = new mongoose.Schema(
     {

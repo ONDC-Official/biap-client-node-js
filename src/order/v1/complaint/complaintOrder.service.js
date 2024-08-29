@@ -21,7 +21,7 @@ class ComplaintOrderService {
         }
         catch (err) {
 
-            console.log("erroe------->")
+            console.error('Error', err);
             throw err;
         }
     }

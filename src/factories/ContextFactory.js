@@ -22,7 +22,7 @@ class ContextFactory {
         this.bapId = bapId;
         this.bapUrl = bapUrl;
         this.timestamp = new Date()
-    };
+    }
 
 
     getCity(city,state,cityCode){
@@ -112,7 +112,7 @@ class ContextFactory {
             timestamp: this.timestamp,
             ...(bppId && { bpp_id: bppId }),
             ttl:"PT30S"
-        };
+        }
 
     }
 }

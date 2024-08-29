@@ -29,6 +29,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -42,6 +43,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -56,6 +58,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -70,6 +73,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -88,6 +92,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -100,6 +105,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -112,6 +118,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -124,6 +131,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -136,6 +144,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -147,6 +156,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -158,6 +168,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -170,6 +181,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -182,6 +194,7 @@ class BppSearchService {
             return { response };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

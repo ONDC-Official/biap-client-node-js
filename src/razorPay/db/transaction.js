@@ -1,6 +1,5 @@
 import mongoose from'mongoose';
 import { uuid } from 'uuidv4';
-import OrderHistory from "../../order/v2/db/orderHistory.js";
 
 const transactionSchema = new mongoose.Schema({
     _id:{

@@ -23,7 +23,7 @@ class UpdateOrderController {
                     return await cancelOrderService.update(order,user);
                 } catch (err) {
 
-                    console.log("update orders---------err------>",err);
+                    console.error('Error', err);
 
                     return err.response.data;
                     // throw err;

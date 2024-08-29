@@ -67,6 +67,7 @@ class OrderHistoryService {
             return { orders, totalCount };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -95,6 +96,7 @@ class OrderHistoryService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

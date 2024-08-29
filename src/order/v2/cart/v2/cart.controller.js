@@ -11,6 +11,7 @@ class CartController {
 
         }
         catch (err) {
+            console.error('Error', err);
            next(err);
         }
     }
@@ -22,6 +23,7 @@ class CartController {
 
         }
         catch (err) {
+            console.error('Error', err);
             next(err);
         }
     }
@@ -34,6 +36,7 @@ class CartController {
 
         }
         catch (err) {
+            console.error('Error', err);
             next(err);
         }
     }
@@ -43,6 +46,7 @@ class CartController {
             return  res.send(await cartService.updateItem({...req.body,...req.params}));
         }
         catch (err) {
+            console.error('Error', err);
             next(err);
         }
     }
@@ -53,6 +57,7 @@ class CartController {
 
         }
         catch (err) {
+            console.error('Error', err);
             next(err);
         }
     }
@@ -62,6 +67,7 @@ class CartController {
             return  res.send(await cartService.clearCart({...req.body,...req.params}));
         }
         catch (err) {
+            console.error('Error', err);
             next(err);
         }
     }

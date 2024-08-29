@@ -60,6 +60,7 @@ const passportJwtStrategy = new JwtStrategy(opts, async (req, jwtPayload, done) 
             return done(null, user);
         }
     } catch (err) {
+        console.error('Error', err);
         return done(err, null);
     }
 });

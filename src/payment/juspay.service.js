@@ -3,7 +3,7 @@ import fs from "fs";
 import util from "util";
 
 import MESSAGES from "../utils/messages.js";
-import { PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../utils/constants.js";
+import { PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT } from "../utils/constants.js";
 
 // import { accessSecretVersion } from "../utils/accessSecretKey.js";
 import { getJuspayOrderStatus } from "../utils/juspayApis.js";
@@ -38,6 +38,7 @@ class JuspayService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -56,6 +57,7 @@ class JuspayService {
             return paymentDetails;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -84,7 +86,7 @@ class JuspayService {
                     break;
                 default:
                     break;
-            };
+            }
 
             const orderRequest = {
                 payment: {
@@ -127,6 +129,7 @@ class JuspayService {
             return;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

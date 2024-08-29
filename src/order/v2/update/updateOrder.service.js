@@ -1,4 +1,4 @@
-import { onOrderCancel ,onUpdateStatus} from "../../../utils/protocolApis/index.js";
+import { onUpdateStatus} from "../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../utils/constants.js";
 import {
     getOrderById, saveOrderRequest,getOrderRequest,
@@ -152,7 +152,7 @@ class UpdateOrderService {
 
             await orderSaved.save();
 
-            const { message = {} } = orderRequest || {};
+            // const { message = {} } = orderRequest || {};
             //const { update_target,order } = message || {};
 
             if (!(context?.bpp_id)) {
@@ -168,6 +168,7 @@ class UpdateOrderService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -302,6 +303,7 @@ class UpdateOrderService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -345,6 +347,7 @@ class UpdateOrderService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -584,6 +587,7 @@ class UpdateOrderService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

@@ -59,9 +59,10 @@ import { v4 as uuidv4 } from 'uuid';
                 }
             }));
     } catch (err) {
+        console.error('Error', err);
         return err;
     }
-};
+}
 
 
 export default getSignedUrlForUpload

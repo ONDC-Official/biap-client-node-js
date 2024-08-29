@@ -8,7 +8,6 @@ class CartService {
         try {
 
             //get bpp_url and check if item is available
-            let itemPresent=true
 
             console.log("-----------------------------------",data)
 
@@ -42,6 +41,7 @@ class CartService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -63,6 +63,7 @@ class CartService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -72,6 +73,7 @@ class CartService {
             return  await CartItem.deleteOne({_id:data.itemId});
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -86,6 +88,7 @@ class CartService {
             return  {}
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -107,6 +110,7 @@ class CartService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -134,6 +138,7 @@ class CartService {
             return cartWithItems;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

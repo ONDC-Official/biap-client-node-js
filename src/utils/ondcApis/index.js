@@ -22,6 +22,7 @@ const confirmOrder = async (orderDetails, user) => {
     .then(response => {
         console.log(response);
     }).catch(error => {
+        console.error('Error', err);
         throw error;
     });
 
@@ -53,6 +54,7 @@ const getOrderDetails = async (orderId, user) => {
         else
             throw response;
     }).catch(error => {
+        console.error('Error', err);
         throw error;
     });
 
@@ -83,6 +85,7 @@ const getBillingAddress = async (user) => {
         else
             throw response;
     }).catch(error => {
+        console.error('Error', err);
         throw error;
     });
 
@@ -113,6 +116,7 @@ const getDeliveryAddress = async (user) => {
         else
             throw response;
     }).catch(error => {
+        console.error('Error', err);
         throw error;
     });
 

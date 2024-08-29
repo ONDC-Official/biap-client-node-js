@@ -21,6 +21,7 @@ const passportEmailLocalStrategy = new LocalStrategy(async (email, password, don
 //    }
         return done(null, null);
     } catch (err) {
+        console.error('Error', err);
         return done(err, false);
     }
 });

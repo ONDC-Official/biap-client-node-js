@@ -1,8 +1,7 @@
 import { onOrderConfirm } from "../../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../../utils/constants.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT } from "../../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
-    getOrderByTransactionId,
+     addOrUpdateOrderWithTransactionIdAndProvider,
     getOrderByTransactionIdAndProvider,
     getOrderById
 } from "../../v1/db/dbService.js";
@@ -15,8 +14,6 @@ import FulfillmentHistory from "../db/fulfillmentHistory.js";
 import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 import OrderMongooseModel from "../../v1/db/order.js";
 import axios from "axios";
-import Fulfillments from "../db/fulfillments.js";
-import dbConnect from "../../../database/mongooseConnector.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
@@ -94,7 +91,6 @@ class ConfirmOrderService {
             context: requestContext,
             message: order = {}
         } = orderRequest || {};
-        let paymentStatus = {}
         // console.log("message---------------->",orderRequest.message)
 
         const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id,orderRequest.message.providers.id);
@@ -300,6 +296,7 @@ class ConfirmOrderService {
             return response;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -360,6 +357,7 @@ class ConfirmOrderService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -387,7 +385,7 @@ class ConfirmOrderService {
 
                 }
                 catch (err) {
-                    console.log(err)
+                    console.error('Error', err);
                     return err.response.data;
                 }
             })
@@ -507,6 +505,7 @@ class ConfirmOrderService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err
         }
     }
@@ -524,6 +523,7 @@ class ConfirmOrderService {
                         return await this.processOnConfirmResponse(protocolConfirmResponse);
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -532,6 +532,7 @@ class ConfirmOrderService {
             return onConfirmOrderResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

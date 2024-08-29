@@ -117,7 +117,7 @@ class BppSelectService {
         catch (err) {
 
 
-            console.log(err);
+            console.error('Error', err);
             err.response.data.selectRequest =order
 
             throw err;

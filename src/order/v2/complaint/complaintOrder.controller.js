@@ -1,5 +1,4 @@
 import ComplaintOrderService from './complaintOrder.service.js';
-import BadRequestParameterError from '../../../lib/errors/bad-request-parameter.error.js';
 
 const complaintService= new ComplaintOrderService();
 
@@ -25,7 +24,7 @@ class ComplaintOrderController {
                     res.json(savedObject);
                 } catch (err) {
 
-                    console.log("update orders---------err------>",err);
+                    console.error('Error', err);
                     next(err)
                     // throw err;
                 }

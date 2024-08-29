@@ -1,4 +1,3 @@
-import { onOrderSelect } from "../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../utils/constants.js";
 
 import ContextFactory from "../../../factories/ContextFactory.js";
@@ -6,9 +5,7 @@ import BppRatingService from "./bppRating.service.js";
 import Rating from "../db/fulfillments copy.js";
 const bppRatingService = new BppRatingService();
 import {
-    addOrUpdateOrderWithTransactionId,getOrderRequestLatestFirst,
-    addOrUpdateOrderWithTransactionIdAndProvider,
-    getOrderById, getOrderRequest, saveOrderRequest
+    getOrderById
 } from "../../v1/db/dbService.js";
 
 class RatingService {
@@ -69,6 +66,7 @@ class RatingService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -82,6 +80,7 @@ class RatingService {
             return ratings
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -100,6 +99,7 @@ class RatingService {
                         return { ...onSelectResponse };
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -108,6 +108,7 @@ class RatingService {
             return onSelectOrderResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

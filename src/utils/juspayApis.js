@@ -28,6 +28,7 @@ const getJuspayOrderStatus = async (orderId) => {
             paymentDetails =  response;
     })
     .catch(err => {
+        console.error('Error', err);
         throw err;
     });
 

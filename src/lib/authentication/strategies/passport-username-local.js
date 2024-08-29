@@ -7,6 +7,7 @@ const passportUsernameLocalStrategy = new LocalStrategy(async (username, passwor
 
         return done(null, null);
     } catch (err) {
+        console.error('Error', err);
         return done(null, false);
     }
 });

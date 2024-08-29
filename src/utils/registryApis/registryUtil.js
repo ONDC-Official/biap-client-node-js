@@ -15,6 +15,7 @@ export const getSubscriberUrl = (subscriberDetails = []) => {
             throw new Error("Invalid subscriber url");
     }
     catch (err) {
+        console.error('Error', err);
         throw err;
     }
 }

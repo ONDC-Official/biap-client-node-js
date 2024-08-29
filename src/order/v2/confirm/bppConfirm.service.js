@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { PAYMENT_COLLECTED_BY, PAYMENT_TYPES, PROTOCOL_PAYMENT } from "../../../utils/constants.js";
 import {protocolConfirm, protocolGetDumps} from '../../../utils/protocolApis/index.js';
-import OrderMongooseModel from "../../v1/db/order.js";
 
 class BppConfirmService {
 
@@ -24,7 +23,7 @@ class BppConfirmService {
 
         }
         catch (err) {
-
+            console.error('Error', err);
             //set confirm request in error data
             err.response.data.confirmRequest =confirmRequest
             throw err;
@@ -36,7 +35,7 @@ class BppConfirmService {
         if (str.length < count)
             str = Array(count - str.length).fill(char).join('') + str;
         return str;
-    };
+    }
 
     /**
      * bpp confirm order
@@ -106,6 +105,7 @@ class BppConfirmService {
             return await this.confirm(confirmRequest);
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -306,6 +306,7 @@ class BppConfirmService {
            // return await this.confirm(confirmRequest);
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {UnauthorisedError} from "../errors/index.js";
 
 class Authorisation {
@@ -70,7 +69,7 @@ class Authorisation {
 
                 reject(new UnauthorisedError());
             } catch (err) {
-                console.error(err);
+                console.error('Error', err);
                 reject(err);
             }
         });

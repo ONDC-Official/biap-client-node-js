@@ -35,6 +35,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -62,6 +63,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -91,6 +93,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -118,6 +121,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -145,6 +149,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -175,6 +180,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -202,6 +208,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -229,6 +236,7 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -258,9 +266,10 @@ class SseProtocol {
             };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
-};
+}
 
 export default SseProtocol;

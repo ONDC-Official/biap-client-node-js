@@ -1,5 +1,4 @@
 import RatingService from './rating.service.js';
-import BadRequestParameterError from '../../../lib/errors/bad-request-parameter.error.js';
 
 const ratingService = new RatingService();
 

@@ -7,6 +7,7 @@ const passportPhoneLocalStrategy = new LocalStrategy(async (phone, password, don
 
         return done(null, null);
     } catch (err) {
+        console.error('Error', err);
         return done(err, false);
     }
 });

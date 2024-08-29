@@ -95,10 +95,10 @@ import {OBJECT_TYPE} from "../constants.js";
         }
 
     } catch (err) {
-        console.log(err)
+        console.error('Error', err);
         return err;
     }
-};
+}
 
 export default translateObject
 

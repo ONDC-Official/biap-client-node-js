@@ -21,6 +21,7 @@ class PaymentController
             return res.json({ signedPayload: signedPayload });
         }
         catch(err) {
+            console.error('Error', err);
             next(err);
         }
 
@@ -60,6 +61,7 @@ class PaymentController
             return res.json({ status: "ok" });
         }
         catch(err) {
+            console.error('Error', err);
             next(err);
         }
 

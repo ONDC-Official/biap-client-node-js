@@ -116,6 +116,7 @@ class SelectOrderService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -134,6 +135,7 @@ class SelectOrderService {
                     return response;
                 }
                 catch (err) {
+                    console.error('Error', err);
                     return err;
                 }
             })
@@ -167,6 +169,7 @@ class SelectOrderService {
             // }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -184,6 +187,7 @@ class SelectOrderService {
                         return { ...onSelectResponse };
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -192,6 +196,7 @@ class SelectOrderService {
             return onSelectOrderResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

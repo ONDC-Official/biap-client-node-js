@@ -40,14 +40,15 @@ async function sendAirtelSingleSms(toMobile, smsBody, templateId, isOtp = false)
                     .catch((error) => error);
                 return res;
             } catch (err) {
+                console.error('Error', err);
                 throw new Error(err);
             }
 
     } catch (err) {
-        console.log(err);
+        console.error('Error', err);
         return err;
     }
-};
+}
 
 
 export default sendAirtelSingleSms

@@ -2,5 +2,5 @@ projectKey=ondc-reference-buyer-app-nodejs-backend
 serverUrl=https://sonar-dev.ondc.org
 serverVersion=8.5.1.38104
 dashboardUrl=https://sonar-dev.ondc.org/dashboard?id=ondc-reference-buyer-app-nodejs-backend
-ceTaskId=AZGaCn9lPWD4xZeItYYo
-ceTaskUrl=https://sonar-dev.ondc.org/api/ce/task?id=AZGaCn9lPWD4xZeItYYo
+ceTaskId=AZGck4kIPWD4xZeItYbt
+ceTaskUrl=https://sonar-dev.ondc.org/api/ce/task?id=AZGck4kIPWD4xZeItYbt

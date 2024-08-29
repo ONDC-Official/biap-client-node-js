@@ -80,7 +80,7 @@ class HttpRequest {
 
             return  err;
         }
-    };
+    }
 }
 
 export default HttpRequest;

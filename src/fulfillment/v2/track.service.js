@@ -34,6 +34,7 @@ class TrackService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -51,6 +52,7 @@ class TrackService {
                     return trackResponse;
                 }
                 catch (err) {
+                    console.error('Error', err);
                     throw err;
                 }
             })
@@ -84,6 +86,7 @@ class TrackService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -101,6 +104,7 @@ class TrackService {
                         return { ...onTrackResponse };
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -109,6 +113,7 @@ class TrackService {
             return onTrackResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

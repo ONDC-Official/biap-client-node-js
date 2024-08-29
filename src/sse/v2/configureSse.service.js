@@ -9,7 +9,7 @@ class ConfigureSSE {
         this.messageId = messageId;
         this.message = message;
         this.action = action || false;
-    };
+    }
 
     initialize() {
         try {
@@ -31,9 +31,10 @@ class ConfigureSSE {
             return sse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
-    };
+    }
 }
 
 export default ConfigureSSE;

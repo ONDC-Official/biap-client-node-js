@@ -1,7 +1,6 @@
 import { onOrderStatus } from "../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId,getOrderRequestLatestFirst,
     addOrUpdateOrderWithTransactionIdAndProvider,
     getOrderById, getOrderRequest, saveOrderRequest
 } from "../../v1/db/dbService.js";
@@ -10,9 +9,7 @@ import OrderMongooseModel from '../../v1/db/order.js';
 import ContextFactory from "../../../factories/ContextFactory.js";
 import BppOrderStatusService from "./bppOrderStatus.service.js";
 import CustomError from "../../../lib/errors/custom.error.js";
-import OrderRequestLogMongooseModel from "../../v1/db/orderRequestLog.js";
 import BppUpdateService from "../update/bppUpdate.service.js";
-import Fulfillments from "../db/fulfillments.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
 import OrderHistory from "../db/orderHistory.js";
 import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
@@ -50,6 +47,7 @@ class OrderStatusService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -72,6 +70,7 @@ class OrderStatusService {
                     return orderResponse;
                 }
                 catch (err) {
+                    console.error('Error', err);
                     return err.response.data;
                 }
             })
@@ -108,6 +107,7 @@ class OrderStatusService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -322,6 +322,7 @@ class OrderStatusService {
                         
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -330,6 +331,7 @@ class OrderStatusService {
             return onOrderStatusResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -441,6 +443,7 @@ class OrderStatusService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -455,6 +458,7 @@ class OrderStatusService {
                             return { ...onOrderStatusResponse };
                     }
                     catch (err) {
+                        console.error('Error', err);
                         throw err;
                     }
                 })
@@ -463,6 +467,7 @@ class OrderStatusService {
             return onOrderStatusResponse;
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

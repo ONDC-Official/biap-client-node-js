@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import RazorPayController from './razorPay.controller.js';
-import { authentication } from '../middlewares/index.js';
 const router = new Router();
 
 const razorPayController = new RazorPayController();

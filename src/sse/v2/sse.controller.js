@@ -1,4 +1,3 @@
-import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 import { addSSEConnection } from '../../utils/sse.js';
 
 import SseProtocol from './sseProtocol.service.js';
@@ -36,7 +35,7 @@ class SseController {
             // res.json({});
         }
         catch (err) {
-            console.log("error----------->",err);
+            console.error('Error', err);
             throw err;
         }
     }

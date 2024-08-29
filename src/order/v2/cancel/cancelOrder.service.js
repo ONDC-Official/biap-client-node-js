@@ -1,8 +1,6 @@
 import { onOrderCancel } from "../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId,
-    addOrUpdateOrderWithTransactionIdAndProvider,
     addOrUpdateOrderWithTransactionIdAndOrderId,
     getOrderById
 } from "../../v1/db/dbService.js";
@@ -59,6 +57,7 @@ class CancelOrderService {
             );
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }
@@ -94,6 +93,7 @@ class CancelOrderService {
             }
         }
         catch (err) {
+            console.error('Error', err);
             return err.response.data;
         }
     }
@@ -150,6 +150,7 @@ class CancelOrderService {
 
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

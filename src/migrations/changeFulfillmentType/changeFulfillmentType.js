@@ -22,6 +22,7 @@ const changeFulfillmentType = async (req, res, next) => {
 
     }
     catch (err) {
+        console.error('Error', err);
         throw err;
     }
 }

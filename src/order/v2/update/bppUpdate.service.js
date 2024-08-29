@@ -23,6 +23,7 @@ class BppUpdateService {
             return { context: context, message: response.message };
         }
         catch (err) {
+            console.error('Error', err);
             throw err;
         }
     }

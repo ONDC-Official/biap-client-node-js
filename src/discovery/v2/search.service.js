@@ -1,14 +1,4 @@
-import _ from "lodash";
-import { onSearch } from "../../utils/protocolApis/index.js";
-import ContextFactory from "../../factories/ContextFactory.js";
-import BppSearchService from "./bppSearch.service.js";
-import { CITY_CODE } from "../../utils/cityCode.js";
 import { CATEGORIES } from "../../utils/categories.js";
-import createPeriod from "date-period";
-import translateObject from "../../utils/bhashini/translate.js";
-import { OBJECT_TYPE } from "../../utils/constants.js";
-// import logger from "../lib/logger";
-const bppSearchService = new BppSearchService();
 import client from "../../database/elasticSearch.js";
 import moment from 'moment-timezone';
 class SearchService {
@@ -171,6 +161,7 @@ class SearchService {
         },
       };
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -570,6 +561,7 @@ class SearchService {
         },
       };
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -622,6 +614,7 @@ class SearchService {
 
       return provider_details;
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -697,6 +690,7 @@ class SearchService {
 
       return location_details;
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -866,6 +860,7 @@ class SearchService {
       // TODO: attach related items
       // TODO: attach customisations
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -944,6 +939,7 @@ class SearchService {
       
 
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -1131,6 +1127,7 @@ class SearchService {
       return { response: { data: uniqueValues, count: uniqueValues.length } };
   
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -1291,6 +1288,7 @@ class SearchService {
         };
 
     } catch (err) {
+      console.error('Error', err);
         throw err;
     }
 }
@@ -1308,7 +1306,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           return (R * c) * 1.4; // Distance in km * 1.4 approximate routing distance
-      };
+      }
 
       // Match queries for filtering common conditions
       let matchQuery = [
@@ -1434,7 +1432,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
               return null; // Exclude results without GPS data
           }
       }).filter(result => result !== null) // Remove null entries
-      .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship);; // Remove null entries
+      .sort((a, b) => a.distance_time_to_ship - b.distance_time_to_ship); // Remove null entries
 
       // Merge results
       let allResults = [...hitsWithinTTS];
@@ -1450,6 +1448,7 @@ async getLocationsNearest(searchRequest, targetLanguage = "en") {
           afterKey: { location_id: "location_id" } // to make web UI backward compatible
       };
   } catch (err) {
+    console.error('Error', err);
       console.error(err); // Log the error for debugging
       throw err;
   }
@@ -1753,6 +1752,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
     };
 
   } catch (err) {
+    console.error('Error', err);
     console.error("Error executing search query:", err);
     throw err;
   }
@@ -1846,6 +1846,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
       };
 
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -1932,6 +1933,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
         pages: customisationMenus.length,
       };
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
@@ -2012,6 +2014,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
 
 
     } catch (err) {
+      console.error('Error', err);
       throw err;
     }
   }
