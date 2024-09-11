@@ -252,7 +252,6 @@ class SearchService {
           },
         });
       }
-  
       // For variants we set is_first = true
       matchQuery.push({
         match: {
@@ -266,6 +265,32 @@ class SearchService {
       //   },
       // });
   
+      let shouldQuery = []
+
+      if(searchRequest.name){
+
+       shouldQuery.push( {
+          "match": {
+            "item_details.descriptor.name": searchRequest.name
+          },
+        })
+
+        shouldQuery.push({
+          "match": {
+            "item_details.category_id": searchRequest.name
+          },
+        })
+       
+      }
+
+      if(searchRequest.category){
+        shouldQuery.push({
+          "match": {
+            "item_details.category_id": searchRequest.category
+          },
+        })
+      }
+
       // Define filter conditions
       let filterConditions = [
         {
@@ -315,29 +340,7 @@ class SearchService {
                 {
                   bool: {
                     must: matchQuery,
-                    should: [
-                      {
-                        "match": {
-                          "item_details.descriptor.name": searchRequest.name
-                        },
-                      },
-                      // {
-                      //   "wildcard": {
-                      //     "item_details.descriptor.short_desc": `*${searchRequest.name}*`
-                      //   },
-                      // },
-                      // {
-                      //   "wildcard": {
-                      //     "item_details.descriptor.long_desc":`*${searchRequest.name}*`
-                      //   },
-                      // },
-                      {
-                        "match": {
-                          "item_details.category_id": searchRequest.name
-                        },
-                      },
-                     
-                    ],
+                    should: shouldQuery,
                     minimum_should_match: 1
                   },
                 },
@@ -1483,6 +1486,54 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
     });
     matchQuery.push({ exists: { field: "item_details" } })
 
+    let shouldQuery = [
+
+    ]
+
+    if(searchRequest.subcategory){
+      shouldQuery.push({
+        "match": {
+          "item_details.category_id": searchRequest.subcategory
+        }
+      })
+    }
+
+    if(searchRequest.category){
+      shouldQuery.push({
+        "match": {
+          "context.domain": searchRequest.category
+        }
+      })
+    }
+
+    if(searchRequest.name){
+      shouldQuery.push({
+        "match": {
+          "provider_details.descriptor.name": searchRequest.name
+        }
+      })
+      shouldQuery.push({
+        "match": {
+          "item_details.descriptor.name": searchRequest.name
+        },
+      })
+      // {
+      //   "wildcard": {
+      //     "item_details.descriptor.short_desc": `*${searchRequest.name}*`
+      //   },
+      // },
+      // {
+      //   "wildcard": {
+      //     "item_details.descriptor.long_desc":`*${searchRequest.name}*`
+      //   },
+      // },
+      shouldQuery.push({
+        "match": {
+          "item_details.category_id": searchRequest.name
+        },
+      })
+    }
+
     // Set the timezone to Asia/Kolkata (IST)
     const timezone = 'Asia/Kolkata';
 
@@ -1509,34 +1560,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
               {
                 bool: {
                   must: matchQuery,
-                  should: [
-                    {
-                      "match": {
-                        "provider_details.descriptor.name": searchRequest.name
-                      }
-                    },
-                    {
-                      "match": {
-                        "item_details.descriptor.name": searchRequest.name
-                      },
-                    },
-                    // {
-                    //   "wildcard": {
-                    //     "item_details.descriptor.short_desc": `*${searchRequest.name}*`
-                    //   },
-                    // },
-                    // {
-                    //   "wildcard": {
-                    //     "item_details.descriptor.long_desc":`*${searchRequest.name}*`
-                    //   },
-                    // },
-                    {
-                      "match": {
-                        "item_details.category_id": searchRequest.name
-                      },
-                    },
-                   
-                  ],
+                  should: shouldQuery,
                   minimum_should_match: 1
                 },
               },
