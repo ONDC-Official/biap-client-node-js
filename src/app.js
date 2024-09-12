@@ -120,6 +120,11 @@ app.use(mongoSanitize({
 // Error handling middleware
 app.use(logErrors);
 
+app.get('/', (req, res) => {
+    res.status(200).send('OK');
+});
+
+
 // Route not found handler
 app.get("*", (req, res) => {
     res.status(404).send("API NOT FOUND");

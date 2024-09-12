@@ -25,6 +25,7 @@
     "libsodium-wrappers": "^0.7.10",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.45",
     "mongoose": "^6.2.9",
     "morgan": "^1.10.0",
     "node-fetch": "^3.2.3",
@@ -39,7 +40,16 @@
   },
   "scripts": {
     "debug": "NODE_ENV=development nodemon --exec babel-node src/app.js --trace-deprecation",
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "lint:fix": "eslint src/*.js --fix",
+    "lint": "eslint src/*.js",
+    "test": "lint-staged",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "repository": {
     "type": "git",
@@ -61,7 +71,9 @@
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.2",
+    "husky": "^9.1.5",
     "js-beautify": "^1.8.9",
+    "lint-staged": "^15.2.9",
     "nodemon": "^1.18.9",
     "npm-run-all": "^4.1.5"
   },
@@ -69,6 +81,9 @@
     "node": ">=16.0.0"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
