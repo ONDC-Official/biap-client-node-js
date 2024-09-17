@@ -853,7 +853,8 @@ class SearchService {
         }
       }
                  console.log("itemdetails--->",item_details)
-      item_details.locations = [item_details.location_details]
+      if(item_details){
+        item_details.locations = [item_details.location_details]
 
       //map attribute keys 
       const flatObject = {};
@@ -863,6 +864,8 @@ class SearchService {
       });
       }
       item_details.attributes = flatObject
+
+      }           
 
       return item_details;
 
@@ -1901,7 +1904,7 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
     return response.aggregations.unique_provider_ids;
   }
 
-  async getCustomMenu(searchRequest, targetLanguage = "en") {
+  async getCustomMenu(searchRequest, targetLanguage = "en") { //TODO: FIX pagination issue default to 100
     try {
       let matchQuery = [];
 
