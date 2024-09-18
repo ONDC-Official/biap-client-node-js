@@ -26,7 +26,7 @@ class WishlistService {
                //add items to the wishList
 
                let wishListItem = new WishListItem();
-               wishListItem.wishList=wishList._id;
+               wishListItem.wishlist=wishList._id;
                wishListItem.item =data;
                wishListItem.location_id =data.locationId
               return  await wishListItem.save();
@@ -34,7 +34,7 @@ class WishlistService {
                //create a new wishList
                let wishList =await new WishList({userId:data.userId,location_id:data.locationId}).save()
                let wishListItem = new WishListItem();
-               wishListItem.wishList=wishList._id;
+               wishListItem.wishlist=wishList._id;
                wishListItem.location_id =data.locationId
                wishListItem.item =data;
                return  await wishListItem.save();
@@ -81,7 +81,7 @@ class WishlistService {
             const wishList = await WishList.findOne({userId:data.userId,_id:data.id})
             await WishList.deleteMany({userId:data.userId,_id:data.id})
             if(wishList){
-                await WishListItem.deleteMany({wishList:wishList._id});
+                await WishListItem.deleteMany({wishlist:wishList._id});
             }
             return  {}
         }
@@ -100,7 +100,7 @@ class WishlistService {
             }
             const wishList = await WishList.findOne(query);
             if(wishList){
-                return  await WishListItem.find({wishList:wishList._id});
+                return  await WishListItem.find({wishlist:wishList._id});
             }else{
                 return  []
             }
@@ -123,11 +123,10 @@ class WishlistService {
                     if(wishListItem.location_id){
                         wishListItem.location= await bppSearchService.getLocationDetails({id:wishListItem.location_id})
                     }
-                    
-                    const items = await WishListItem.find({ wishList: wishListItem._id }).lean();
+                    const items = await WishListItem.find({ wishlist: wishListItem._id.toString()  }).lean();
                     let productDetailList =[]
                     for(let item of items){
-                        item = await bppSearchService.getItemDetails({id:wishListItem.id})
+                      item = await bppSearchService.getItemDetails({id:item.item.id})
                         if(item){
                             productDetailList.push(item)
                         }
