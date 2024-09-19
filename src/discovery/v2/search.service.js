@@ -162,7 +162,75 @@ class SearchService {
       // Get the total count of results
       let totalCount = queryResults.hits.total.value;
   
+      for(let item_details of sources){
+
+      if (item_details.item_details.parent_item_id) {
+        // hit db to find all related items
+        let matchQuery = [];
+
+        matchQuery.push({
+          match: {
+            language: targetLanguage,
+          },
+        });
+
+        matchQuery.push({
+          match: {
+            "item_details.parent_item_id":
+              item_details.item_details.parent_item_id,
+          },
+        });
+
+        // match provider id
+        matchQuery.push({
+          match: {
+            "provider_details.id": item_details.provider_details.id,
+          },
+        });
+
+        // match location id
+        matchQuery.push({
+          match: {
+            "location_details.id": item_details.location_details.id,
+          },
+        });
+
+        matchQuery.push(
+          {
+            match: {
+              language: targetLanguage,
+            },
+          })
+
+        let query_obj = {
+          bool: {
+            must: matchQuery,
+          },
+        };
+
+        let queryResults = await client.search({
+          query: query_obj,
+          size:100
+        });
+
+        let related_items = queryResults.hits.hits.map(
+          (hit) => {
+           let data =  hit._source 
+
+          },
+        );
+        if(related_items.length > 1){
+          item_details.related_items = true
+        }else{
+          item_details.related_items = false
+        }
+
+      } else{
+        item_details.related_items = false
+      } 
       // Return the total count and the sources
+      
+      }
       return {
         response: {
           count: totalCount,
@@ -472,6 +540,79 @@ class SearchService {
       // Extract the _source field from each hit
       let sources = queryResults.hits.hits.map((hit) => hit._source);
   
+      for(let item_details of sources){
+
+        if (item_details.item_details.parent_item_id) {
+          // hit db to find all related items
+          let matchQuery = [];
+  
+          matchQuery.push({
+            match: {
+              language: targetLanguage,
+            },
+          });
+  
+          matchQuery.push({
+            match: {
+              "item_details.parent_item_id":
+                item_details.item_details.parent_item_id,
+            },
+          });
+  
+          // match provider id
+          matchQuery.push({
+            match: {
+              "provider_details.id": item_details.provider_details.id,
+            },
+          });
+  
+          // match location id
+          matchQuery.push({
+            match: {
+              "location_details.id": item_details.location_details.id,
+            },
+          });
+  
+          matchQuery.push(
+            {
+              match: {
+                language: targetLanguage,
+              },
+            })
+  
+          let query_obj = {
+            bool: {
+              must: matchQuery,
+            },
+          };
+  
+          let queryResults = await client.search({
+            query: query_obj,
+            size:100
+          });
+  
+          let related_items = queryResults.hits.hits.map(
+            (hit) => {
+             let data =  hit._source 
+  
+            },
+          );
+
+          console.log("related_items--->",related_items.length)
+          if(related_items.length > 1){
+
+            item_details.related_items = true
+          }else{
+            item_details.related_items = false
+          }
+  
+        }else{
+          item_details.related_items = false
+        } 
+        // Return the total count and the sources
+        
+        }
+
       // Get the total count of results
       let totalCount = queryResults.hits.total.value;
   
