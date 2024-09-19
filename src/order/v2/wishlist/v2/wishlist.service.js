@@ -126,7 +126,9 @@ class WishlistService {
                     const items = await WishListItem.find({ wishlist: wishListItem._id.toString()  }).lean();
                     let productDetailList =[]
                     for(let item of items){
+                      let id = item._id  
                       item = await bppSearchService.getItemDetails({id:item.item.id})
+                      item._id = id;
                         if(item){
                             productDetailList.push(item)
                         }
