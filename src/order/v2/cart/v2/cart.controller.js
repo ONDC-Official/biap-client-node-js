@@ -66,6 +66,15 @@ class CartController {
         }
     }
 
+    async mergeUserCart(req, res, next) {
+        try {
+            return  res.send(await cartService.mergeUserCart({...req.body,...req.params}));
+        }
+        catch (err) {
+            next(err);
+        }
+    }
+
 }
 
 export default CartController;

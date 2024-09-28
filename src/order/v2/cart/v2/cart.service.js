@@ -139,6 +139,33 @@ class CartService {
     }
 
 
+    async mergeUserCart(data) {
+        try {
+            let query = { userId: data.guestUserId };
+
+            const cart = await Cart.find(query).lean();
+    
+            if(!cart){
+                return {
+                    error: { message: "Request is invalid" }
+                }
+            }else{
+                            // Update userId of the found cart
+            const updatedCart = await Cart.findOneAndUpdate(
+                { userId: data.guestUserId }, // Filter the guest user's cart
+                { userId: data.systemUserId },    // Update with the new userId
+                { new: true }                  // Return the updated document
+            )
+                return updatedCart;
+            }
+    
+            
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
 }
 
 export default CartService;

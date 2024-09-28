@@ -45,5 +45,12 @@ rootRouter.put(
     cartController.updateItem,
 );
 
+
+rootRouter.post(
+    '/v2/cart/user/merge',
+    authentication(),
+    cartController.mergeUserCart,
+);
+
 //#endregion
 export default rootRouter;
