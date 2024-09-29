@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import NoRecordFoundError from '../../lib/errors/no-record-found.error.js';
-
+import admin from 'firebase-admin';
 import DeliveryAddressMongooseModel from './db/deliveryAddress.js';
-
+import axios from 'axios';
 class DeliveryAddressService {
 
     /**
@@ -12,6 +12,8 @@ class DeliveryAddressService {
     */
     async deliveryAddress(request = {}, user = {}) {
         try {
+
+
             const deliveryAddressSchema = {
                 userId: user?.decodedToken?.uid,
                 id: uuidv4(),
@@ -32,6 +34,8 @@ class DeliveryAddressService {
                 { ...deliveryAddressSchema}
             );
             storedDeliveryAddress = storedDeliveryAddress?.toJSON();
+
+            this.syncUserWithOMS(user?.decodedToken?.uid,request?.address,false);
 
             return {
                 id: storedDeliveryAddress?.id,
@@ -98,6 +102,8 @@ class DeliveryAddressService {
             );
             storedDeliveryAddress = storedDeliveryAddress?.toJSON();
 
+            this.syncUserWithOMS(userId,request?.address,false);
+
             if(storedDeliveryAddress)
                 return {
                     id: storedDeliveryAddress?.id,
@@ -114,6 +120,60 @@ class DeliveryAddressService {
         catch (err) {
             throw err;
         }
+    }
+
+    async syncUserWithOMS(userId, deliveryAddress, update=false){
+
+        let userJSON =  await admin.auth().getUser(userId);
+        userJSON = userJSON.toJSON()
+
+        const syncjson = {
+           user:{
+             email: userJSON.email,
+            displayName: userJSON.displayName,
+            phoneNumber:  userJSON.phoneNumber,
+            uid: userJSON.uid
+           },
+           address:{
+            userId: userId,
+            id: deliveryAddress.id,
+                door: deliveryAddress.door,
+                building: deliveryAddress.building,
+                street: deliveryAddress.street,
+                city: deliveryAddress.city,
+                state : deliveryAddress.state,
+                country: deliveryAddress.country,
+                areaCode: deliveryAddress.areaCode,
+                tag:  deliveryAddress.tag,
+                lat: deliveryAddress.lat,
+                lng: deliveryAddress.lng
+           },
+           update:update
+        }
+
+        console.log(syncjson)
+        //
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${process.env.OMS_URL}/api/ondcUsers`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data : syncjson
+        };
+
+        // console.log({order})
+        axios.request(config)
+            .then((response) => {
+                console.log(JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+        return syncjson;
     }
 
 }
