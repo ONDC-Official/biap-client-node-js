@@ -133,7 +133,7 @@ class WishlistService {
                         productDetailList.push(item)
                       }else{
                         if(productDetailList.length===0){
-                            return;
+                            break;
                         }
                     }
                     }

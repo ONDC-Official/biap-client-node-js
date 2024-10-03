@@ -764,6 +764,7 @@ class SearchService {
         let details = queryResults.hits.hits[0]._source; // Return the source of the first hit
         provider_details = {
           domain: details.context.domain,
+          bpp_details: details.bpp_details,
           ...details.provider_details,
         };
       }
