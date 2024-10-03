@@ -73,6 +73,10 @@ class SearchService {
           },
         });
       }
+
+      if (searchRequest.domain) {
+        matchQuery.push({ match: { "context.domain": searchRequest.domain } });
+      }
   
       for (const [key, value] of Object.entries(searchRequest)) {
         if (key.startsWith('product_attr_')) {

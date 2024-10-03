@@ -128,10 +128,14 @@ class WishlistService {
                     for(let item of items){
                       let id = item._id  
                       item = await bppSearchService.getItemDetails({id:item.item.id})
-                      item._id = id;
-                        if(item){
-                            productDetailList.push(item)
+                      if(item){
+                        item._id = id;
+                        productDetailList.push(item)
+                      }else{
+                        if(productDetailList.length===0){
+                            return;
                         }
+                    }
                     }
                     return { ...wishListItem, items:productDetailList };
                 } else {
