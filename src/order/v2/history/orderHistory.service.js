@@ -48,7 +48,7 @@ class OrderHistoryService {
             if (userId)
                 clonedFilterObj = { ...clonedFilterObj, userId: userId };
 
-           // if (_.isEmpty(clonedFilterObj))
+           if (_.isEmpty(clonedFilterObj))
                 clonedFilterObj = {...clonedFilterObj, userId: user.decodedToken.uid };
 
             console.log("clonedFilter obj --->",clonedFilterObj)
