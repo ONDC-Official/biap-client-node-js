@@ -11,6 +11,7 @@ import { OBJECT_TYPE } from "../../utils/constants.js";
 const bppSearchService = new BppSearchService();
 import client from "../../database/elasticSearch.js";
 import moment from 'moment-timezone';
+import axios from 'axios';
 class SearchService {
   isBppFilterSpecified(context = {}) {
     return typeof context.bpp_id !== "undefined";
@@ -765,6 +766,7 @@ class SearchService {
         provider_details = {
           domain: details.context.domain,
           bpp_details: details.bpp_details,
+          context: details.context,
           ...details.provider_details,
         };
       }
@@ -2467,6 +2469,25 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
         throw err;
     }
 }
+
+  async getCoupons(body,user){
+
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: `${process.env.OMS_URL}/api/offers/user/${user.decodedToken.uid}`,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    };
+
+    // console.log({order})
+    let data =  await axios.request(config);
+     console.log(data);
+     
+     return data.data;
+
+  }
 
 }
 
