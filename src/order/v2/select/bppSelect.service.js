@@ -19,7 +19,7 @@ class BppSelectService {
     */
     async select(context, order = {}) {
         try {
-            const { cart = {}, fulfillments = [],offers=undefined } = order || {};
+            const { cart = {}, fulfillments = [],offers=undefined,coupon=undefined } = order || {};
 
             const provider = cart?.items?.[0]?.provider || {};
 

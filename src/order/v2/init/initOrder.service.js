@@ -167,7 +167,8 @@ class InitOrderService {
                     fulfillments: [ fulfillment ],
                     provider: { ...providerDetails },
                     items:itemProducts ,
-                    offers:orderRequest.offers
+                    offers:orderRequest.offers,
+                    coupon:orderRequest.coupon
                 }
             );
         }
