@@ -449,7 +449,15 @@ class SearchController {
                 next(err);
             });
     }
-
+    
+    getWidgets(req, res, next) {
+        const { body,user } = req;
+            searchService.getWidgets(body,user).then(result => {
+                res.json(result);
+            }).catch((err) => {
+                next(err);
+            });
+    }
 }
 
 export default SearchController;

@@ -104,6 +104,11 @@ router.get(
 );
 
 
+// get offers
+router.get(
+    '/v2/widget',authentication(),  searchController.getWidgets,
+);
+
 // // get custom menus
 // router.get(
 //     '/v2/custom-menus/:id', authentication(), searchController.getProviderCustomMenus,

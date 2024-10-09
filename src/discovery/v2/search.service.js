@@ -2489,6 +2489,21 @@ async getGlobalProviders(searchRequest, targetLanguage = "en") {
 
   }
 
+  async getWidgets(body,user){
+
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${process.env.OMS_URL}/api/widget`,
+      headers: {
+          'Content-Type': 'application/json'
+      },
+  };
+  // console.log({order})
+  let data =  await axios.request(config);
+   console.log(data);
+   return data.data;
+}
 }
 
 export default SearchService;
