@@ -19,7 +19,7 @@ class RazorPayController {
 
         const currentUserAccessToken = res.get('currentUserAccessToken');
 
-        logger.info(`Creating payment for order ID: ${orderId} by user: ${currentUser.id}`);
+        //logger.info(`Creating payment for order ID: ${orderId} by user: ${currentUser.id}`);
 
         razorPayService.createPayment(orderId, data, currentUser, currentUserAccessToken)
             .then(user => {
