@@ -1,60 +1,56 @@
-import { onOrderConfirm } from "../../../../utils/protocolApis/index.js";
+import { onOrderConfirm } from "../../../utils/protocolApis/index.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../../utils/constants.js";
 import {
-    JUSPAY_PAYMENT_STATUS,
-    PAYMENT_TYPES,
-    PROTOCOL_CONTEXT,
-    PROTOCOL_PAYMENT
-} from "../../../../utils/constants.js";
-import {
-    addOrUpdateOrderWithTransactionIdAndProvider,
+    addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
+    getOrderByTransactionId,
     getOrderByTransactionIdAndProvider,
     getOrderById
 } from "../../v1/db/dbService.js";
 
 import ContextFactory from "../../../factories/ContextFactory.js";
-import BppConfirmService from "./bppConfirmService.js";
-import JuspayService from "../../../payment/juspayService.js";
-import CartService from "../cart/v2/cartService.js";
+import BppConfirmService from "./bppConfirm.service.js";
+import JuspayService from "../../../payment/juspay.service.js";
+import CartService from "../cart/v2/cart.service.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
-import sendAirtelSingleSms from "../../../../utils/sms/smsUtils.js";
+import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
 import OrderMongooseModel from "../../v1/db/order.js";
 import axios from "axios";
-import mongoose from 'mongoose';
-import logger from "../../../../lib/logger/index.js"; // Import your logger utility
-
+import Fulfillments from "../db/fulfillments.js";
+import dbConnect from "../../../database/mongooseConnector.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
-
+import mongoose from 'mongoose';
 class ConfirmOrderService {
+
     /**
-     * Check if multiple BPP items are selected.
-     * @param {Array} items - The items to check.
-     * @returns {Boolean} - True if multiple BPP items are selected, otherwise false.
+     *
+     * @param {Array} items
+     * @returns Boolean
      */
     areMultipleBppItemsSelected(items) {
         return items ? [...new Set(items.map(item => item.bpp_id))].length > 1 : false;
     }
 
     /**
-     * Check if multiple provider items are selected.
-     * @param {Array} items - The items to check.
-     * @returns {Boolean} - True if multiple provider items are selected, otherwise false.
+     *
+     * @param {Array} items
+     * @returns Boolean
      */
     areMultipleProviderItemsSelected(items) {
         return items ? [...new Set(items.map(item => item.provider.id))].length > 1 : false;
     }
 
     /**
-     * Check if payments are pending.
-     * @param {Object} payment - The payment object to check.
-     * @param {String} orderId - The ID of the order.
-     * @param {Number} total - The total amount for the order.
-     * @param {Boolean} confirmPayment - Flag indicating if payment confirmation should be checked.
-     * @returns {Boolean} - True if payments are pending, otherwise false.
+     *
+     * @param {Object} payment
+     * @param {String} orderId
+     * @param {Boolean} confirmPayment
+     * @returns Boolean
      */
     async arePaymentsPending(payment, orderId, total, confirmPayment = true) {
-        if (payment?.type !== PAYMENT_TYPES["ON-ORDER"]) return false;
+        if (payment?.type !== PAYMENT_TYPES["ON-ORDER"])
+            return false;
 
         const paymentDetails = (confirmPayment && await juspayService.getOrderStatus(orderId)) || {};
 
@@ -70,71 +66,88 @@ class ConfirmOrderService {
     }
 
     /**
-     * Update order in the database.
-     * @param {Object} dbResponse - The response from the database.
-     * @param {Object} confirmResponse - The response from the confirmation service.
-     * @param {String} paymentType - The type of payment used for the order.
+     * Update order in db
+     * @param {Object} dbResponse
+     * @param {Object} confirmResponse
      */
     async updateOrder(dbResponse, confirmResponse, paymentType) {
         let orderSchema = dbResponse?.toJSON() || {};
 
         orderSchema.messageId = confirmResponse?.context?.message_id;
-        if (paymentType === PAYMENT_TYPES["ON-ORDER"]) {
+        if (paymentType === PAYMENT_TYPES["ON-ORDER"])
             orderSchema.paymentStatus = PROTOCOL_PAYMENT.PAID;
-        }
 
         await addOrUpdateOrderWithTransactionIdAndProvider(
-            confirmResponse?.context?.transaction_id, dbResponse.provider.id,
+            confirmResponse?.context?.transaction_id,dbResponse.provider.id,
             { ...orderSchema }
         );
     }
 
     /**
-     * Confirm and update the order in the database.
-     * @param {Object} orderRequest - The order request object.
-     * @param {Number} total - The total amount for the order.
-     * @param {Boolean} confirmPayment - Flag indicating if payment confirmation should be checked.
-     * @param {Object} paymentData - Payment-related data.
-     * @returns {Object} - The response from the confirmation service.
+     * confirm and update order in db
+     * @param {Object} orderRequest
+     * @param {Number} total
+     * @param {Boolean} confirmPayment
      */
-    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true, paymentData) {
+    async confirmAndUpdateOrder(orderRequest = {}, total, confirmPayment = true,paymentData) {
         const {
             context: requestContext,
             message: order = {}
         } = orderRequest || {};
-        let paymentStatus = {};
+        let paymentStatus = {}
+        // console.log("message---------------->",orderRequest.message)
 
-        logger.info("Confirming order request:", { orderRequest });
+        const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id,orderRequest.message.providers.id);
 
-        const dbResponse = await getOrderByTransactionIdAndProvider(orderRequest?.context?.transaction_id, orderRequest.message.providers.id);
-        logger.info("Database response:", { dbResponse });
+        console.log("dbResponse---------------->",dbResponse)
 
         if (dbResponse?.paymentStatus === null) {
+
             const contextFactory = new ContextFactory();
             const context = contextFactory.create({
                 action: PROTOCOL_CONTEXT.CONFIRM,
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse.bppId,
                 bpp_uri: dbResponse.bpp_uri,
-                city: requestContext.city,
-                state: requestContext.state,
-                domain: requestContext.domain,
-                pincode: requestContext?.pincode,
+                city:requestContext.city,
+                state:requestContext.state,
+                domain:requestContext.domain,
+                pincode:requestContext?.pincode,
             });
 
-            paymentStatus = { txn_id: requestContext?.transaction_id };
+            // if(order.payment.paymentGatewayEnabled){//remove this check once juspay is enabled
+            //     if (await this.arePaymentsPending(
+            //         order?.payment,
+            //         orderRequest?.context?.parent_order_id,
+            //         total,
+            //         confirmPayment,
+            //     )) {
+            //         return {
+            //             context,
+            //             error: {
+            //                 message: "BAP hasn't received payment yet",
+            //                 status: "BAP_015",
+            //                 name: "PAYMENT_PENDING"
+            //             }
+            //         };
+            //     }
+            //
+            //     paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+            //
+            // }else{
+            paymentStatus = {txn_id:requestContext?.transaction_id}
+            // }
 
             const bppConfirmResponse = await bppConfirmService.confirmV2(
                 context,
-                { ...order, jusPayTransactionId: paymentData.razorpay_order_id },
+                {...order,jusPayTransactionId:paymentData.razorpay_order_id},
                 dbResponse
             );
 
-            logger.info("BPP confirmation response:", { bppConfirmResponse });
+            console.log("bppConfirmResponse-------------------->",bppConfirmResponse);
 
-            if (bppConfirmResponse?.message?.ack) {
+            if (bppConfirmResponse?.message?.ack)
                 await this.updateOrder(dbResponse, bppConfirmResponse, order?.payment?.type);
-            }
 
             return bppConfirmResponse;
 
@@ -145,9 +158,9 @@ class ConfirmOrderService {
                 transactionId: requestContext?.transaction_id,
                 bppId: dbResponse?.bppId,
                 messageId: dbResponse?.messageId,
-                city: requestContext.city,
-                state: requestContext.state,
-                domain: requestContext.domain
+                city:requestContext.city,
+                state:requestContext.state,
+                domain:requestContext.domain
             });
 
             return {
@@ -162,17 +175,18 @@ class ConfirmOrderService {
     }
 
     /**
-     * Process the confirm response and update the database.
-     * @param {Object} response - The response object from the confirmation.
-     * @returns {Object} - The updated response.
+     * process on confirm response and update db
+     * @param {Object} response
+     * @returns
      */
     async processOnConfirmResponse(response = {}) {
         try {
-            logger.info("Processing confirm response:", { response });
 
+            console.log("processOnConfirmResponse------------------------------>",response)
+            console.log("processOnConfirmResponse------------------------------>",response?.message?.order.provider)
             if (response?.message?.order) {
                 const dbResponse = await getOrderByTransactionIdAndProvider(
-                    response?.context?.transaction_id, response?.message?.order.provider.id
+                    response?.context?.transaction_id,response?.message?.order.provider.id
                 );
 
                 let orderSchema = { ...response?.message?.order };
@@ -186,37 +200,42 @@ class ConfirmOrderService {
                     }
                 };
 
-                if (orderSchema.fulfillment) {
+                if(orderSchema.fulfillment) {
                     orderSchema.fulfillments = [orderSchema.fulfillment];
                     delete orderSchema.fulfillment;
                 }
 
-                for (let fulfillment of orderSchema.fulfillments) {
-                    logger.info("Processing fulfillment:", { fulfillment });
-                    let existingFulfillment = await FulfillmentHistory.findOne({
-                        id: fulfillment.id,
-                        state: fulfillment.state.descriptor.code,
-                        orderId: orderSchema.id
-                    });
-                    if (!existingFulfillment) {
+
+                for(let fulfillment of orderSchema.fulfillments){
+                    console.log("fulfillment--->",fulfillment)
+                    // if(fulfillment.type==='Delivery'){
+                    let existingFulfillment  =await FulfillmentHistory.findOne({
+                        id:fulfillment.id,
+                        state:fulfillment.state.descriptor.code,
+                        orderId:orderSchema.id
+                    })
+                    if(!existingFulfillment){
                         await FulfillmentHistory.create({
-                            orderId: orderSchema.id,
-                            type: fulfillment.type,
-                            id: fulfillment.id,
-                            state: fulfillment.state.descriptor.code,
-                            updatedAt: orderSchema.toString()
-                        });
+                            orderId:orderSchema.id,
+                            type:fulfillment.type,
+                            id:fulfillment.id,
+                            state:fulfillment.state.descriptor.code,
+                            updatedAt:orderSchema.toString()
+                        })
                     }
+                    console.log("existingFulfillment--->",existingFulfillment);
+                    // }
                 }
 
-                logger.info("Updating order schema:", { orderSchema });
+                console.log("processOnConfirmResponse----------------dbResponse.items-------------->",dbResponse)
+                console.log("processOnConfirmResponse----------------dbResponse.orderSchema-------------->",orderSchema)
 
-                if (orderSchema.items && dbResponse.items) {
-                    orderSchema.items = dbResponse.items;
+                if(orderSchema.items && dbResponse.items) {
+                    orderSchema.items = dbResponse.items
                 }
 
-                orderSchema.provider = dbResponse.provider;
-                if (orderSchema.fulfillment) {
+                orderSchema.provider = dbResponse.provider
+                if(orderSchema.fulfillment) {
                     orderSchema.fulfillments = [...orderSchema.fulfillments].map((fulfillment) => {
                         return {
                             ...fulfillment,
@@ -229,39 +248,291 @@ class ConfirmOrderService {
                                     }
                                 }
                             },
-                        };
+                        }
                     });
                 }
 
-                let updateItems = [];
-                for (let item of dbResponse.items) {
-                    let temp = orderSchema?.fulfillments?.find(fulfillment => fulfillment?.id === item?.fulfillment_id);
-                    item.fulfillment_status = temp?.state?.descriptor?.code ?? "";
-                    updateItems.push(item);
+                let updateItems = []
+                for(let item of dbResponse.items){
+                    let temp = orderSchema?.fulfillments?.find(fulfillment=> fulfillment?.id === item?.fulfillment_id)
+                    item.fulfillment_status = temp?.state?.descriptor?.code??""
+                    //     let updatedItem = {}
+                    //
+                    //     // updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags); //TODO: verify if this will work with cancel/returned items
+                    //     updatedItem = orderSchema.items.filter(element=> element.id === item.id && !element.tags);
+                    //     let temp=updatedItem[0];
+                    //     console.log("item----length-before->",item)
+                    //     console.log("item----length-before temp->",temp)
+                    //     // if(item.tags){
+                    //     //     item.return_status = item?.tags?.status;
+                    //     //     item.cancellation_status = item?.tags?.status;
+                    //     //     delete item.tags
+                    //     // }
+                    //    // item.fulfillment_status = temp.fulfillment_status;
+                    //     item.product = temp.product;
+                    //     //item.quantity = item.quantity.count
+                    //
+                    //     console.log("item --after-->",item)
+                    updateItems.push(item)
                 }
                 orderSchema.items = updateItems;
-                orderSchema.updatedQuote = orderSchema.quote;
-                orderSchema.tags = orderSchema.tags;
-                orderSchema.domain = response?.context.domain;
+                orderSchema.updatedQuote= orderSchema.quote;
+                orderSchema.tags= orderSchema.tags;
+                orderSchema.domain= response?.context.domain
 
                 await addOrUpdateOrderWithTransactionIdAndProvider(
-                    response.context.transaction_id, dbResponse.provider.id,
+                    response.context.transaction_id,dbResponse.provider.id,
                     { ...orderSchema }
                 );
 
-                let billingContactPerson = orderSchema.billing.phone;
-                let provider = orderSchema.provider.descriptor.name;
-                await sendAirtelSingleSms(billingContactPerson, [provider], 'ORDER_PLACED', false);
+                let billingContactPerson = orderSchema.billing.phone
+                let provider = orderSchema.provider.descriptor.name
+                await sendAirtelSingleSms(billingContactPerson, [provider], 'ORDER_PLACED', false)
 
                 response.parentOrderId = dbResponse?.[0]?.parentOrderId;
+                //clear cart
 
-                cartService.clearCart({ userId: dbResponse.userId }); // Clear cart once order placed in multicart flows
+                cartService.clearCart({userId:dbResponse.userId}); //TODO: clear cart once order placed in multicart flows
+
             }
 
+
             return response;
-        } catch (err) {
-            logger.error("Error processing confirm response:", { error: err.message, response });
-            throw err; // Rethrow the error after logging it
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * confirm order
+     * @param {Object} orderRequest
+     */
+    async confirmOrder(orderRequest) {
+        try {
+            const { context: requestContext, message: order = {} } = orderRequest || {};
+
+            const contextFactory = new ContextFactory();
+            const context = contextFactory.create({
+                action: PROTOCOL_CONTEXT.CONFIRM,
+                transactionId: requestContext?.transaction_id,
+                city:requestContext.city,
+                state:requestContext.state
+            });
+
+            if (!(order?.items?.length)) {
+                return {
+                    context,
+                    error: { message: "Empty order received" }
+                };
+            }
+            else if (this.areMultipleBppItemsSelected(order?.items)) {
+                return {
+                    context,
+                    error: { message: "More than one BPP's item(s) selected/initialized" }
+                };
+            }
+            else if (this.areMultipleProviderItemsSelected(order?.items)) {
+                return {
+                    context,
+                    error: { message: "More than one Provider's item(s) selected/initialized" }
+                };
+            } else if (await this.arePaymentsPending(
+                order?.payment,
+                orderRequest?.context?.transaction_id,
+                order?.payment?.paid_amount
+            )) {
+                return {
+                    context,
+                    error: {
+                        message: "BAP hasn't received payment yet",
+                        status: "BAP_015",
+                        name: "PAYMENT_PENDING"
+                    }
+                };
+            }
+
+            let paymentStatus = await juspayService.getOrderStatus(orderRequest?.context?.transaction_id);
+
+            return await bppConfirmService.confirmV1(
+                context,
+                {...order,jusPayTransactionId:paymentStatus.txn_id}
+            );
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * confirm multiple orders
+     * @param {Array} orders
+     */
+    async confirmMultipleOrder(orders,paymentData) {
+
+        let total = 0;
+        orders.forEach(order => {
+            total += order?.message?.payment?.paid_amount;
+        });
+
+        console.log(orders)
+        const confirmOrderResponse = await Promise.all(
+            orders.map(async orderRequest => {
+                try {
+                    if(paymentData){
+                        return await this.confirmAndUpdateOrder(orderRequest, total, true,paymentData);
+                    }else{
+                        return await this.confirmAndUpdateOrder(orderRequest, total, false,paymentData);
+                    }
+
+                }
+                catch (err) {
+                    console.log(err)
+                    return err.response.data;
+                }
+            })
+        );
+
+        return confirmOrderResponse;
+    }
+
+    async getOrderDetails(orderId,user){
+
+        const dbResponse = await getOrderById(orderId);
+        // if(dbResponse[0].userId !==user.decodedToken.uid){
+        //     return []
+        // }else{
+        return dbResponse
+        // }
+
+    }
+
+    async orderPushToOMS(data){
+
+        try{
+            let orderCount = await OrderMongooseModel.count()
+
+            // Calculate the date two days ago
+            const twoDaysAgo = new Date();
+            twoDaysAgo.setDate(twoDaysAgo.getDate() - 7);
+
+            let orders = await OrderMongooseModel.find({id: { "$ne": null },
+                updatedAt: { $gte: twoDaysAgo }
+            }).sort({createdAt: -1}).lean();
+
+            let index = 0
+            for(let order of orders){
+
+                //get issues for order id
+
+                //get issues
+                // await dbConnect();
+                const db = mongoose.connection;
+                const collection = db.collection("issues");
+
+                const issues = await collection.find({"order_details.id":order.id}).toArray();
+
+                // console.log("------->",issues);
+                order.issues = issues;
+
+                console.log("order",order)
+
+                // console.log({order})
+                if(order.id){//only confirm orders needs to be pushed to OMS
+                    index= index+1;
+
+
+                    setTimeout(() => {
+                        let config = {
+                            method: 'post',
+                            maxBodyLength: Infinity,
+                            url: 'https://ref-app-buyer-staging-v2.ondc.org/api/loaddata',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            data : [order]
+                        };
+
+                        // console.log({order})
+                        axios.request(config)
+                            .then((response) => {
+                                // console.log(JSON.stringify(response.data));
+                            })
+                            .catch((error) => {
+                                // console.log(error);
+                            });
+
+                        console.log(new Date())
+                    }, 3000*index);
+                }
+            }
+            return true
+        }catch (e) {
+            console.log(e)
+        }
+
+    }
+
+    /**
+     * on confirm order
+     * @param {Object} messageId
+     */
+    async onConfirmOrder(messageId) {
+        try {
+            let protocolConfirmResponse = await onOrderConfirm(messageId);
+            protocolConfirmResponse = protocolConfirmResponse?.[0] || {};
+
+            if (
+                protocolConfirmResponse?.context &&
+                protocolConfirmResponse?.message?.order &&
+                protocolConfirmResponse.context.message_id &&
+                protocolConfirmResponse.context.transaction_id
+            ) {
+                return protocolConfirmResponse;
+
+            } else {
+                const contextFactory = new ContextFactory();
+                const context = contextFactory.create({
+                    messageId: messageId,
+                    action: PROTOCOL_CONTEXT.ON_CONFIRM
+                });
+
+                return {
+                    context,
+                    error: {
+                        message: "No data found"
+                    }
+                };
+            }
+
+        }
+        catch (err) {
+            throw err
+        }
+    }
+
+    /**
+     * on confirm multiple order
+     * @param {Object} messageId
+     */
+    async onConfirmMultipleOrder(messageIds) {
+        try {
+            const onConfirmOrderResponse = await Promise.all(
+                messageIds.map(async messageId => {
+                    try {
+                        const protocolConfirmResponse = await this.onConfirmOrder(messageId);
+                        return await this.processOnConfirmResponse(protocolConfirmResponse);
+                    }
+                    catch (err) {
+                        throw err;
+                    }
+                })
+            );
+
+            return onConfirmOrderResponse;
+        }
+        catch (err) {
+            throw err;
         }
     }
 }
