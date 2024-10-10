@@ -1,43 +1,46 @@
 import { onOrderSelect } from "../../../../utils/protocolApis/index.js";
 import { PROTOCOL_CONTEXT } from "../../../../utils/constants.js";
-import {RetailsErrorCode} from "../../../../utils/retailsErrorCode.js";
-
+import { RetailsErrorCode } from "../../../../utils/retailsErrorCode.js";
 import ContextFactory from "../../../factories/ContextFactory.js";
 import BppSelectService from "./bppSelectService.js";
 import SearchService from "../../../discovery/v2/searchService.js";
+
 const bppSearchService = new SearchService();
 const bppSelectService = new BppSelectService();
 
+/**
+ * Service for handling order selection operations.
+ */
 class SelectOrderService {
 
     /**
-     * 
-     * @param {Array} items 
-     * @returns Boolean
+     * Checks if multiple BPP items are selected.
+     * @param {Array} items - List of items to check.
+     * @returns {Boolean} True if items from multiple BPPs are selected, false otherwise.
      */
     areMultipleBppItemsSelected(items) {
         return items ? [...new Set(items.map(item => item.bpp_id))].length > 1 : false;
     }
 
     /**
-     * 
-     * @param {Array} items 
-     * @returns Boolean
+     * Checks if multiple provider items are selected.
+     * @param {Array} items - List of items to check.
+     * @returns {Boolean} True if items from multiple providers are selected, false otherwise.
      */
     areMultipleProviderItemsSelected(items) {
         return items ? [...new Set(items.map(item => item.provider.id))].length > 1 : false;
     }
 
     /**
-     * 
-     * @param {Object} response 
-     * @returns 
+     * Transforms the response into the required structure.
+     * @param {Object} response - The response to transform.
+     * @returns {Object} The transformed response.
      */
     transform(response) {
-
-        let error =  response.error ? Object.assign({}, response.error, {
-            message: response.error.message?response.error.message:RetailsErrorCode[response.error.code],
-        }):null;
+        const error = response.error ? {
+            ...response.error,
+            message: response.error.message || RetailsErrorCode[response.error.code],
+        } : null;
 
         return {
             context: response?.context,
@@ -46,38 +49,35 @@ class SelectOrderService {
                     ...response?.message?.order
                 }
             },
-            error:error
+            error
         };
     }
 
     /**
-    * select order
-    * @param {Object} orderRequest
-    */
+     * Selects an order.
+     * @param {Object} orderRequest - The order request to process.
+     * @returns {Promise<Object>} The response of the selection process.
+     */
     async selectOrder(orderRequest) {
         try {
             const { context: requestContext, message = {} } = orderRequest || {};
-            const { cart = {}, fulfillments = [], offers=[] } = message;
+            const { cart = {}, fulfillments = [], offers = [] } = message;
 
-            //get bpp_url and check if item is available
-            let itemContext={}
-            let itemPresent=true
-            for(let [index,item] of cart.items.entries()){
-                let items =  await bppSearchService.getItemDetails(
-                    {id:item.id}
-                );
-                if(!items){
-                    itemPresent = false
-                }else{
-                    itemContext =items.context
+            let itemContext = {};
+            let itemPresent = true;
+
+            // Check if the items are available by fetching their details.
+            for (let item of cart.items) {
+                const items = await bppSearchService.getItemDetails({ id: item.id });
+                if (!items) {
+                    itemPresent = false;
+                } else {
+                    itemContext = items.context;
                 }
-
             }
 
-            if(!itemPresent){
-                return {
-                    error: { message: "Invalid request" }
-                }
+            if (!itemPresent) {
+                return { error: { message: "Invalid request" } };
             }
 
             const contextFactory = new ContextFactory();
@@ -86,112 +86,77 @@ class SelectOrderService {
                 transactionId: requestContext?.transaction_id,
                 bppId: itemContext?.bpp_id,
                 bpp_uri: itemContext?.bpp_uri,
-                city:requestContext?.city,
-                pincode:requestContext?.pincode,
-                state:requestContext?.state,
-                domain:requestContext?.domain
+                city: requestContext?.city,
+                pincode: requestContext?.pincode,
+                state: requestContext?.state,
+                domain: requestContext?.domain
             });
 
-            if (!(cart?.items || cart?.items?.length)) {
-                return { 
-                    context, 
-                    error: { message: "Empty order received" }
-                };
+            if (!cart?.items?.length) {
+                return { context, error: { message: "Empty order received" } };
             } else if (this.areMultipleBppItemsSelected(cart?.items)) {
-                return { 
-                    context, 
-                    error: { message: "More than one BPP's item(s) selected/initialized" }
-                };
-            }
-            else if (this.areMultipleProviderItemsSelected(cart?.items)) {
-                return { 
-                    context, 
-                    error: { message: "More than one Provider's item(s) selected/initialized" }
-                };
+                return { context, error: { message: "More than one BPP's item(s) selected/initialized" } };
+            } else if (this.areMultipleProviderItemsSelected(cart?.items)) {
+                return { context, error: { message: "More than one Provider's item(s) selected/initialized" } };
             }
 
-            return await bppSelectService.select(
-                context,
-                { cart, fulfillments,offers }
-            );
-        }
-        catch (err) {
+            return await bppSelectService.select(context, { cart, fulfillments, offers });
+        } catch (err) {
             throw err;
         }
     }
 
     /**
-     * select multiple orders
-     * @param {Array} requests 
+     * Selects multiple orders.
+     * @param {Array} requests - List of order requests to process.
+     * @returns {Promise<Array>} The responses of the selection process.
      */
     async selectMultipleOrder(requests) {
-
-        console.log("requests--->",JSON.stringify(requests))
-        const selectOrderResponse = await Promise.all(
-            requests.map(async request => {
+        console.log("requests--->", JSON.stringify(requests));
+        const selectOrderResponses = await Promise.all(
+            requests.map(async (request) => {
                 try {
-                    const response = await this.selectOrder(request);
-                    return response;
-                }
-                catch (err) {
+                    return await this.selectOrder(request);
+                } catch (err) {
                     return err;
                 }
             })
         );
-
-        return selectOrderResponse;
+        return selectOrderResponses;
     }
 
     /**
-    * on select order
-    * @param {Object} messageId
-    */
+     * Handles the select order callback for a specific messageId.
+     * @param {String} messageId - The message ID of the select order request.
+     * @returns {Promise<Object>} The transformed response for the select order.
+     */
     async onSelectOrder(messageId) {
         try {
             const protocolSelectResponse = await onOrderSelect(messageId);
-
-            // if (!(protocolSelectResponse && protocolSelectResponse.length)  ||
-            //     protocolSelectResponse?.[0]?.error) {
-            //     const contextFactory = new ContextFactory();
-            //     const context = contextFactory.create({
-            //         messageId: messageId,
-            //         action: PROTOCOL_CONTEXT.ON_SELECT
-            //     });
-            //
-            //     return {
-            //         context,
-            //         error: protocolSelectResponse?.[0]?.error
-            //     };
-            // } else {
-                return this.transform(protocolSelectResponse?.[0]);
-            // }
-        }
-        catch (err) {
+            return this.transform(protocolSelectResponse?.[0]);
+        } catch (err) {
             throw err;
         }
     }
 
     /**
-    * on select multiple order
-    * @param {Object} messageId
-    */
+     * Handles the select order callback for multiple messageIds.
+     * @param {Array} messageIds - List of message IDs for the select order requests.
+     * @returns {Promise<Array>} The transformed responses for the select orders.
+     */
     async onSelectMultipleOrder(messageIds) {
         try {
-            const onSelectOrderResponse = await Promise.all(
-                messageIds.map(async messageId => {
+            const onSelectOrderResponses = await Promise.all(
+                messageIds.map(async (messageId) => {
                     try {
-                        const onSelectResponse = await this.onSelectOrder(messageId);
-                        return { ...onSelectResponse };
-                    }
-                    catch (err) {
+                        return await this.onSelectOrder(messageId);
+                    } catch (err) {
                         throw err;
                     }
                 })
             );
-
-            return onSelectOrderResponse;
-        }
-        catch (err) {
+            return onSelectOrderResponses;
+        } catch (err) {
             throw err;
         }
     }

@@ -2,109 +2,125 @@ import ConfirmOrderService from './confirmOrderService.js';
 import BadRequestParameterError from '../../../../lib/errors/bad-request-parameter.error.js';
 
 const confirmOrderService = new ConfirmOrderService();
+
 class ConfirmOrderController {
-
     /**
-    * confirm order
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    confirmOrder(req, res, next) {
-        const { body: orderRequest } = req;
-
-        confirmOrderService.confirmOrder(orderRequest).then(response => {
+     * Confirm order
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async confirmOrder(req, res, next) {
+        try {
+            const { body: orderRequest } = req;
+            const response = await confirmOrderService.confirmOrder(orderRequest);
             res.json({ ...response });
-        }).catch((err) => {
+        } catch (err) {
+            console.error("Error confirming order:", err);
             next(err);
-        });
+        }
     }
 
     /**
-    * confirm multiple orders
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    confirmMultipleOrder(req, res, next) {
-        const { body: orderRequests } = req;
+     * Confirm multiple orders
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async confirmMultipleOrder(req, res, next) {
+        try {
+            const { body: orderRequests } = req;
 
-        if (orderRequests && orderRequests.length) {
-
-            confirmOrderService.confirmMultipleOrder(orderRequests,{}).then(response => {
+            if (Array.isArray(orderRequests) && orderRequests.length > 0) {
+                const response = await confirmOrderService.confirmMultipleOrder(orderRequests, {});
                 res.json(response);
-            }).catch((err) => {
-                next(err);
-            });
-
-        }
-        else
-            throw new BadRequestParameterError();
-    }
-
-    /**
-    * on confirm order
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    onConfirmOrder(req, res, next) {
-        const { query } = req;
-        const { messageId } = query;
-        
-        confirmOrderService.onConfirmOrder(messageId).then(order => {
-            res.json(order);
-        }).catch((err) => {
+            } else {
+                throw new BadRequestParameterError('Order requests must be a non-empty array.');
+            }
+        } catch (err) {
+            console.error("Error confirming multiple orders:", err);
             next(err);
-        });
+        }
     }
 
     /**
-    * on confirm multiple order
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    onConfirmMultipleOrder(req, res, next) {
-        const { query } = req;
-        const { messageIds } = query;
-        
-        if(messageIds && messageIds.length && messageIds.trim().length) { 
-            const messageIdArray = messageIds.split(",");
-            
-            confirmOrderService.onConfirmMultipleOrder(messageIdArray).then(orders => {
-                res.json(orders);
-            }).catch((err) => {
-                next(err);
-            });
-            
+     * On confirm order
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async onConfirmOrder(req, res, next) {
+        try {
+            const { messageId } = req.query;
+            const order = await confirmOrderService.onConfirmOrder(messageId);
+            res.json(order);
+        } catch (err) {
+            console.error("Error on confirming order:", err);
+            next(err);
         }
-        else
-            throw new BadRequestParameterError();
     }
 
-    orderDetails(req, res, next) {
-        const { params , user} = req;
-        const { orderId } = params;
+    /**
+     * On confirm multiple orders
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async onConfirmMultipleOrder(req, res, next) {
+        try {
+            const { messageIds } = req.query;
 
-            confirmOrderService.getOrderDetails(orderId,user).then(orders => {
+            if (messageIds && messageIds.trim().length) {
+                const messageIdArray = messageIds.split(",");
+                const orders = await confirmOrderService.onConfirmMultipleOrder(messageIdArray);
                 res.json(orders);
-            }).catch((err) => {
-                next(err);
-            });
+            } else {
+                throw new BadRequestParameterError('Message IDs must be a non-empty string.');
+            }
+        } catch (err) {
+            console.error("Error on confirming multiple orders:", err);
+            next(err);
+        }
     }
-    orderPushToOMS(req, res, next) {
 
-            confirmOrderService.orderPushToOMS(req.body).then(orders => {
-                res.json(orders);
-            }).catch((err) => {
-                console.log(err)
-                next(err);
-            });
+    /**
+     * Get order details
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async orderDetails(req, res, next) {
+        try {
+            const { params, user } = req;
+            const { orderId } = params;
+            const orders = await confirmOrderService.getOrderDetails(orderId, user);
+            res.json(orders);
+        } catch (err) {
+            console.error("Error fetching order details:", err);
+            next(err);
+        }
+    }
+
+    /**
+     * Push order to OMS
+     * @param {*} req HTTP request object
+     * @param {*} res HTTP response object
+     * @param {*} next Callback argument to the middleware function
+     * @return {callback}
+     */
+    async orderPushToOMS(req, res, next) {
+        try {
+            const orders = await confirmOrderService.orderPushToOMS(req.body);
+            res.json(orders);
+        } catch (err) {
+            console.error("Error pushing order to OMS:", err);
+            next(err);
+        }
     }
 }
 

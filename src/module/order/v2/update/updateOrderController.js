@@ -5,61 +5,56 @@ const cancelOrderService = new UpdateOrderService();
 
 class UpdateOrderController {
     /**
-    * cancel order
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
+     * Cancels orders based on the request body.
+     *
+     * @param {*} req - The HTTP request object containing the orders to be canceled.
+     * @param {*} res - The HTTP response object used to send the response.
+     * @param {*} next - Callback argument to the middleware function for error handling.
+     * @returns {Promise<void>} - A promise that resolves when the response is sent.
+     */
     async update(req, res, next) {
-        const {body: orders,user} = req;
+        const { body: orders, user } = req;
 
-        // console.log("orderStatus-------------------->",orders)
         const onUpdateOrderResponse = await Promise.all(
             orders.map(async order => {
                 try {
-
-                    console.log("update orders--------------->",order);
-                    return await cancelOrderService.update(order,user);
+                    console.log("Updating order:", order); // Logger statement for order update
+                    return await cancelOrderService.update(order, user);
                 } catch (err) {
-
-                    console.log("update orders---------err------>",err);
-
-                    return err.response.data;
-                    // throw err;
+                    console.error("Error updating order:", err); // Logger statement for error
+                    return err.response.data; // Return error response
                 }
             })
         );
 
-        res.json(onUpdateOrderResponse);
-
-        // return onUpdateOrderResponse;
+        res.json(onUpdateOrderResponse); // Send the response
     }
-
 
     /**
-    * on cancel order
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    onUpdate(req, res, next) {
+     * Handles the order update callback.
+     *
+     * @param {*} req - The HTTP request object containing the message ID.
+     * @param {*} res - The HTTP response object used to send the response.
+     * @param {*} next - Callback argument to the middleware function for error handling.
+     * @returns {Promise<void>} - A promise that resolves when the response is sent.
+     */
+    async onUpdate(req, res, next) {
         const { query } = req;
         const { messageId } = query;
-        
-        if(messageId) {
-            cancelOrderService.onUpdate(messageId).then(order => {
-                res.json(order);
-            }).catch((err) => {
-                next(err);
-            });
+
+        if (messageId) {
+            try {
+                const order = await cancelOrderService.onUpdate(messageId);
+                res.json(order); // Send the response for the updated order
+            } catch (err) {
+                console.error("Error during order update callback:", err); // Logger statement for error
+                next(err); // Pass the error to the next middleware
+            }
+        } else {
+            console.error("Bad request: missing messageId"); // Logger statement for bad request
+            next(new BadRequestParameterError()); // Handle missing messageId error
         }
-        else
-            throw new BadRequestParameterError();
-
     }
-
 }
 
 export default UpdateOrderController;

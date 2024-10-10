@@ -1,76 +1,63 @@
-// import BadRequestParameterError from '../lib/errors/bad-request-parameter.error.js';
-import {uuid} from 'uuidv4';
+import { uuid } from 'uuidv4';
 import Transaction from './db/transaction.js';
 import Order from '../order/v1/db/order.js';
-import {pad} from '../../utils/stringHelper.js';
+import { pad } from '../../utils/stringHelper.js';
 import Razorpay from 'razorpay';
-import {RAZORPAY_STATUS} from '../../utils/constants.js';
+import { RAZORPAY_STATUS } from '../../utils/constants.js';
 import crypto from 'crypto';
 import BadRequestParameterError from '../../lib/errors/bad-request-parameter.error.js';
 import ConfirmOrderService from "../order/v2/confirm/confirmOrderService.js";
 import Refund from "./db/refund.js";
+import logger from '../../lib/logger/index.js'; // Import your logger
+
 const confirmOrderService = new ConfirmOrderService();
-class RazorPayService
-{
 
+class RazorPayService {
     /**
-     * create payment
-     * @param {Object} data
-     * @param {Integer} data.amount
-     * @param {String} data.receiptNo
+     * Create a payment
+     * @param {string} transactionId - The ID of the transaction
+     * @param {Object} data - Payment details
+     * @param {number} data.amount - Amount to be paid
+     * @param {string} data.receiptNo - Receipt number for the payment
+     * @param {Object} user - User making the payment
+     * @param {string} currentUserAccessToken - Access token for the current user
+     * @returns {Promise<Object>} - Payment response details
      */
-    async createPayment(transactionId,data,user,currentUserAccessToken)
-    {
-        try 
-        {
-
-            console.log('[Payment] data......................',data);
+    async createPayment(transactionId, data, user, currentUserAccessToken) {
+        try {
+            logger.info(`[RazorPayService] Creating payment for transaction ID: ${transactionId}`, data);
 
             let uuid1 = uuid();
-            const intent = await Order .findOne({transactionId:transactionId})
+            const intent = await Order.findOne({ transactionId: transactionId });
 
-            if (!intent)
+            if (!intent) {
                 throw new BadRequestParameterError();
+            }
 
             let paymentDetail;
             let instance = new Razorpay({
-                key_id:process.env.RAZORPAY_KEY_ID,
-                key_secret:process.env.RAZORPAY_KEY_SECRET
+                key_id: process.env.RAZORPAY_KEY_ID,
+                key_secret: process.env.RAZORPAY_KEY_SECRET
             });
 
-            // integer The transaction amount, 
-            // expressed in the currency subunit, 
-            // such as paise (in case of INR). For example, 
-            // for an actual amount of ₹299.35, 
-            // the value of this field should be 29935.
-            //ref : https://razorpay.com/docs/payments/payment-gateway/server-integration/nodejs/
-
-            // console.log('[payment] orderDetail.........',orderDetail);
-
-            let lastTransaction = await Transaction.find({}).sort({createdAt:-1}).limit(1)
+            let lastTransaction = await Transaction.find({}).sort({ createdAt: -1 }).limit(1);
             let humanReadableID = '';
 
-            if(lastTransaction ) {
+            if (lastTransaction) {
                 const lastHumanReadableID = lastTransaction.humanReadableID;
 
                 if (lastHumanReadableID) {
                     const lastTransactionNumber = lastHumanReadableID.split('-');
-
-                    //get humanReadable id
                     humanReadableID = `transactionId_${parseInt(lastTransactionNumber.slice(-1)) + 1}`;
-                }else{
-
+                } else {
                     humanReadableID = `transactionId_${pad(1, 4)}`;
                 }
-            }else{
+            } else {
                 humanReadableID = `transactionId_${pad(1, 4)}`;
             }
-            
 
             const numberValue = Number(data.amount);
-
-            // Multiply by 100 to remove decimal point and make it an integer
-            const razorpayAmount = Math.round(numberValue * 100);
+            const razorpayAmount = Math.round(numberValue * 100); // Convert amount to subunit
 
             let options = {
                 amount: razorpayAmount,
@@ -85,9 +72,10 @@ class RazorPayService
                 status: RAZORPAY_STATUS.IN_PROGRESS,
                 type: 'ON-ORDER',
                 transactionId: transactionId,
-                orderId:orderDetail.id,
-                humanReadableID:humanReadableID,
+                orderId: orderDetail.id,
+                humanReadableID: humanReadableID,
             };
+
             const intentTransaction = new Transaction(transaction);
             await intentTransaction.save();
 
@@ -97,231 +85,163 @@ class RazorPayService
                 transactionIdx: intentTransaction._id,
             };
 
+            logger.info(`[RazorPayService] Payment created successfully: ${JSON.stringify(resp)}`);
             return resp;
-        } 
-        catch (err) 
-        {
 
+        } catch (err) {
+            logger.error(`[RazorPayService] Error creating payment: ${err.message}`);
             throw err;
         }
-     
     }
 
-
-
     /**
-    * verify payment
-    * @param {Object} data
-    * @param {Integer} data.amount
-    * @param {String} data.receiptNo
-    */
-    async verifyPayment(signature,responseData)
-    {
-          
-        try 
-        {
+     * Verify payment details
+     * @param {string} signature - Signature from Razorpay
+     * @param {Object} responseData - Response data from Razorpay
+     * @returns {Promise<Object>} - Verified payment status
+     */
+    async verifyPayment(signature, responseData) {
+        try {
+            if (responseData.payload.payment.entity.order_id) {
+                logger.info('[RazorPayService] Verifying payment', responseData);
+                let order = await Transaction.findOne({ order_id: responseData.payload.payment.entity.order_id });
 
-            if(responseData.payload.payment.entity.order_id)
-            {
-
-                console.log('responseData......................',responseData);
-                let order=await Transaction.findOne({order_id:responseData.payload.payment.entity.order_id});
-                let previousTransaction = order;
-
-                if(order){
-
-                    console.log('order details-------------------------->',order);
-
-                    if(responseData.event === 'payment.captured' || responseData.event === 'order.paid' || responseData.event === 'payment.authorized')
-                    {
-
+                if (order) {
+                    if (responseData.event === 'payment.captured' || responseData.event === 'order.paid' || responseData.event === 'payment.authorized') {
                         const data = crypto.createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET);
                         data.update(JSON.stringify(responseData));
-
                         const digest = data.digest('hex');
 
-                        console.log("digest---->",digest)
-                        console.log("signature---->",signature)
-                        if (digest === signature)
-                        {
-
-                            console.log('request is legit');
+                        if (digest === signature) {
+                            logger.info('Razorpay request is legit, updating order status to TXN_SUCCESS');
                             order.status = 'TXN_SUCCESS';
                             await order.save();
                             return order;
-
-                        }
-                        else
-                        {
+                        } else {
                             throw new BadRequestParameterError('Invalid Signature');
                         }
                     }
 
-                    if(responseData.event === 'refund.created')
-                    {
-
+                    if (responseData.event === 'refund.created') {
                         order.status = 'TXN_REVERSED';
                         await order.save();
                         return order;
                     }
 
-                    if(responseData.event === 'payment.failed')
-                    {
+                    if (responseData.event === 'payment.failed') {
                         order.status = 'TXN_FAILURE';
                         await order.save();
                         return order;
-
                     }
-
-                    //TODO: if txn type changes from pending success and make confirm request
-
-                    // const response = {
-                    //     change: {
-                    //         type: CHANGE_TYPES.STATUS_UPDATE,
-                    //         update: order,
-                    //         transaction: previousTransaction,
-                    //         newTransaction: order,
-                    //         transactionIdx: order._id,
-                    //     },
-                    // };
-
                 }
-            }
-            else{
-
-                console.log('response data..........................\n',responseData);
-                console.log('response data json..........................n',JSON.stringify(responseData));
+            } else {
+                logger.warn('[RazorPayService] Invalid response data', responseData);
                 throw new BadRequestParameterError('Invalid Signature');
             }
-            
+
             return responseData;
-        } 
-        catch (err) 
-        {
+        } catch (err) {
+            logger.error(`[RazorPayService] Error verifying payment: ${err.message}`);
             throw err;
         }
-       
     }
 
-    async verifyPaymentDetails(signature,responseData,confirmdata)
-    {
-
-        try
-        {
-
-            if(responseData.razorpay_order_id)
-            {
+    /**
+     * Verify payment details with confirmation data
+     * @param {string} signature - Signature from Razorpay
+     * @param {Object} responseData - Response data from Razorpay
+     * @param {Object} confirmdata - Confirmation data for the order
+     * @returns {Promise<Object>} - Verified payment status with confirmation
+     */
+    async verifyPaymentDetails(signature, responseData, confirmdata) {
+        try {
+            if (responseData.razorpay_order_id) {
+                logger.info('[RazorPayService] Verifying payment details', responseData);
                 let instance = new Razorpay({
-                    key_id:process.env.RAZORPAY_KEY_ID,
-                    key_secret:process.env.RAZORPAY_KEY_SECRET
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET
                 });
-                console.log('responseData......................',responseData);
-                let order=await Transaction.findOne({orderId:responseData.razorpay_order_id});
-                let previousTransaction = order;
+                let order = await Transaction.findOne({ orderId: responseData.razorpay_order_id });
 
-                if(order){
-
+                if (order) {
                     const data = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
                     data.update(responseData.razorpay_order_id + "|" + responseData.razorpay_payment_id);
-
                     const digest = data.digest('hex');
 
-                    if (digest === signature)
-                    {
-                       let orderDetails = await instance.orders.fetch(responseData.razorpay_order_id)
-                       let paymentDetails = await instance.payments.fetch(responseData.razorpay_payment_id)
-                        console.log('Razorpay request is legit-----order-->',orderDetails);
-                        console.log('Razorpay request is legit------payment->',paymentDetails);
-                       if(orderDetails.status==='paid'){
-                           order.status = RAZORPAY_STATUS.COMPLETED;
-                       }else{
-                           order.status = RAZORPAY_STATUS.FAILED;
-                       }
+                    if (digest === signature) {
+                        let orderDetails = await instance.orders.fetch(responseData.razorpay_order_id);
+                        let paymentDetails = await instance.payments.fetch(responseData.razorpay_payment_id);
+
+                        logger.info('Razorpay request is legit, updating order status');
+                        if (orderDetails.status === 'paid') {
+                            order.status = RAZORPAY_STATUS.COMPLETED;
+                        } else {
+                            order.status = RAZORPAY_STATUS.FAILED;
+                        }
                         await order.save();
-                        order.payment= paymentDetails
-                        await Transaction.updateOne({orderId:responseData.razorpay_order_id},order);
-                        return await confirmOrderService.confirmMultipleOrder(confirmdata,responseData)
-                    }
-                    else
-                    {
+                        order.payment = paymentDetails;
+                        await Transaction.updateOne({ orderId: responseData.razorpay_order_id }, order);
+                        return await confirmOrderService.confirmMultipleOrder(confirmdata, responseData);
+                    } else {
                         throw new BadRequestParameterError('Invalid Signature');
                     }
-
-                    //TODO: if txn type changes from pending success and make confirm request
-
                 }
-            }
-            else{
-
-                console.log('response data..........................\n',responseData);
-                console.log('response data json..........................n',JSON.stringify(responseData));
-
+            } else {
+                logger.warn('[RazorPayService] Invalid response data', responseData);
             }
 
             return responseData;
-        }
-        catch (err)
-        {
+        } catch (err) {
+            logger.error(`[RazorPayService] Error verifying payment details: ${err.message}`);
             throw err;
         }
-
     }
 
-    async refundAmount(txnId,amount)
-    {
+    /**
+     * Refund an amount for a given transaction
+     * @param {string} txnId - The transaction ID for which the refund is requested
+     * @param {number} amount - The amount to be refunded
+     * @returns {Promise<void>}
+     */
+    async refundAmount(txnId, amount) {
+        try {
+            logger.info(`[RazorPayService] Processing refund for transaction ID: ${txnId}, amount: ${amount}`);
 
-        try
-        {
+            let order = await Transaction.findOne({ transactionId: txnId });
 
-            let order=await Transaction.findOne({transactionId:txnId});
-
-            if(order)
-            {
+            if (order) {
                 let instance = new Razorpay({
-                    key_id:process.env.RAZORPAY_KEY_ID,
-                    key_secret:process.env.RAZORPAY_KEY_SECRET
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET
                 });
 
-                if(order){
+                let paymentDetails = await instance.payments.fetch(order.payment.id);
+                let refund = new Refund();
 
-                       let paymentDetails = await instance.payments.fetch(order.payment.id)
+                if (paymentDetails) {
+                    logger.info('Initiating refund', paymentDetails);
+                    let refundStatus = await instance.payments.refund(order.payment.id, {
+                        "amount": `${amount * 100 * -1}`, // Refund amount in subunit
+                        "speed": "normal",
+                        "notes": {
+                            "notes_key_1": "refund",
+                        },
+                        "receipt": refund._id
+                    });
 
-                       let refund = new Refund()
-                        console.log({paymentDetails})
-                    console.log("refund generation ----amount--->",amount)
-                    if(paymentDetails){
-                        console.log("refund generation ------->",paymentDetails)
-                       let refundStatus =  await instance.payments.refund(order.payment.id,{
-                            "amount":  `${amount*100*-1}`,
-                            "speed": "normal",
-                            "notes": {
-                                "notes_key_1": "refund",
-                            },
-                            "receipt": refund._id
-                        })
-
-                        console.log({refundStatus})
-                        refund.amount = amount;
-                        refund.orderId = order.orderId;
-                        refund.paymentId = order.paymentId;
-                        refund.status = 'refunded';
-                        await refund.save();
-                    }
-
+                    logger.info('Refund status:', refundStatus);
+                    refund.amount = amount;
+                    refund.orderId = order.orderId;
+                    refund.paymentId = order.paymentId;
+                    refund.status = 'refunded';
+                    await refund.save();
                 }
             }
-        }
-        catch (err)
-        {
-            console.log("refund error ---",err)
+        } catch (err) {
+            logger.error(`[RazorPayService] Error processing refund: ${err.message}`);
             throw err;
         }
-
     }
-
-  
 }
 
 export default RazorPayService;
-
-// webhooks

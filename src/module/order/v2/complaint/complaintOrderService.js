@@ -1,31 +1,25 @@
-
-import  ComplaintSchemaModel from '../../v1/db/complaints.js';
-
+import ComplaintSchemaModel from '../../v1/db/complaints.js';
 
 class ComplaintOrderService {
-
     /**
-    * cancel order
-    * @param {Object} orderRequest
-    */
+     * Raises a complaint for an order.
+     * @param {Object} orderRequest - The request object containing complaint details.
+     * @return {Promise<Object>} - The complaint details saved.
+     */
     async raiseComplaint(orderRequest) {
         try {
+            console.log("Received order request for complaint:", orderRequest);
 
-           console.log("orderRequest-------------->",orderRequest);
+            const complaintSchemaModel = new ComplaintSchemaModel(orderRequest);
+            await complaintSchemaModel.save(); // Awaiting the save operation
 
-   let complaintSchemaModel = new ComplaintSchemaModel(orderRequest);
-
-           complaintSchemaModel.save();
-            //const orderDetails = await getOrderById(orderRequest.message.order.id);
-            return orderRequest;
-        }
-        catch (err) {
-
-            console.log("erroe------->")
-            throw err;
+            console.log("Complaint saved successfully:", complaintSchemaModel);
+            return complaintSchemaModel; // Returning the saved complaint model
+        } catch (err) {
+            console.error("Error while raising complaint:", err);
+            throw err; // Rethrow the error for higher-level handling
         }
     }
-
 }
 
 export default ComplaintOrderService;

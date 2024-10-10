@@ -1,68 +1,74 @@
 import JuspayService from './juspayService.js';
+import logger from '../../lib/logger/index.js'; // Ensure you have a logger module
 
 const juspayService = new JuspayService();
 
-class PaymentController 
+class PaymentController
 {
-
     /**
-    * sign payload
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    async signPayload(req, res, next) 
+     * Sign payload
+     * @param {*} req - HTTP request object
+     * @param {*} res - HTTP response object
+     * @param {*} next - Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async signPayload(req, res, next)
     {
-        try{
+        logger.info('Received signPayload request', { body: req.body });
+        try {
             const data = req.body;
-                
+
             const signedPayload = await juspayService.signPayload(data);
+            logger.info('Successfully signed payload', { signedPayload });
             return res.json({ signedPayload: signedPayload });
-        }
-        catch(err) {
+        } catch (err) {
+            logger.error('Error signing payload', { error: err });
             next(err);
         }
-
     }
 
     /**
-    * get order status
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    getOrderStatus(req, res, next) {
+     * Get order status
+     * @param {*} req - HTTP request object
+     * @param {*} res - HTTP response object
+     * @param {*} next - Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async getOrderStatus(req, res, next) {
         const { params, user } = req;
-        const { orderId: orderId } = params;     
-        
-        juspayService.getOrderStatus(orderId, user).then(orderStatus => {
-            res.json({data: orderStatus});
-        }).catch((err) => {
+        const { orderId } = params;
+
+        logger.info('Received getOrderStatus request', { orderId, userId: user.id });
+        try {
+            const orderStatus = await juspayService.getOrderStatus(orderId, user);
+            logger.info('Successfully retrieved order status', { orderStatus });
+            return res.json({ data: orderStatus });
+        } catch (err) {
+            logger.error('Error retrieving order status', { error: err });
             next(err);
-        });
+        }
     }
 
     /**
-    * verify payment
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    async verifyPayment(req, res, next) 
+     * Verify payment
+     * @param {*} req - HTTP request object
+     * @param {*} res - HTTP response object
+     * @param {*} next - Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async verifyPayment(req, res, next)
     {
+        logger.info('Received verifyPayment request', { body: req.body });
         const data = req.body;
 
-        try{
+        try {
             await juspayService.verifyPayment(data);
+            logger.info('Payment verified successfully');
             return res.json({ status: "ok" });
-        }
-        catch(err) {
+        } catch (err) {
+            logger.error('Error verifying payment', { error: err });
             next(err);
         }
-
     }
 }
 

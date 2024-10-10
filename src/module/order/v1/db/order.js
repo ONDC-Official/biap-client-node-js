@@ -328,7 +328,7 @@ const OrderSchema = new mongoose.Schema(
         provider: { type: ProviderSchema },
         items: { type: [ItemsSchema] },
         addOns: { type: [AddOnsSchema] },
-        offers: { type: [OfferSchema] },
+        // offers: { type: [OfferSchema] },
         coupon:{ type: Object },
         billing: { type: BillingSchema },
         fulfillments: { type: Object },

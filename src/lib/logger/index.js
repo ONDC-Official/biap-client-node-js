@@ -2,28 +2,30 @@ import winston from 'winston';
 
 const { combine, timestamp, colorize, align, printf } = winston.format;
 
+// Create a custom logger instance
 const logger = winston.createLogger({
     format: combine(
-        colorize(),
-        timestamp(),
-        align(),
-        printf((info) => {
-            const { timestamp, level, message } = info;
-
+        colorize(), // Colorize the log messages
+        timestamp(), // Add a timestamp to each log
+        align(), // Align the log messages
+        printf(({ timestamp, level, message }) => {
+            // Custom log message format
             return `[${level}]:[${timestamp}] ---> ${message}`;
         })
     ),
-    transports: [new winston.transports.Console({ colorize: true })],
+    transports: [
+        new winston.transports.Console() // Log to the console
+    ],
 });
 
-// do not exit logger when uncaught exception occures
+// Prevent logger from exiting on uncaught exceptions
 logger.exitOnError = false;
 
-// write all the logs to the file in production environment only
-// if (process.env.NODE_ENV === 'production') {
-//     logger.add(
-//         new winston.transports.File({ filename: __dirname + '/actions.log' })
-//     );
-// }
+// Optionally write all logs to a file in production environment only
+if (process.env.NODE_ENV === 'production') {
+    logger.add(
+        new winston.transports.Console() // Log to actions.log file
+    );
+}
 
-module.exports = logger;
+export default logger; // Export the logger instance

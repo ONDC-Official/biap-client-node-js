@@ -1,59 +1,68 @@
 import BillingService from './billingService.js';
+import logger from '../../../lib/logger/index.js'; // Ensure you import the logger
 
 const billingService = new BillingService();
 
 class BillingController {
-
     /**
-    * add billing address
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    billingAddress(req, res, next) {
-        const { body: request, user} = req;
+     * Adds a billing address.
+     * @param {*} req    HTTP request object
+     * @param {*} res    HTTP response object
+     * @param {*} next   Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async billingAddress(req, res, next) {
+        const { body: request, user } = req;
 
-        billingService.billingAddress(request, user).then(response => {
+        try {
+            const response = await billingService.billingAddress(request, user);
             res.json(response);
-        }).catch((err) => {
+            logger.info(`Billing address added successfully for user: ${user.id}`);
+        } catch (err) {
+            logger.error(`Error adding billing address: ${err.message}`);
             next(err);
-        });
+        }
     }
 
     /**
-    * get billing address
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    onBillingDetails(req, res, next) {
+     * Retrieves the billing address.
+     * @param {*} req    HTTP request object
+     * @param {*} res    HTTP response object
+     * @param {*} next   Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async onBillingDetails(req, res, next) {
         const { user } = req;
 
-        billingService.onBillingDetails(user).then(order => {
+        try {
+            const order = await billingService.onBillingDetails(user);
             res.json(order);
-        }).catch((err) => {
+            logger.info(`Retrieved billing details for user: ${user.id}`);
+        } catch (err) {
+            logger.error(`Error retrieving billing details: ${err.message}`);
             next(err);
-        });
+        }
     }
 
     /**
-    * update billing address
-    * @param {*} req    HTTP request object
-    * @param {*} res    HTTP response object
-    * @param {*} next   Callback argument to the middleware function
-    * @return {callback}
-    */
-    updateBillingAddress(req, res, next) {
+     * Updates a billing address.
+     * @param {*} req    HTTP request object
+     * @param {*} res    HTTP response object
+     * @param {*} next   Callback argument to the middleware function
+     * @return {Promise<void>}
+     */
+    async updateBillingAddress(req, res, next) {
         const { body: request, params } = req;
         const { id } = params;
 
-        billingService.updateBillingAddress(id, request).then(response => {
+        try {
+            const response = await billingService.updateBillingAddress(id, request);
             res.json(response);
-        }).catch((err) => {
+            logger.info(`Billing address updated successfully for ID: ${id}`);
+        } catch (err) {
+            logger.error(`Error updating billing address with ID ${id}: ${err.message}`);
             next(err);
-        });
+        }
     }
 }
 
