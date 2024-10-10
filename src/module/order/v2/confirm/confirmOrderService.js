@@ -1,22 +1,19 @@
-import { onOrderConfirm } from "../../../utils/protocolApis/index.js";
-import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT, SUBSCRIBER_TYPE } from "../../../utils/constants.js";
+import { onOrderConfirm } from "../../../../utils/protocolApis/index.js";
+import { JUSPAY_PAYMENT_STATUS, PAYMENT_TYPES, PROTOCOL_CONTEXT, PROTOCOL_PAYMENT} from "../../../../utils/constants.js";
 import {
-    addOrUpdateOrderWithTransactionId, addOrUpdateOrderWithTransactionIdAndProvider,
-    getOrderByTransactionId,
+    addOrUpdateOrderWithTransactionIdAndProvider,
     getOrderByTransactionIdAndProvider,
     getOrderById
 } from "../../v1/db/dbService.js";
 
 import ContextFactory from "../../../factories/ContextFactory.js";
-import BppConfirmService from "./bppConfirm.service.js";
-import JuspayService from "../../../payment/juspay.service.js";
-import CartService from "../cart/v2/cart.service.js";
+import BppConfirmService from "./bppConfirmService.js";
+import JuspayService from "../../../payment/juspayService.js";
+import CartService from "../cart/v2/cartService.js";
 import FulfillmentHistory from "../db/fulfillmentHistory.js";
-import sendAirtelSingleSms from "../../../utils/sms/smsUtils.js";
+import sendAirtelSingleSms from "../../../../utils/sms/smsUtils.js";
 import OrderMongooseModel from "../../v1/db/order.js";
 import axios from "axios";
-import Fulfillments from "../db/fulfillments.js";
-import dbConnect from "../../../database/mongooseConnector.js";
 const bppConfirmService = new BppConfirmService();
 const cartService = new CartService();
 const juspayService = new JuspayService();
