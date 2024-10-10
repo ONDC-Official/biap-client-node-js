@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import logger from '../path/to/your/logger.js'; // Adjust the path to your logger
 
 /**
  * Schema for Address
@@ -91,6 +90,5 @@ const DeliveryAddressSchema = new mongoose.Schema(
 
 const DeliveryAddress = mongoose.model('delivery_address', DeliveryAddressSchema, "delivery_address");
 
-logger.info('DeliveryAddress model has been initialized.');
 
 export default DeliveryAddress;

@@ -9,10 +9,12 @@ import cartRoutesv2 from "../module/order/v2/cart/v2/cartRoutes.js";
 import sseRoutesv2 from "../sse/v2/sseRoutes.js";
 import razorPayv2 from "../module/razorPay/razorpayRoutes.js";
 import wishlistv2 from "../module/order/v2/wishlist/v2/wishlistRoutes.js"
+import accountRoutes from "../module/accounts/accountsRoutes.js";
 const router = new Router();
 
 //v2
 router.use(orderRoutesv2);
+router.use(accountRoutes)
 router.use(searchRoutesv2);
 router.use(supportRoutesv2);
 router.use(trackRoutesv2);
